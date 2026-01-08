@@ -61,8 +61,8 @@ export default async function Home() {
 
             <div className="flex items-center justify-between p-3 bg-zinc-700 rounded">
               <span>Vercel</span>
-              <span className="px-3 py-1 rounded text-sm font-medium bg-yellow-600 text-white">
-                Pending Deploy
+              <span className="px-3 py-1 rounded text-sm font-medium bg-green-600 text-white">
+                Deployed
               </span>
             </div>
           </div>
