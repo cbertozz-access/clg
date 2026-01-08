@@ -1,0 +1,13 @@
+{
+  "name": "clg-visitor-id",
+  "version": "1.0.0",
+  "description": "Visitor ID service for behavioral targeting across Builder.io sites",
+  "main": "index.js",
+  "scripts": {
+    "deploy": "gcloud functions deploy visitorId --runtime nodejs20 --trigger-http --allow-unauthenticated --project=composable-lg --region=australia-southeast1"
+  },
+  "dependencies": {
+    "@google-cloud/firestore": "^7.0.0",
+    "uuid": "^9.0.0"
+  }
+}
