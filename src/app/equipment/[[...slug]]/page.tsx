@@ -38,14 +38,23 @@ export default async function EquipmentPage({
     resolvedSearchParams["builder.preview"] !== undefined ||
     resolvedSearchParams["builder.frameEditing"] !== undefined;
 
-  // Fetch content from Builder.io
-  const content = await fetchOneEntry({
-    model: "cc-equipment-category",
-    apiKey: BUILDER_API_KEY,
-    userAttributes: {
-      urlPath,
-    },
-  });
+  // Fetch content from Builder.io with error handling
+  let content = null;
+  try {
+    content = await fetchOneEntry({
+      model: "cc-equipment-category",
+      apiKey: BUILDER_API_KEY,
+      userAttributes: {
+        urlPath,
+      },
+    });
+  } catch (error) {
+    console.error("Builder.io fetch error:", error);
+    // In preview mode, continue without content
+    if (!isPreviewMode) {
+      throw error;
+    }
+  }
 
   // If no content and not in preview mode, show 404
   if (!content && !isPreviewMode) {
