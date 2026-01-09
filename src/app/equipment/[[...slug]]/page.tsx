@@ -8,7 +8,7 @@ const BUILDER_API_KEY = process.env.NEXT_PUBLIC_BUILDER_API_KEY!;
  * Equipment Category Page - Claude Code Version (CLG-39)
  *
  * Dynamic routing for equipment category landing pages.
- * Fetches content from Builder.io CC-Equipment-Category model.
+ * Fetches content from Builder.io cc-equipment-category model.
  *
  * Routes:
  *   /equipment                    → Equipment hub page
@@ -21,12 +21,22 @@ interface PageProps {
   params: Promise<{
     slug?: string[];
   }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export default async function EquipmentPage({ params }: PageProps) {
+export default async function EquipmentPage({
+  params,
+  searchParams,
+}: PageProps) {
   const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
   const slug = resolvedParams.slug?.join("/") || "";
   const urlPath = `/equipment${slug ? `/${slug}` : ""}`;
+
+  // Check if Builder.io is in preview mode via URL params
+  const isPreviewMode =
+    resolvedSearchParams["builder.preview"] !== undefined ||
+    resolvedSearchParams["builder.frameEditing"] !== undefined;
 
   // Fetch content from Builder.io
   const content = await fetchOneEntry({
@@ -37,8 +47,8 @@ export default async function EquipmentPage({ params }: PageProps) {
     },
   });
 
-  // If no content found, show 404
-  if (!content) {
+  // If no content and not in preview mode, show 404
+  if (!content && !isPreviewMode) {
     return notFound();
   }
 
