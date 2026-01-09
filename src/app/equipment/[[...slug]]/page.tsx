@@ -63,13 +63,22 @@ export default async function EquipmentPage({
 
   return (
     <main className="min-h-screen">
-      {/* Builder.io Content component - always render for visual editing to work */}
-      <Content
-        content={content}
-        apiKey={BUILDER_API_KEY}
-        model="cc-equipment-category"
-        customComponents={customComponents}
-      />
+      {/* Builder.io Content component */}
+      {content ? (
+        <Content
+          content={content}
+          apiKey={BUILDER_API_KEY}
+          model="cc-equipment-category"
+          customComponents={customComponents}
+        />
+      ) : (
+        <div className="p-8 text-center">
+          <p className="text-gray-500">Loading Builder.io content...</p>
+          <p className="text-sm text-gray-400 mt-2">
+            Add content in Builder.io editor for path: {urlPath}
+          </p>
+        </div>
+      )}
 
       {/* Attribution footer for AI comparison */}
       <footer className="bg-gray-100 py-4 text-center text-sm text-gray-500">
