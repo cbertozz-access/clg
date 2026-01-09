@@ -55,12 +55,22 @@ export default async function EquipmentPage({
   return (
     <main className="min-h-screen">
       {/* Builder.io renders the page content with registered components */}
-      <Content
-        content={content}
-        apiKey={BUILDER_API_KEY}
-        model="cc-equipment-category"
-        customComponents={customComponents}
-      />
+      {content && (
+        <Content
+          content={content}
+          apiKey={BUILDER_API_KEY}
+          model="cc-equipment-category"
+          customComponents={customComponents}
+        />
+      )}
+
+      {/* Show placeholder in preview mode when no content exists */}
+      {!content && isPreviewMode && (
+        <div className="p-8 text-center text-gray-500">
+          <p>Builder.io Preview Mode</p>
+          <p className="text-sm">Create content for this page in the Builder.io editor</p>
+        </div>
+      )}
 
       {/* Attribution footer for AI comparison */}
       <footer className="bg-gray-100 py-4 text-center text-sm text-gray-500">
