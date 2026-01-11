@@ -57,17 +57,20 @@ export default async function EquipmentPage({
 
   return (
     <main className="min-h-screen">
-      {/* Builder.io Content component - always render for visual editor */}
-      <Content
-        content={content}
-        apiKey={BUILDER_API_KEY}
-        model="cc-equipment-category"
-        customComponents={customComponents}
-      />
+      {/* Builder.io Content component - only render when content exists */}
+      {content && (
+        <Content
+          content={content}
+          apiKey={BUILDER_API_KEY}
+          model="cc-equipment-category"
+          customComponents={customComponents}
+        />
+      )}
 
       {/* Show placeholder when no content exists */}
       {!content && (
-        <div className="p-8 text-center">
+        <div className="p-8 text-center min-h-[60vh] flex flex-col items-center justify-center">
+          <h1 className="text-2xl font-semibold text-gray-700 mb-4">Equipment</h1>
           <p className="text-gray-500">
             {isPreviewMode
               ? "Loading Builder.io content..."
