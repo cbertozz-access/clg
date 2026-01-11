@@ -1,6 +1,6 @@
 import { BuilderContent } from "@/components/builder/BuilderContent";
 
-const BUILDER_API_KEY = process.env.NEXT_PUBLIC_BUILDER_API_KEY!;
+const BUILDER_API_KEY = process.env.NEXT_PUBLIC_BUILDER_API_KEY!.trim();
 const MODEL_NAME = "cc-equipment-category";
 
 /**
