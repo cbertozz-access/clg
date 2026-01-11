@@ -1,19 +1,34 @@
-import { fetchOneEntry } from "@builder.io/sdk-react-nextjs";
 import { NextResponse } from "next/server";
 
 const BUILDER_API_KEY = process.env.NEXT_PUBLIC_BUILDER_API_KEY;
 
 export async function GET() {
   const urlPath = "/equipment";
+  const model = "cc-equipment-category";
 
   try {
-    const content = await fetchOneEntry({
-      model: "cc-equipment-category",
-      apiKey: BUILDER_API_KEY!,
-      userAttributes: {
-        urlPath,
+    // Try direct API fetch instead of SDK
+    const apiUrl = `https://cdn.builder.io/api/v3/content/${model}?apiKey=${BUILDER_API_KEY}&userAttributes.urlPath=${encodeURIComponent(urlPath)}&limit=1`;
+
+    const response = await fetch(apiUrl, {
+      headers: {
+        'Accept': 'application/json',
       },
+      cache: 'no-store',
     });
+
+    if (!response.ok) {
+      return NextResponse.json({
+        apiKeyPresent: !!BUILDER_API_KEY,
+        apiKeyPrefix: BUILDER_API_KEY?.substring(0, 8) + "...",
+        urlPath,
+        directApiStatus: response.status,
+        directApiError: await response.text(),
+      }, { status: response.status });
+    }
+
+    const data = await response.json();
+    const content = data.results?.[0];
 
     return NextResponse.json({
       apiKeyPresent: !!BUILDER_API_KEY,
@@ -22,6 +37,7 @@ export async function GET() {
       contentFound: !!content,
       contentId: content?.id || null,
       contentTitle: content?.data?.title || null,
+      resultCount: data.results?.length || 0,
     });
   } catch (error) {
     return NextResponse.json({
