@@ -1,18 +1,52 @@
 import { BuilderContent } from "@/components/builder/BuilderContent";
+import { getBuilderSearchParams } from "@builder.io/sdk-react-nextjs";
 
 const BUILDER_API_KEY = process.env.NEXT_PUBLIC_BUILDER_API_KEY!.trim();
 const MODEL_NAME = "cc-equipment-category";
 
 /**
- * Direct fetch from Builder.io CDN API
- * Bypasses SDK's fetchOneEntry which has auth issues on Vercel
+ * Fetch from Builder.io CDN API with visual editor support
  */
-async function fetchBuilderContent(urlPath: string) {
-  const apiUrl = `https://cdn.builder.io/api/v3/content/${MODEL_NAME}?apiKey=${BUILDER_API_KEY}&userAttributes.urlPath=${encodeURIComponent(urlPath)}&limit=1`;
+async function fetchBuilderContent(
+  urlPath: string,
+  searchParams: { [key: string]: string | string[] | undefined }
+) {
+  // Convert searchParams to URLSearchParams for Builder SDK
+  const urlSearchParams = new URLSearchParams();
+  for (const [key, value] of Object.entries(searchParams)) {
+    if (value !== undefined) {
+      if (Array.isArray(value)) {
+        value.forEach((v) => urlSearchParams.append(key, v));
+      } else {
+        urlSearchParams.set(key, value);
+      }
+    }
+  }
+
+  // Get Builder.io search params for visual editor support
+  const builderParams = getBuilderSearchParams(urlSearchParams);
+
+  // Build API URL
+  const apiParams = new URLSearchParams({
+    apiKey: BUILDER_API_KEY,
+    "userAttributes.urlPath": urlPath,
+    limit: "1",
+  });
+
+  // Add builder params if any
+  if (builderParams) {
+    for (const [key, value] of Object.entries(builderParams)) {
+      if (value !== undefined) {
+        apiParams.set(key, String(value));
+      }
+    }
+  }
+
+  const apiUrl = `https://cdn.builder.io/api/v3/content/${MODEL_NAME}?${apiParams.toString()}`;
 
   const response = await fetch(apiUrl, {
     headers: { Accept: "application/json" },
-    next: { revalidate: 60 }, // Cache for 60 seconds
+    cache: "no-store", // Don't cache in editing mode
   });
 
   if (!response.ok) {
@@ -58,8 +92,8 @@ export default async function EquipmentPage({
     resolvedSearchParams["builder.preview"] !== undefined ||
     resolvedSearchParams["builder.frameEditing"] !== undefined;
 
-  // Fetch content from Builder.io using direct API
-  const content = await fetchBuilderContent(urlPath);
+  // Fetch content from Builder.io using direct API with visual editor params
+  const content = await fetchBuilderContent(urlPath, resolvedSearchParams);
 
   return (
     <main className="min-h-screen">
@@ -89,12 +123,13 @@ export default async function EquipmentPage({
 }
 
 // Generate metadata for SEO
-export async function generateMetadata({ params }: PageProps) {
+export async function generateMetadata({ params, searchParams }: PageProps) {
   const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
   const slug = resolvedParams.slug?.join("/") || "";
   const urlPath = `/equipment${slug ? `/${slug}` : ""}`;
 
-  const content = await fetchBuilderContent(urlPath);
+  const content = await fetchBuilderContent(urlPath, resolvedSearchParams);
 
   if (!content) {
     return {
