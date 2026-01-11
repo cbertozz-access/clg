@@ -28,7 +28,8 @@ export async function GET() {
       apiKeyPresent: !!BUILDER_API_KEY,
       apiKeyPrefix: BUILDER_API_KEY?.substring(0, 8) + "...",
       urlPath,
-      error: String(error),
+      error: error instanceof Error ? error.message : JSON.stringify(error),
+      errorStack: error instanceof Error ? error.stack : undefined,
     }, { status: 500 });
   }
 }
