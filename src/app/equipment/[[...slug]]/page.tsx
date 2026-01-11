@@ -94,22 +94,28 @@ export async function generateMetadata({ params }: PageProps) {
   const slug = resolvedParams.slug?.join("/") || "";
   const urlPath = `/equipment${slug ? `/${slug}` : ""}`;
 
-  const content = await fetchOneEntry({
-    model: "cc-equipment-category",
-    apiKey: BUILDER_API_KEY,
-    userAttributes: {
-      urlPath,
-    },
-  });
+  try {
+    const content = await fetchOneEntry({
+      model: "cc-equipment-category",
+      apiKey: BUILDER_API_KEY,
+      userAttributes: {
+        urlPath,
+      },
+    });
 
-  if (!content) {
+    if (!content) {
+      return {
+        title: "Equipment | Access Group",
+      };
+    }
+
+    return {
+      title: content.data?.title || "Equipment | Access Group",
+      description: content.data?.description || "Browse our equipment range",
+    };
+  } catch {
     return {
       title: "Equipment | Access Group",
     };
   }
-
-  return {
-    title: content.data?.title || "Equipment | Access Group",
-    description: content.data?.description || "Browse our equipment range",
-  };
 }
