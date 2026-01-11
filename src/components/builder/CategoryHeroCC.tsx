@@ -3,10 +3,10 @@
 /**
  * CategoryHeroCC - Equipment Category Hero Component
  *
- * Created by: Claude Code (CLG-39)
+ * Created by: CLG-39 (CLG-39)
  * Purpose: AI Platform Comparison Test
  *
- * Naming Convention: "CC" suffix = Claude Code created
+ * Naming Convention: "CC" suffix = CLG-39 created
  * Compare with: Builder.io AI version (CLG-38)
  */
 
@@ -132,7 +132,7 @@ export function CategoryHeroCC(props: Partial<CategoryHeroCCProps>) {
 
       {/* Component Attribution (visible in dev) */}
       <div className="absolute bottom-2 right-2 text-xs text-white/30">
-        CategoryHeroCC - Claude Code
+        CategoryHeroCC - CLG-39
       </div>
     </section>
   );

@@ -5,7 +5,7 @@ import { CategoryHeroCC } from "../components/builder/CategoryHeroCC";
  * Builder.io Component Registry
  *
  * Naming Convention:
- * - "CC" suffix = Claude Code created (CLG-39)
+ * - "CC" suffix = CLG-39 created (CLG-39)
  * - No suffix = Builder.io AI created (CLG-38)
  */
 
@@ -14,9 +14,9 @@ export const customComponents: RegisteredComponent[] = [
   {
     component: CategoryHeroCC,
     name: "CategoryHeroCC",
-    friendlyName: "Category Hero (Claude Code)",
+    friendlyName: "Category Hero (CLG-39)",
     description:
-      "Equipment category hero section with value proposition, benefits, and CTAs. Created by Claude Code for AI Platform Comparison (CLG-39).",
+      "Equipment category hero section with value proposition, benefits, and CTAs. Created by CLG-39 for AI Platform Comparison (CLG-39).",
 
     inputs: [
       // Content Section

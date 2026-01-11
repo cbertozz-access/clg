@@ -116,7 +116,7 @@ export default async function EquipmentPage({
 
       {/* Attribution footer for AI comparison */}
       <footer className="bg-gray-100 py-4 text-center text-sm text-gray-500">
-        Page rendered via Claude Code approach (CLG-39)
+        Page rendered via CLG-39
       </footer>
     </main>
   );
