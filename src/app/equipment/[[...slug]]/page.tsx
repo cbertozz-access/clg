@@ -49,10 +49,7 @@ export default async function EquipmentPage({
     });
   } catch (error) {
     console.error("Builder.io fetch error:", error);
-    // In preview mode, continue without content
-    if (!isPreviewMode) {
-      throw error;
-    }
+    // Continue without content - page will show placeholder
   }
 
   return (
