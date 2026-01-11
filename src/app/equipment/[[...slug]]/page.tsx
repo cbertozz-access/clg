@@ -1,5 +1,4 @@
 import { Content, fetchOneEntry } from "@builder.io/sdk-react-nextjs";
-import { notFound } from "next/navigation";
 import { customComponents } from "@/lib/builder-registry";
 
 const BUILDER_API_KEY = process.env.NEXT_PUBLIC_BUILDER_API_KEY!;
@@ -56,24 +55,24 @@ export default async function EquipmentPage({
     }
   }
 
-  // If no content and not in preview mode, show 404
-  if (!content && !isPreviewMode) {
-    return notFound();
-  }
-
   return (
     <main className="min-h-screen">
-      {/* Builder.io Content component */}
-      {content ? (
-        <Content
-          content={content}
-          apiKey={BUILDER_API_KEY}
-          model="cc-equipment-category"
-          customComponents={customComponents}
-        />
-      ) : (
+      {/* Builder.io Content component - always render for visual editor */}
+      <Content
+        content={content}
+        apiKey={BUILDER_API_KEY}
+        model="cc-equipment-category"
+        customComponents={customComponents}
+      />
+
+      {/* Show placeholder when no content exists */}
+      {!content && (
         <div className="p-8 text-center">
-          <p className="text-gray-500">Loading Builder.io content...</p>
+          <p className="text-gray-500">
+            {isPreviewMode
+              ? "Loading Builder.io content..."
+              : "No content found for this page"}
+          </p>
           <p className="text-sm text-gray-400 mt-2">
             Add content in Builder.io editor for path: {urlPath}
           </p>
