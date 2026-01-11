@@ -34,25 +34,25 @@ interface CategoryHeroCCProps {
   primaryButtonColor: string;
 }
 
-export function CategoryHeroCC({
-  categoryName = "Equipment Hire",
-  valueProposition = "Access Australia's largest fleet of equipment for projects of any size",
-  benefits = [
+export function CategoryHeroCC(props: Partial<CategoryHeroCCProps>) {
+  // Use defaults for any undefined/null props (Builder.io may pass undefined explicitly)
+  const categoryName = props.categoryName || "Equipment Hire";
+  const valueProposition = props.valueProposition || "Access Australia's largest fleet of equipment for projects of any size";
+  const benefits = props.benefits?.length ? props.benefits : [
     { benefit: "24/7 equipment support" },
     { benefit: "Flexible hire periods" },
     { benefit: "Delivery to any site" },
     { benefit: "Fully maintained fleet" },
-  ],
-  trustBadgeText = "Available across 5 locations Australia-wide",
-  primaryButtonText = "Get a Quote",
-  primaryButtonLink = "/quote",
-  secondaryButtonText = "Browse Equipment",
-  secondaryButtonLink = "#equipment-grid",
-  backgroundColor = "#1F2937",
-  backgroundImage,
-  overlayOpacity = 60,
-  primaryButtonColor = "#F97316",
-}: CategoryHeroCCProps) {
+  ];
+  const trustBadgeText = props.trustBadgeText || "Available across 5 locations Australia-wide";
+  const primaryButtonText = props.primaryButtonText || "Get a Quote";
+  const primaryButtonLink = props.primaryButtonLink || "/quote";
+  const secondaryButtonText = props.secondaryButtonText || "Browse Equipment";
+  const secondaryButtonLink = props.secondaryButtonLink || "#equipment-grid";
+  const backgroundColor = props.backgroundColor || "#1F2937";
+  const backgroundImage = props.backgroundImage;
+  const overlayOpacity = props.overlayOpacity ?? 60;
+  const primaryButtonColor = props.primaryButtonColor || "#F97316";
   return (
     <section
       className="relative w-full py-12 lg:py-20"
