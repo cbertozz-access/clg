@@ -1,10 +1,11 @@
 "use client";
 
-import { Content } from "@builder.io/sdk-react-nextjs";
+import { Content, type BuilderContent as BuilderContentType } from "@builder.io/sdk-react-nextjs";
 import { customComponents } from "@/lib/builder-registry";
 
 interface BuilderContentProps {
-  content: unknown;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  content: BuilderContentType | any;
   apiKey: string;
   model: string;
 }
