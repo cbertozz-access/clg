@@ -1,7 +1,29 @@
-import { Content, fetchOneEntry } from "@builder.io/sdk-react-nextjs";
+import { Content } from "@builder.io/sdk-react-nextjs";
 import { customComponents } from "@/lib/builder-registry";
 
 const BUILDER_API_KEY = process.env.NEXT_PUBLIC_BUILDER_API_KEY!;
+const MODEL_NAME = "cc-equipment-category";
+
+/**
+ * Direct fetch from Builder.io CDN API
+ * Bypasses SDK's fetchOneEntry which has auth issues on Vercel
+ */
+async function fetchBuilderContent(urlPath: string) {
+  const apiUrl = `https://cdn.builder.io/api/v3/content/${MODEL_NAME}?apiKey=${BUILDER_API_KEY}&userAttributes.urlPath=${encodeURIComponent(urlPath)}&limit=1`;
+
+  const response = await fetch(apiUrl, {
+    headers: { Accept: "application/json" },
+    next: { revalidate: 60 }, // Cache for 60 seconds
+  });
+
+  if (!response.ok) {
+    console.error("Builder.io API error:", response.status);
+    return null;
+  }
+
+  const data = await response.json();
+  return data.results?.[0] || null;
+}
 
 /**
  * Equipment Category Page - Claude Code Version (CLG-39)
@@ -37,20 +59,8 @@ export default async function EquipmentPage({
     resolvedSearchParams["builder.preview"] !== undefined ||
     resolvedSearchParams["builder.frameEditing"] !== undefined;
 
-  // Fetch content from Builder.io with error handling
-  let content = null;
-  try {
-    content = await fetchOneEntry({
-      model: "cc-equipment-category",
-      apiKey: BUILDER_API_KEY,
-      userAttributes: {
-        urlPath,
-      },
-    });
-  } catch (error) {
-    console.error("Builder.io fetch error:", error);
-    // Continue without content - page will show placeholder
-  }
+  // Fetch content from Builder.io using direct API
+  const content = await fetchBuilderContent(urlPath);
 
   return (
     <main className="min-h-screen">
@@ -93,28 +103,16 @@ export async function generateMetadata({ params }: PageProps) {
   const slug = resolvedParams.slug?.join("/") || "";
   const urlPath = `/equipment${slug ? `/${slug}` : ""}`;
 
-  try {
-    const content = await fetchOneEntry({
-      model: "cc-equipment-category",
-      apiKey: BUILDER_API_KEY,
-      userAttributes: {
-        urlPath,
-      },
-    });
+  const content = await fetchBuilderContent(urlPath);
 
-    if (!content) {
-      return {
-        title: "Equipment | Access Group",
-      };
-    }
-
-    return {
-      title: content.data?.title || "Equipment | Access Group",
-      description: content.data?.description || "Browse our equipment range",
-    };
-  } catch {
+  if (!content) {
     return {
       title: "Equipment | Access Group",
     };
   }
+
+  return {
+    title: content.data?.title || "Equipment | Access Group",
+    description: content.data?.description || "Browse our equipment range",
+  };
 }
