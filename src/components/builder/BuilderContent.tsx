@@ -13,7 +13,7 @@ interface BuilderContentProps {
 
 export function BuilderContent({ content, apiKey, model }: BuilderContentProps) {
   const [isMounted, setIsMounted] = useState(false);
-  const title = content?.data?.title || content?.name || "No title";
+  const title = content?.data?.title || content?.name || "Equipment";
 
   // Only render Content component after client-side hydration
   useEffect(() => {
@@ -30,7 +30,8 @@ export function BuilderContent({ content, apiKey, model }: BuilderContentProps) 
     );
   }
 
-  // Render Builder.io Content component on client side only
+  // Always render Content component - it handles null content in editing mode
+  // The Content component creates the drop zone for the visual editor
   return (
     <Content
       content={content}

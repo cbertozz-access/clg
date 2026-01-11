@@ -63,8 +63,8 @@ export default async function EquipmentPage({
 
   return (
     <main className="min-h-screen">
-      {/* Content found - pass to client component for rendering */}
-      {content ? (
+      {/* Always render BuilderContent in preview mode for drag-drop to work */}
+      {(content || isPreviewMode) ? (
         <BuilderContent
           content={content}
           apiKey={BUILDER_API_KEY}
@@ -73,11 +73,7 @@ export default async function EquipmentPage({
       ) : (
         <div className="p-8 text-center min-h-[60vh] flex flex-col items-center justify-center">
           <h1 className="text-2xl font-semibold text-gray-700 mb-4">Equipment</h1>
-          <p className="text-gray-500">
-            {isPreviewMode
-              ? "Loading Builder.io content..."
-              : "No content found for this page"}
-          </p>
+          <p className="text-gray-500">No content found for this page</p>
           <p className="text-sm text-gray-400 mt-2">
             Add content in Builder.io editor for path: {urlPath}
           </p>
