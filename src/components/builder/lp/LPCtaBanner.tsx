@@ -9,14 +9,13 @@ export interface LPCtaBannerProps {
   secondaryCtaLink?: string;
 }
 
-export function LPCtaBanner({
-  headline = "Ready to Get Started?",
-  subtext = "Get a competitive quote for your equipment hire needs today.",
-  primaryCtaText = "Get a Quote",
-  primaryCtaLink = "#quote-form",
-  secondaryCtaText = "Call 13 4000",
-  secondaryCtaLink = "tel:134000",
-}: LPCtaBannerProps) {
+export function LPCtaBanner(props: Partial<LPCtaBannerProps>) {
+  const headline = props.headline || "Ready to Get Started?";
+  const subtext = props.subtext || "Get a competitive quote for your equipment hire needs today.";
+  const primaryCtaText = props.primaryCtaText || "Get a Quote";
+  const primaryCtaLink = props.primaryCtaLink || "#quote-form";
+  const secondaryCtaText = props.secondaryCtaText || "Call 13 4000";
+  const secondaryCtaLink = props.secondaryCtaLink || "tel:134000";
   return (
     <section className="bg-[#E63229] py-12">
       <div className="max-w-7xl mx-auto px-4 text-center">

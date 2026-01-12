@@ -36,16 +36,16 @@ const defaultFields: FormField[] = [
   { name: "message", label: "Enquiry Message", type: "textarea", placeholder: "Enter Enquiry Message", required: true },
 ];
 
-export function LPQuoteForm({
-  title = "Request a Quote",
-  subtitle = "Fill in your details and we'll get back to you within 24 hours.",
-  submitButtonText = "Submit",
-  fields = defaultFields,
-  showPrivacyNote = true,
-  privacyNoteText = "Your information is secure and will never be shared",
-  variant = "standard",
-  backgroundColor = "dark",
-}: LPQuoteFormProps) {
+export function LPQuoteForm(props: Partial<LPQuoteFormProps>) {
+  const title = props.title || "Request a Quote";
+  const subtitle = props.subtitle || "Fill in your details and we'll get back to you within 24 hours.";
+  const submitButtonText = props.submitButtonText || "Submit";
+  const fields = props.fields?.length ? props.fields : defaultFields;
+  const showPrivacyNote = props.showPrivacyNote ?? true;
+  const privacyNoteText = props.privacyNoteText || "Your information is secure and will never be shared";
+  const variant = props.variant || "standard";
+  const backgroundColor = props.backgroundColor || "dark";
+
   const [formData, setFormData] = useState<Record<string, string>>({});
 
   const handleSubmit = (e: React.FormEvent) => {

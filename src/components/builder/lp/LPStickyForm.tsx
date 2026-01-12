@@ -10,13 +10,12 @@ export interface LPStickyFormProps {
   showPhoneCta?: boolean;
 }
 
-export function LPStickyForm({
-  title = "Get a Quick Quote",
-  subtitle = "Tell us what you need and we'll respond within 2 hours",
-  submitButtonText = "Get My Quote",
-  phoneNumber = "13 4000",
-  showPhoneCta = true,
-}: LPStickyFormProps) {
+export function LPStickyForm(props: Partial<LPStickyFormProps>) {
+  const title = props.title || "Get a Quick Quote";
+  const subtitle = props.subtitle || "Tell us what you need and we'll respond within 2 hours";
+  const submitButtonText = props.submitButtonText || "Get My Quote";
+  const phoneNumber = props.phoneNumber || "13 4000";
+  const showPhoneCta = props.showPhoneCta ?? true;
   const [formData, setFormData] = useState({
     name: "",
     phone: "",

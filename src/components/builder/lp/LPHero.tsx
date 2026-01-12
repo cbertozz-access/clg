@@ -20,21 +20,20 @@ export interface LPHeroProps {
   badgeText?: string;
 }
 
-export function LPHero({
-  variant = "standard",
-  backgroundImage,
-  overlayOpacity = 60,
-  headline = "Equipment Hire Across Australia",
-  highlightWord = "Equipment",
-  subheadline = "Get competitive quotes from Australia's largest privately-owned equipment fleet. Hire or buy with confidence.",
-  primaryCtaText = "Get a Quote",
-  primaryCtaLink = "#quote-form",
-  secondaryCtaText = "Call 13 4000",
-  secondaryCtaLink = "tel:134000",
-  benefits = [],
-  showBadge = false,
-  badgeText = "Fast Response Guaranteed",
-}: LPHeroProps) {
+export function LPHero(props: Partial<LPHeroProps>) {
+  const variant = props.variant || "standard";
+  const backgroundImage = props.backgroundImage;
+  const overlayOpacity = props.overlayOpacity ?? 60;
+  const headline = props.headline || "Equipment Hire Across Australia";
+  const highlightWord = props.highlightWord || "Equipment";
+  const subheadline = props.subheadline || "Get competitive quotes from Australia's largest privately-owned equipment fleet. Hire or buy with confidence.";
+  const primaryCtaText = props.primaryCtaText || "Get a Quote";
+  const primaryCtaLink = props.primaryCtaLink || "#quote-form";
+  const secondaryCtaText = props.secondaryCtaText || "Call 13 4000";
+  const secondaryCtaLink = props.secondaryCtaLink || "tel:134000";
+  const benefits = props.benefits || [];
+  const showBadge = props.showBadge ?? false;
+  const badgeText = props.badgeText || "Fast Response Guaranteed";
   // Replace highlight word in headline
   const formattedHeadline = headline.replace(
     new RegExp(`(${highlightWord})`, "i"),

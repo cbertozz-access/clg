@@ -10,13 +10,14 @@ export interface LPBreadcrumbProps {
   currentPage?: string;
 }
 
-export function LPBreadcrumb({
-  items = [
-    { label: "Home", href: "/" },
-    { label: "Equipment", href: "/equipment" },
-  ],
-  currentPage = "Forklifts",
-}: LPBreadcrumbProps) {
+const defaultItems = [
+  { label: "Home", href: "/" },
+  { label: "Equipment", href: "/equipment" },
+];
+
+export function LPBreadcrumb(props: Partial<LPBreadcrumbProps>) {
+  const items = props.items?.length ? props.items : defaultItems;
+  const currentPage = props.currentPage || "Forklifts";
   return (
     <div className="bg-white border-b">
       <div className="max-w-7xl mx-auto px-4 py-3">

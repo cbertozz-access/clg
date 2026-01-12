@@ -10,15 +10,17 @@ export interface LPTrustBadgesProps {
   variant?: "light" | "dark";
 }
 
-export function LPTrustBadges({
-  stats = [
-    { value: "7,500", label: "Equipment Units" },
-    { value: "24/7", label: "Support Available" },
-    { value: "20+", label: "Locations Australia-Wide" },
-    { value: "25+", label: "Years Experience" },
-  ],
-  variant = "light",
-}: LPTrustBadgesProps) {
+const defaultStats = [
+  { value: "7,500", label: "Equipment Units" },
+  { value: "24/7", label: "Support Available" },
+  { value: "20+", label: "Locations Australia-Wide" },
+  { value: "25+", label: "Years Experience" },
+];
+
+export function LPTrustBadges(props: Partial<LPTrustBadgesProps>) {
+  const stats = props.stats?.length ? props.stats : defaultStats;
+  const variant = props.variant || "light";
+
   const isDark = variant === "dark";
 
   return (

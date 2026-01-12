@@ -15,15 +15,15 @@ export interface LPHeaderProps {
   variant?: "full" | "minimal";
 }
 
-export function LPHeader({
-  logoUrl,
-  companyName = "ACCESS HIRE",
-  navLinks = [],
-  phoneNumber = "13 4000",
-  ctaText = "Get a Quote",
-  ctaLink = "#quote-form",
-  variant = "full",
-}: LPHeaderProps) {
+export function LPHeader(props: Partial<LPHeaderProps>) {
+  const logoUrl = props.logoUrl;
+  const companyName = props.companyName || "ACCESS HIRE";
+  const navLinks = props.navLinks || [];
+  const phoneNumber = props.phoneNumber || "13 4000";
+  const ctaText = props.ctaText || "Get a Quote";
+  const ctaLink = props.ctaLink || "#quote-form";
+  const variant = props.variant || "full";
+
   const isMinimal = variant === "minimal";
 
   return (

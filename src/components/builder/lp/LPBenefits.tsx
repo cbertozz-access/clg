@@ -39,16 +39,17 @@ const defaultIcons: Record<string, ReactNode> = {
   ),
 };
 
-export function LPBenefits({
-  sectionTitle = "Why Choose Access Hire?",
-  benefits = [
-    { icon: "shield", title: "Safety Certified", description: "All equipment meets strict Australian safety standards and is regularly maintained." },
-    { icon: "clock", title: "24/7 Support", description: "Round-the-clock assistance whenever you need it, wherever you are." },
-    { icon: "location", title: "Australia Wide", description: "Delivery and pickup across all states from our 20+ branch locations." },
-    { icon: "badge", title: "25+ Years Experience", description: "Industry expertise you can trust since 1985." },
-  ],
-  columns = 4,
-}: LPBenefitsProps) {
+const defaultBenefits = [
+  { icon: "shield", title: "Safety Certified", description: "All equipment meets strict Australian safety standards and is regularly maintained." },
+  { icon: "clock", title: "24/7 Support", description: "Round-the-clock assistance whenever you need it, wherever you are." },
+  { icon: "location", title: "Australia Wide", description: "Delivery and pickup across all states from our 20+ branch locations." },
+  { icon: "badge", title: "25+ Years Experience", description: "Industry expertise you can trust since 1985." },
+];
+
+export function LPBenefits(props: Partial<LPBenefitsProps>) {
+  const sectionTitle = props.sectionTitle || "Why Choose Access Hire?";
+  const benefits = props.benefits?.length ? props.benefits : defaultBenefits;
+  const columns = props.columns || 4;
   const gridCols = {
     2: "md:grid-cols-2",
     3: "md:grid-cols-3",

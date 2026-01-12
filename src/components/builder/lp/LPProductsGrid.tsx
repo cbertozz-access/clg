@@ -28,17 +28,15 @@ export interface LPProductsGridProps {
   backgroundColor?: "light" | "white";
 }
 
-export function LPProductsGrid({
-  sectionTitle = "Featured Equipment",
-  apiEndpoint = "https://acccessproducts.netlify.app/api/products",
-  category = "Forklift",
-  productsPerRow = 3,
-  maxProducts = 6,
-  showFilters = false,
-  viewAllLink = "#",
-  viewAllText = "View All Equipment",
-  backgroundColor = "light",
-}: LPProductsGridProps) {
+export function LPProductsGrid(props: Partial<LPProductsGridProps>) {
+  const sectionTitle = props.sectionTitle || "Featured Equipment";
+  const apiEndpoint = props.apiEndpoint || "https://acccessproducts.netlify.app/api/products";
+  const category = props.category || "Forklift";
+  const productsPerRow = props.productsPerRow || 3;
+  const maxProducts = props.maxProducts ?? 6;
+  const viewAllLink = props.viewAllLink || "#";
+  const viewAllText = props.viewAllText || "View All Equipment";
+  const backgroundColor = props.backgroundColor || "light";
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

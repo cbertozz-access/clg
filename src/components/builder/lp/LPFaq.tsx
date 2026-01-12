@@ -13,28 +13,30 @@ export interface LPFaqProps {
   defaultOpenIndex?: number;
 }
 
-export function LPFaq({
-  sectionTitle = "Frequently Asked Questions",
-  items = [
-    {
-      question: "What areas do you service?",
-      answer: "We service all of Australia with branches in WA, NT, SA, NSW, VIC, and QLD. Our extensive network ensures we can deliver equipment to most locations across the country.",
-    },
-    {
-      question: "What are your hire rates?",
-      answer: "Our rates vary depending on the equipment type, hire duration, and location. Contact us for a competitive quote tailored to your specific needs.",
-    },
-    {
-      question: "Do you offer delivery and pickup?",
-      answer: "Yes, we offer delivery and pickup services across all states. Same-day delivery is available in metro areas for urgent requirements.",
-    },
-    {
-      question: "What certifications do your operators need?",
-      answer: "Operators require relevant licenses for the equipment being used. We can advise on specific requirements and provide operator training if needed.",
-    },
-  ],
-  defaultOpenIndex = 0,
-}: LPFaqProps) {
+const defaultFaqItems = [
+  {
+    question: "What areas do you service?",
+    answer: "We service all of Australia with branches in WA, NT, SA, NSW, VIC, and QLD. Our extensive network ensures we can deliver equipment to most locations across the country.",
+  },
+  {
+    question: "What are your hire rates?",
+    answer: "Our rates vary depending on the equipment type, hire duration, and location. Contact us for a competitive quote tailored to your specific needs.",
+  },
+  {
+    question: "Do you offer delivery and pickup?",
+    answer: "Yes, we offer delivery and pickup services across all states. Same-day delivery is available in metro areas for urgent requirements.",
+  },
+  {
+    question: "What certifications do your operators need?",
+    answer: "Operators require relevant licenses for the equipment being used. We can advise on specific requirements and provide operator training if needed.",
+  },
+];
+
+export function LPFaq(props: Partial<LPFaqProps>) {
+  const sectionTitle = props.sectionTitle || "Frequently Asked Questions";
+  const items = props.items?.length ? props.items : defaultFaqItems;
+  const defaultOpenIndex = props.defaultOpenIndex ?? 0;
+
   const [openIndex, setOpenIndex] = useState<number | null>(defaultOpenIndex);
 
   const toggleItem = (index: number) => {

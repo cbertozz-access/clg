@@ -21,35 +21,37 @@ export interface LPFooterProps {
   variant?: "full" | "minimal";
 }
 
-export function LPFooter({
-  logoUrl,
-  companyName = "ACCESS HIRE",
-  companyDescription = "Australia's largest privately-owned equipment hire company since 1985.",
-  columns = [
-    {
-      title: "Equipment",
-      links: [
-        { label: "Forklifts", href: "#" },
-        { label: "Boom Lifts", href: "#" },
-        { label: "Scissor Lifts", href: "#" },
-        { label: "Telehandlers", href: "#" },
-      ],
-    },
-    {
-      title: "Company",
-      links: [
-        { label: "About Us", href: "#" },
-        { label: "Locations", href: "#" },
-        { label: "Careers", href: "#" },
-        { label: "Contact", href: "#" },
-      ],
-    },
-  ],
-  phoneNumber = "13 4000",
-  email = "info@accesshire.net",
-  copyrightText = "© 2024 Access Hire Australia. All rights reserved.",
-  variant = "full",
-}: LPFooterProps) {
+const defaultColumns = [
+  {
+    title: "Equipment",
+    links: [
+      { label: "Forklifts", href: "#" },
+      { label: "Boom Lifts", href: "#" },
+      { label: "Scissor Lifts", href: "#" },
+      { label: "Telehandlers", href: "#" },
+    ],
+  },
+  {
+    title: "Company",
+    links: [
+      { label: "About Us", href: "#" },
+      { label: "Locations", href: "#" },
+      { label: "Careers", href: "#" },
+      { label: "Contact", href: "#" },
+    ],
+  },
+];
+
+export function LPFooter(props: Partial<LPFooterProps>) {
+  const logoUrl = props.logoUrl;
+  const companyName = props.companyName || "ACCESS HIRE";
+  const companyDescription = props.companyDescription || "Australia's largest privately-owned equipment hire company since 1985.";
+  const columns = props.columns?.length ? props.columns : defaultColumns;
+  const phoneNumber = props.phoneNumber || "13 4000";
+  const email = props.email || "info@accesshire.net";
+  const copyrightText = props.copyrightText || "© 2024 Access Hire Australia. All rights reserved.";
+  const variant = props.variant || "full";
+
   if (variant === "minimal") {
     return (
       <footer className="bg-[#1A1A1A] py-6 border-t border-white/10">

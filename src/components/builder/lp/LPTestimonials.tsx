@@ -26,27 +26,28 @@ function StarRating() {
   );
 }
 
-export function LPTestimonials({
-  sectionTitle = "What Our Customers Say",
-  testimonials = [
-    {
-      quote: "Access Hire has been our go-to equipment provider for over 5 years. Professional, reliable, and always have what we need.",
-      name: "John Mitchell",
-      title: "Project Manager",
-    },
-    {
-      quote: "Quick response, competitive pricing, and the equipment was delivered on time. Exactly what we needed for our warehouse expansion.",
-      name: "Sarah Chen",
-      title: "Operations Director",
-    },
-    {
-      quote: "The team really understands mining site requirements. Safety-focused and always deliver quality equipment that meets our standards.",
-      name: "Mike Thompson",
-      title: "Site Supervisor",
-    },
-  ],
-  variant = "grid",
-}: LPTestimonialsProps) {
+const defaultTestimonials: Testimonial[] = [
+  {
+    quote: "Access Hire has been our go-to equipment provider for over 5 years. Professional, reliable, and always have what we need.",
+    name: "John Mitchell",
+    title: "Project Manager",
+  },
+  {
+    quote: "Quick response, competitive pricing, and the equipment was delivered on time. Exactly what we needed for our warehouse expansion.",
+    name: "Sarah Chen",
+    title: "Operations Director",
+  },
+  {
+    quote: "The team really understands mining site requirements. Safety-focused and always deliver quality equipment that meets our standards.",
+    name: "Mike Thompson",
+    title: "Site Supervisor",
+  },
+];
+
+export function LPTestimonials(props: Partial<LPTestimonialsProps>) {
+  const sectionTitle = props.sectionTitle || "What Our Customers Say";
+  const testimonials = props.testimonials?.length ? props.testimonials : defaultTestimonials;
+  const variant = props.variant || "grid";
   if (variant === "single" && testimonials.length > 0) {
     const testimonial = testimonials[0];
     return (
