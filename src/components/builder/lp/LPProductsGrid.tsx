@@ -28,14 +28,23 @@ export interface LPProductsGridProps {
   backgroundColor?: "light" | "white";
 }
 
+const placeholderProducts: Product[] = [
+  { id: "1", model: "Lorem Ipsum 2500", brand: "Dolor Sit", category: "Forklift", subCategory: "Amet", productImages: [{ imageThumbUrl: "https://placehold.co/400x300/F3F4F6/6B7280?text=Product+1" }], operationalSpecification: { capacityT: 2.5 } },
+  { id: "2", model: "Consectetur XL", brand: "Adipiscing", category: "Forklift", subCategory: "Electric", productImages: [{ imageThumbUrl: "https://placehold.co/400x300/F3F4F6/6B7280?text=Product+2" }], operationalSpecification: { capacityT: 3.5 } },
+  { id: "3", model: "Sed Eiusmod 5000", brand: "Tempor Inc", category: "Forklift", subCategory: "Diesel", productImages: [{ imageThumbUrl: "https://placehold.co/400x300/F3F4F6/6B7280?text=Product+3" }], operationalSpecification: { capacityT: 5.0 } },
+  { id: "4", model: "Ut Labore Pro", brand: "Dolore Magna", category: "Forklift", subCategory: "Electric", productImages: [{ imageThumbUrl: "https://placehold.co/400x300/F3F4F6/6B7280?text=Product+4" }], operationalSpecification: { capacityT: 1.8 } },
+  { id: "5", model: "Aliqua Veniam", brand: "Quis Nostrud", category: "Forklift", subCategory: "Gas", productImages: [{ imageThumbUrl: "https://placehold.co/400x300/F3F4F6/6B7280?text=Product+5" }], operationalSpecification: { capacityT: 4.0 } },
+  { id: "6", model: "Exercitation 3000", brand: "Ullamco Labs", category: "Forklift", subCategory: "Diesel", productImages: [{ imageThumbUrl: "https://placehold.co/400x300/F3F4F6/6B7280?text=Product+6" }], operationalSpecification: { capacityT: 10.0 } },
+];
+
 export function LPProductsGrid(props: Partial<LPProductsGridProps>) {
-  const sectionTitle = props.sectionTitle || "Featured Equipment";
-  const apiEndpoint = props.apiEndpoint || "https://acccessproducts.netlify.app/api/products";
+  const sectionTitle = props.sectionTitle || "Lorem Ipsum Dolor";
+  const apiEndpoint = props.apiEndpoint || "";
   const category = props.category || "Forklift";
   const productsPerRow = props.productsPerRow || 3;
   const maxProducts = props.maxProducts ?? 6;
   const viewAllLink = props.viewAllLink || "#";
-  const viewAllText = props.viewAllText || "View All Equipment";
+  const viewAllText = props.viewAllText || "Lorem Ipsum Amet";
   const backgroundColor = props.backgroundColor || "light";
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,6 +52,13 @@ export function LPProductsGrid(props: Partial<LPProductsGridProps>) {
 
   useEffect(() => {
     async function fetchProducts() {
+      // Use placeholder products if no API endpoint
+      if (!apiEndpoint) {
+        setProducts(placeholderProducts.slice(0, maxProducts));
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
         const response = await fetch(`${apiEndpoint}?limit=500`);
@@ -53,8 +69,9 @@ export function LPProductsGrid(props: Partial<LPProductsGridProps>) {
           : allProducts;
         setProducts(filtered.slice(0, maxProducts));
       } catch (err) {
-        setError("Failed to load products");
-        console.error("Failed to load products:", err);
+        // Fall back to placeholder products on error
+        setProducts(placeholderProducts.slice(0, maxProducts));
+        console.error("Failed to load products, using placeholders:", err);
       } finally {
         setLoading(false);
       }

@@ -22,18 +22,22 @@ export interface LPHeroProps {
 
 export function LPHero(props: Partial<LPHeroProps>) {
   const variant = props.variant || "standard";
-  const backgroundImage = props.backgroundImage;
+  const backgroundImage = props.backgroundImage || "https://placehold.co/1920x800/1A1A1A/666?text=Hero+Background";
   const overlayOpacity = props.overlayOpacity ?? 60;
-  const headline = props.headline || "Equipment Hire Across Australia";
-  const highlightWord = props.highlightWord || "Equipment";
-  const subheadline = props.subheadline || "Get competitive quotes from Australia's largest privately-owned equipment fleet. Hire or buy with confidence.";
-  const primaryCtaText = props.primaryCtaText || "Get a Quote";
+  const headline = props.headline || "Lorem Ipsum Dolor Sit Amet";
+  const highlightWord = props.highlightWord || "Lorem";
+  const subheadline = props.subheadline || "Consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.";
+  const primaryCtaText = props.primaryCtaText || "Lorem Ipsum";
   const primaryCtaLink = props.primaryCtaLink || "#quote-form";
-  const secondaryCtaText = props.secondaryCtaText || "Call 13 4000";
+  const secondaryCtaText = props.secondaryCtaText || "Dolor Sit";
   const secondaryCtaLink = props.secondaryCtaLink || "tel:134000";
-  const benefits = props.benefits || [];
-  const showBadge = props.showBadge ?? false;
-  const badgeText = props.badgeText || "Fast Response Guaranteed";
+  const benefits = props.benefits?.length ? props.benefits : [
+    { text: "Lorem ipsum dolor sit amet" },
+    { text: "Consectetur adipiscing elit" },
+    { text: "Sed do eiusmod tempor" },
+  ];
+  const showBadge = props.showBadge ?? true;
+  const badgeText = props.badgeText || "Lorem Ipsum Dolor";
   // Replace highlight word in headline
   const formattedHeadline = headline.replace(
     new RegExp(`(${highlightWord})`, "i"),

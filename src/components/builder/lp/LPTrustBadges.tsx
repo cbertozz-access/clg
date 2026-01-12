@@ -11,10 +11,10 @@ export interface LPTrustBadgesProps {
 }
 
 const defaultStats = [
-  { value: "7,500", label: "Equipment Units" },
-  { value: "24/7", label: "Support Available" },
-  { value: "20+", label: "Locations Australia-Wide" },
-  { value: "25+", label: "Years Experience" },
+  { value: "1,234", label: "Lorem Ipsum" },
+  { value: "24/7", label: "Dolor Sit" },
+  { value: "50+", label: "Amet Consectetur" },
+  { value: "99%", label: "Adipiscing Elit" },
 ];
 
 export function LPTrustBadges(props: Partial<LPTrustBadgesProps>) {

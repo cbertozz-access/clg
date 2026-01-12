@@ -10,11 +10,11 @@ export interface LPCtaBannerProps {
 }
 
 export function LPCtaBanner(props: Partial<LPCtaBannerProps>) {
-  const headline = props.headline || "Ready to Get Started?";
-  const subtext = props.subtext || "Get a competitive quote for your equipment hire needs today.";
-  const primaryCtaText = props.primaryCtaText || "Get a Quote";
+  const headline = props.headline || "Lorem Ipsum Dolor Sit?";
+  const subtext = props.subtext || "Consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore.";
+  const primaryCtaText = props.primaryCtaText || "Lorem Ipsum";
   const primaryCtaLink = props.primaryCtaLink || "#quote-form";
-  const secondaryCtaText = props.secondaryCtaText || "Call 13 4000";
+  const secondaryCtaText = props.secondaryCtaText || "Dolor Sit";
   const secondaryCtaLink = props.secondaryCtaLink || "tel:134000";
   return (
     <section className="bg-[#E63229] py-12">

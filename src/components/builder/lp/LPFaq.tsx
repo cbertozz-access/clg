@@ -15,25 +15,25 @@ export interface LPFaqProps {
 
 const defaultFaqItems = [
   {
-    question: "What areas do you service?",
-    answer: "We service all of Australia with branches in WA, NT, SA, NSW, VIC, and QLD. Our extensive network ensures we can deliver equipment to most locations across the country.",
+    question: "Lorem ipsum dolor sit amet?",
+    answer: "Consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.",
   },
   {
-    question: "What are your hire rates?",
-    answer: "Our rates vary depending on the equipment type, hire duration, and location. Contact us for a competitive quote tailored to your specific needs.",
+    question: "Ut enim ad minim veniam?",
+    answer: "Quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum.",
   },
   {
-    question: "Do you offer delivery and pickup?",
-    answer: "Yes, we offer delivery and pickup services across all states. Same-day delivery is available in metro areas for urgent requirements.",
+    question: "Duis aute irure dolor?",
+    answer: "In reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident sunt in culpa.",
   },
   {
-    question: "What certifications do your operators need?",
-    answer: "Operators require relevant licenses for the equipment being used. We can advise on specific requirements and provide operator training if needed.",
+    question: "Excepteur sint occaecat?",
+    answer: "Cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem.",
   },
 ];
 
 export function LPFaq(props: Partial<LPFaqProps>) {
-  const sectionTitle = props.sectionTitle || "Frequently Asked Questions";
+  const sectionTitle = props.sectionTitle || "Lorem Ipsum Dolor Sit";
   const items = props.items?.length ? props.items : defaultFaqItems;
   const defaultOpenIndex = props.defaultOpenIndex ?? 0;
 

@@ -40,14 +40,14 @@ const defaultIcons: Record<string, ReactNode> = {
 };
 
 const defaultBenefits = [
-  { icon: "shield", title: "Safety Certified", description: "All equipment meets strict Australian safety standards and is regularly maintained." },
-  { icon: "clock", title: "24/7 Support", description: "Round-the-clock assistance whenever you need it, wherever you are." },
-  { icon: "location", title: "Australia Wide", description: "Delivery and pickup across all states from our 20+ branch locations." },
-  { icon: "badge", title: "25+ Years Experience", description: "Industry expertise you can trust since 1985." },
+  { icon: "shield", title: "Lorem Ipsum", description: "Consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore." },
+  { icon: "clock", title: "Dolor Sit Amet", description: "Ut enim ad minim veniam quis nostrud exercitation ullamco laboris." },
+  { icon: "location", title: "Adipiscing Elit", description: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum." },
+  { icon: "badge", title: "Sed Eiusmod", description: "Excepteur sint occaecat cupidatat non proident sunt in culpa qui." },
 ];
 
 export function LPBenefits(props: Partial<LPBenefitsProps>) {
-  const sectionTitle = props.sectionTitle || "Why Choose Access Hire?";
+  const sectionTitle = props.sectionTitle || "Lorem Ipsum Dolor Sit?";
   const benefits = props.benefits?.length ? props.benefits : defaultBenefits;
   const columns = props.columns || 4;
   const gridCols = {

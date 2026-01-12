@@ -11,9 +11,9 @@ export interface LPStickyFormProps {
 }
 
 export function LPStickyForm(props: Partial<LPStickyFormProps>) {
-  const title = props.title || "Get a Quick Quote";
-  const subtitle = props.subtitle || "Tell us what you need and we'll respond within 2 hours";
-  const submitButtonText = props.submitButtonText || "Get My Quote";
+  const title = props.title || "Lorem Ipsum Dolor";
+  const subtitle = props.subtitle || "Consectetur adipiscing elit sed do eiusmod tempor";
+  const submitButtonText = props.submitButtonText || "Lorem Ipsum";
   const phoneNumber = props.phoneNumber || "13 4000";
   const showPhoneCta = props.showPhoneCta ?? true;
   const [formData, setFormData] = useState({

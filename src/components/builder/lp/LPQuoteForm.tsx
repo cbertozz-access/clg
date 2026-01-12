@@ -37,9 +37,9 @@ const defaultFields: FormField[] = [
 ];
 
 export function LPQuoteForm(props: Partial<LPQuoteFormProps>) {
-  const title = props.title || "Request a Quote";
-  const subtitle = props.subtitle || "Fill in your details and we'll get back to you within 24 hours.";
-  const submitButtonText = props.submitButtonText || "Submit";
+  const title = props.title || "Lorem Ipsum Dolor";
+  const subtitle = props.subtitle || "Consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore.";
+  const submitButtonText = props.submitButtonText || "Lorem Ipsum";
   const fields = props.fields?.length ? props.fields : defaultFields;
   const showPrivacyNote = props.showPrivacyNote ?? true;
   const privacyNoteText = props.privacyNoteText || "Your information is secure and will never be shared";

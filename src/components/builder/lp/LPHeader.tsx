@@ -16,8 +16,8 @@ export interface LPHeaderProps {
 }
 
 export function LPHeader(props: Partial<LPHeaderProps>) {
-  const logoUrl = props.logoUrl;
-  const companyName = props.companyName || "ACCESS HIRE";
+  const logoUrl = props.logoUrl || "https://placehold.co/40x40/E63229/white?text=A";
+  const companyName = props.companyName || "LOREM IPSUM";
   const navLinks = props.navLinks || [];
   const phoneNumber = props.phoneNumber || "13 4000";
   const ctaText = props.ctaText || "Get a Quote";
@@ -34,13 +34,7 @@ export function LPHeader(props: Partial<LPHeaderProps>) {
         <div className="flex items-center justify-between py-4">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            {logoUrl ? (
-              <img src={logoUrl} alt={companyName} className="h-10 w-auto" />
-            ) : (
-              <div className="w-10 h-10 bg-[#E63229] rounded flex items-center justify-center">
-                <span className="font-bold text-xl">A</span>
-              </div>
-            )}
+            <img src={logoUrl} alt={companyName} className="h-10 w-auto rounded" />
             <span className="font-bold text-lg hidden sm:block">{companyName}</span>
           </div>
 

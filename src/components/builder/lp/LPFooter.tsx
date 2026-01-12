@@ -23,33 +23,33 @@ export interface LPFooterProps {
 
 const defaultColumns = [
   {
-    title: "Equipment",
+    title: "Lorem Ipsum",
     links: [
-      { label: "Forklifts", href: "#" },
-      { label: "Boom Lifts", href: "#" },
-      { label: "Scissor Lifts", href: "#" },
-      { label: "Telehandlers", href: "#" },
+      { label: "Dolor Sit", href: "#" },
+      { label: "Amet Consectetur", href: "#" },
+      { label: "Adipiscing Elit", href: "#" },
+      { label: "Sed Eiusmod", href: "#" },
     ],
   },
   {
-    title: "Company",
+    title: "Dolor Amet",
     links: [
-      { label: "About Us", href: "#" },
-      { label: "Locations", href: "#" },
-      { label: "Careers", href: "#" },
-      { label: "Contact", href: "#" },
+      { label: "Tempor Incididunt", href: "#" },
+      { label: "Ut Labore", href: "#" },
+      { label: "Et Dolore", href: "#" },
+      { label: "Magna Aliqua", href: "#" },
     ],
   },
 ];
 
 export function LPFooter(props: Partial<LPFooterProps>) {
-  const logoUrl = props.logoUrl;
-  const companyName = props.companyName || "ACCESS HIRE";
-  const companyDescription = props.companyDescription || "Australia's largest privately-owned equipment hire company since 1985.";
+  const logoUrl = props.logoUrl || "https://placehold.co/40x40/E63229/white?text=L";
+  const companyName = props.companyName || "LOREM IPSUM";
+  const companyDescription = props.companyDescription || "Consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.";
   const columns = props.columns?.length ? props.columns : defaultColumns;
   const phoneNumber = props.phoneNumber || "13 4000";
   const email = props.email || "info@accesshire.net";
-  const copyrightText = props.copyrightText || "© 2024 Access Hire Australia. All rights reserved.";
+  const copyrightText = props.copyrightText || "© 2024 Lorem Ipsum Dolor. Sit amet consectetur.";
   const variant = props.variant || "full";
 
   if (variant === "minimal") {
@@ -78,13 +78,7 @@ export function LPFooter(props: Partial<LPFooterProps>) {
           {/* Logo & Description */}
           <div>
             <div className="flex items-center gap-3 mb-4">
-              {logoUrl ? (
-                <img src={logoUrl} alt={companyName} className="h-10 w-auto" />
-              ) : (
-                <div className="w-10 h-10 bg-[#E63229] rounded flex items-center justify-center">
-                  <span className="font-bold text-xl">A</span>
-                </div>
-              )}
+              <img src={logoUrl} alt={companyName} className="h-10 w-auto rounded" />
               <span className="font-bold">{companyName}</span>
             </div>
             <p className="text-gray-400 text-sm">{companyDescription}</p>

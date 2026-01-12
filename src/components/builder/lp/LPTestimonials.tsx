@@ -28,24 +28,27 @@ function StarRating() {
 
 const defaultTestimonials: Testimonial[] = [
   {
-    quote: "Access Hire has been our go-to equipment provider for over 5 years. Professional, reliable, and always have what we need.",
-    name: "John Mitchell",
-    title: "Project Manager",
+    quote: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    name: "Lorem Ipsum",
+    title: "Dolor Sit Amet",
+    avatarUrl: "https://placehold.co/80x80/E63229/white?text=LI",
   },
   {
-    quote: "Quick response, competitive pricing, and the equipment was delivered on time. Exactly what we needed for our warehouse expansion.",
-    name: "Sarah Chen",
-    title: "Operations Director",
+    quote: "Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+    name: "Consectetur Elit",
+    title: "Adipiscing Director",
+    avatarUrl: "https://placehold.co/80x80/1A1A1A/white?text=CE",
   },
   {
-    quote: "The team really understands mining site requirements. Safety-focused and always deliver quality equipment that meets our standards.",
-    name: "Mike Thompson",
-    title: "Site Supervisor",
+    quote: "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur excepteur sint.",
+    name: "Sed Eiusmod",
+    title: "Tempor Manager",
+    avatarUrl: "https://placehold.co/80x80/6B7280/white?text=SE",
   },
 ];
 
 export function LPTestimonials(props: Partial<LPTestimonialsProps>) {
-  const sectionTitle = props.sectionTitle || "What Our Customers Say";
+  const sectionTitle = props.sectionTitle || "Lorem Ipsum Dolor";
   const testimonials = props.testimonials?.length ? props.testimonials : defaultTestimonials;
   const variant = props.variant || "grid";
   if (variant === "single" && testimonials.length > 0) {
