@@ -8,6 +8,56 @@
  */
 
 import { register } from "@builder.io/sdk-react-nextjs";
+
+// Register Design Tokens with Builder.io visual editor
+register("editor.settings", {
+  designTokens: {
+    colors: [
+      { name: "Primary", value: "var(--color-primary, #0f172a)" },
+      { name: "Primary Dark", value: "var(--color-primary-dark, #020617)" },
+      { name: "Primary Foreground", value: "var(--color-primary-foreground, #f8fafc)" },
+      { name: "Accent", value: "var(--color-accent, #3b82f6)" },
+      { name: "Accent Foreground", value: "var(--color-accent-foreground, #ffffff)" },
+      { name: "Background", value: "var(--color-background, #ffffff)" },
+      { name: "Background Alt", value: "var(--color-background-alt, #f3f4f6)" },
+      { name: "Foreground", value: "var(--color-foreground, #020617)" },
+      { name: "Muted Foreground", value: "var(--color-muted-foreground, #64748b)" },
+      { name: "Border", value: "var(--color-border, #e2e8f0)" },
+      { name: "Success", value: "var(--color-success, #22c55e)" },
+      { name: "Warning", value: "var(--color-warning, #f59e0b)" },
+      { name: "Error", value: "var(--color-error, #ef4444)" },
+    ],
+    spacing: [
+      { name: "XS", value: "4px" },
+      { name: "SM", value: "8px" },
+      { name: "MD", value: "16px" },
+      { name: "LG", value: "24px" },
+      { name: "XL", value: "32px" },
+      { name: "2XL", value: "48px" },
+    ],
+    fontFamily: [
+      { name: "Heading", value: "var(--font-heading, 'Inter', system-ui, sans-serif)" },
+      { name: "Body", value: "var(--font-body, 'Inter', system-ui, sans-serif)" },
+    ],
+    fontSize: [
+      { name: "XS", value: "12px" },
+      { name: "SM", value: "14px" },
+      { name: "Base", value: "16px" },
+      { name: "LG", value: "18px" },
+      { name: "XL", value: "20px" },
+      { name: "2XL", value: "24px" },
+      { name: "3XL", value: "30px" },
+      { name: "4XL", value: "36px" },
+    ],
+    borderRadius: [
+      { name: "None", value: "0" },
+      { name: "SM", value: "var(--radius-sm, 4px)" },
+      { name: "Default", value: "var(--radius, 8px)" },
+      { name: "LG", value: "var(--radius-lg, 12px)" },
+      { name: "Full", value: "9999px" },
+    ],
+  },
+});
 import { CategoryHeroCC } from "../components/builder/CategoryHeroCC";
 import {
   LPHeader,
