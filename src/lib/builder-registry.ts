@@ -1,5 +1,4 @@
 import type { RegisteredComponent } from "@builder.io/sdk-react-nextjs";
-import { Builder } from "@builder.io/react";
 import { CategoryHeroCC } from "../components/builder/CategoryHeroCC";
 import {
   LPHeader,
@@ -1052,13 +1051,3 @@ export const customComponents: RegisteredComponent[] = [
   },
 ];
 
-// Register all components with Builder.io for visual editor discovery
-customComponents.forEach((componentConfig) => {
-  Builder.registerComponent(componentConfig.component, {
-    name: componentConfig.name,
-    friendlyName: componentConfig.friendlyName,
-    description: componentConfig.description,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    inputs: componentConfig.inputs as any,
-  });
-});

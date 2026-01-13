@@ -3,6 +3,9 @@
 import { Content, isPreviewing } from "@builder.io/sdk-react-nextjs";
 import { customComponents } from "@/lib/builder-registry";
 
+// Register components with Builder.io visual editor
+import "@/lib/builder-register";
+
 interface BuilderContentProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   content: any;
