@@ -84,7 +84,12 @@ export function FigmaProductCardAPI({
 
         const data = await response.json();
         const products = Array.isArray(data) ? data : data.products || [];
-        const found = products.find((p: Product) => p.productId === productId);
+
+        // Search by productId first, then by model name
+        const found = products.find((p: Product) =>
+          p.productId === productId ||
+          p.model?.toLowerCase() === productId?.toLowerCase()
+        );
 
         if (found) {
           setProduct(found);

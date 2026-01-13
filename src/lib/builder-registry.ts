@@ -284,12 +284,46 @@ export const customComponents: RegisteredComponent[] = [
   },
 
   // Figma Product Card (API Connected - Single Product Picker)
-  // NOTE: Inputs are defined in builder-register.ts with dynamic product dropdown
   {
     component: FigmaProductCardAPI,
     name: "FigmaProductCardAPI",
     friendlyName: "Figma - Product Card (API Picker)",
     description: "Select a specific product from the API to display.",
+    inputs: [
+      {
+        name: "productId",
+        type: "string",
+        friendlyName: "Product ID",
+        helperText: "Enter product ID (e.g., H48XM-12). View all products at: acccessproducts.netlify.app/api/products",
+        required: true,
+      },
+      {
+        name: "ctaText",
+        type: "string",
+        defaultValue: "View Details",
+        friendlyName: "CTA Text",
+      },
+      {
+        name: "productBaseUrl",
+        type: "string",
+        defaultValue: "/equipment",
+        friendlyName: "Product Base URL",
+        advanced: true,
+      },
+      {
+        name: "showBrandLogo",
+        type: "boolean",
+        defaultValue: false,
+        friendlyName: "Show Brand Logo",
+      },
+      {
+        name: "brandLogoUrl",
+        type: "file",
+        allowedFileTypes: ["jpeg", "jpg", "png", "svg", "webp"],
+        friendlyName: "Brand Logo",
+        showIf: "options.get('showBrandLogo')",
+      },
+    ],
   },
 
   // Figma Product Grid (API Connected)
