@@ -10,6 +10,7 @@
     "setup:brands": "tsx scripts/setup-builder-brands.ts"
   },
   "dependencies": {
+    "@builder.io/react": "^9.1.0",
     "@builder.io/sdk-react-nextjs": "^0.24.0",
     "next": "16.1.1",
     "react": "19.2.3",
