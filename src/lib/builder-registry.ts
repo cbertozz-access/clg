@@ -19,6 +19,7 @@ import {
   FigmaInput,
   FigmaDialog,
   FigmaProductCard,
+  FigmaProductGrid,
   FigmaHero,
 } from "../components/builder/figma";
 
@@ -267,9 +268,94 @@ export const customComponents: RegisteredComponent[] = [
       },
       {
         name: "ctaLink",
-        type: "url",
-        defaultValue: "#",
+        type: "string",
+        defaultValue: "/product",
         friendlyName: "CTA Link",
+        helperText: "Link to product details page",
+      },
+    ],
+  },
+
+  // Figma Product Grid (API Connected)
+  {
+    component: FigmaProductGrid,
+    name: "FigmaProductGrid",
+    friendlyName: "Figma - Product Grid (API)",
+    description: "Product grid that fetches from live API. Uses CSS variable theming.",
+    inputs: [
+      {
+        name: "sectionTitle",
+        type: "string",
+        defaultValue: "Featured Equipment",
+        friendlyName: "Section Title",
+      },
+      {
+        name: "apiEndpoint",
+        type: "string",
+        defaultValue: "https://acccessproducts.netlify.app/api/products",
+        friendlyName: "API Endpoint",
+        helperText: "URL to fetch products from",
+      },
+      {
+        name: "category",
+        type: "string",
+        friendlyName: "Category Filter",
+        helperText: "Filter by category (e.g., Forklift, Scissor Lift)",
+      },
+      {
+        name: "subcategory",
+        type: "string",
+        friendlyName: "Subcategory Filter",
+      },
+      {
+        name: "columns",
+        type: "enum",
+        enum: ["2", "3", "4"],
+        defaultValue: "3",
+        friendlyName: "Columns",
+      },
+      {
+        name: "maxProducts",
+        type: "number",
+        defaultValue: 6,
+        friendlyName: "Max Products",
+      },
+      {
+        name: "viewAllLink",
+        type: "string",
+        friendlyName: "View All Link",
+      },
+      {
+        name: "viewAllText",
+        type: "string",
+        defaultValue: "View All Equipment",
+        friendlyName: "View All Text",
+      },
+      {
+        name: "cardCtaText",
+        type: "string",
+        defaultValue: "View Details",
+        friendlyName: "Card CTA Text",
+      },
+      {
+        name: "productBaseUrl",
+        type: "string",
+        defaultValue: "/equipment",
+        friendlyName: "Product Base URL",
+        helperText: "Base URL for product detail pages",
+      },
+      {
+        name: "showBrandLogo",
+        type: "boolean",
+        defaultValue: false,
+        friendlyName: "Show Brand Logo",
+      },
+      {
+        name: "brandLogoUrl",
+        type: "file",
+        allowedFileTypes: ["jpeg", "jpg", "png", "svg", "webp"],
+        friendlyName: "Brand Logo",
+        helperText: "Logo shown on each card (if enabled)",
       },
     ],
   },

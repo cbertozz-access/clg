@@ -9,6 +9,47 @@
 
 import { register } from "@builder.io/sdk-react-nextjs";
 
+// Register Data Sources for Builder.io data panel
+register("dataSource", {
+  name: "Products API",
+  description: "Equipment products from the live API",
+  // Default API endpoint
+  url: "https://acccessproducts.netlify.app/api/products",
+  // Define the data schema for binding
+  schema: {
+    type: "array",
+    items: {
+      type: "object",
+      properties: {
+        id: { type: "string" },
+        name: { type: "string" },
+        category: { type: "string" },
+        subcategory: { type: "string" },
+        fuel_type: { type: "string" },
+        model: { type: "string" },
+        image_url: { type: "string" },
+        slug: { type: "string" },
+        specs: {
+          type: "object",
+          properties: {
+            reach: { type: "string" },
+            height: { type: "string" },
+            capacity: { type: "string" },
+          },
+        },
+        pricing: {
+          type: "object",
+          properties: {
+            daily: { type: "number" },
+            weekly: { type: "number" },
+            monthly: { type: "number" },
+          },
+        },
+      },
+    },
+  },
+});
+
 // Register Design Tokens with Builder.io visual editor
 register("editor.settings", {
   designTokens: {
@@ -78,6 +119,7 @@ import {
   FigmaInput,
   FigmaDialog,
   FigmaProductCard,
+  FigmaProductGrid,
   FigmaHero,
 } from "../components/builder/figma";
 
@@ -106,6 +148,12 @@ if (typeof window !== "undefined") {
     name: "FigmaProductCard",
     friendlyName: "Figma - Product Card",
     component: FigmaProductCard,
+  });
+
+  register("editor.component", {
+    name: "FigmaProductGrid",
+    friendlyName: "Figma - Product Grid (API)",
+    component: FigmaProductGrid,
   });
 
   register("editor.component", {
