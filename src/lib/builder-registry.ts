@@ -13,6 +13,12 @@ import {
   LPFooter,
   LPBreadcrumb,
   LPStickyForm,
+  LPStickyBottomCTA,
+  LPFilterBar,
+  LPFilterChips,
+  LPQuoteModal,
+  LPTrustScroll,
+  LPLoadMore,
 } from "../components/builder/lp";
 import {
   FigmaButton,
@@ -1142,6 +1148,253 @@ export const customComponents: RegisteredComponent[] = [
         type: "boolean",
         defaultValue: true,
         friendlyName: "Show Phone CTA",
+      },
+    ],
+  },
+
+  // ============================================
+  // MOBILE-SPECIFIC COMPONENTS
+  // ============================================
+
+  // LP Sticky Bottom CTA (Mobile)
+  {
+    component: LPStickyBottomCTA,
+    name: "LPStickyBottomCTA",
+    friendlyName: "LP - Sticky Bottom CTA (Mobile)",
+    description: "Fixed bottom bar with call and quote buttons for mobile pages",
+    inputs: [
+      {
+        name: "phoneNumber",
+        type: "string",
+        defaultValue: "13 4000",
+        friendlyName: "Phone Number",
+      },
+      {
+        name: "callText",
+        type: "string",
+        defaultValue: "Call",
+        friendlyName: "Call Button Text",
+      },
+      {
+        name: "quoteText",
+        type: "string",
+        defaultValue: "Get Quote",
+        friendlyName: "Quote Button Text",
+      },
+      {
+        name: "quoteLink",
+        type: "string",
+        defaultValue: "#quote-form",
+        friendlyName: "Quote Button Link",
+      },
+      {
+        name: "showProductCount",
+        type: "boolean",
+        defaultValue: false,
+        friendlyName: "Show Product Count",
+      },
+      {
+        name: "productCount",
+        type: "number",
+        friendlyName: "Product Count",
+        showIf: "options.get('showProductCount')",
+      },
+      {
+        name: "productCountLabel",
+        type: "string",
+        defaultValue: "products available",
+        friendlyName: "Product Count Label",
+        showIf: "options.get('showProductCount')",
+      },
+    ],
+  },
+
+  // LP Filter Bar (Desktop)
+  {
+    component: LPFilterBar,
+    name: "LPFilterBar",
+    friendlyName: "LP - Filter Bar (Desktop)",
+    description: "Horizontal filter bar with dropdown selects for product filtering",
+    inputs: [
+      {
+        name: "filters",
+        type: "list",
+        friendlyName: "Filters",
+        subFields: [
+          { name: "name", type: "string", friendlyName: "Filter ID" },
+          { name: "label", type: "string", friendlyName: "Label" },
+          {
+            name: "options",
+            type: "list",
+            friendlyName: "Options",
+            subFields: [
+              { name: "label", type: "string", friendlyName: "Option Label" },
+              { name: "value", type: "string", friendlyName: "Option Value" },
+            ],
+          },
+        ],
+      },
+      {
+        name: "showApiBadge",
+        type: "boolean",
+        defaultValue: true,
+        friendlyName: "Show API Badge",
+      },
+      {
+        name: "apiBadgeText",
+        type: "string",
+        defaultValue: "Live API",
+        friendlyName: "API Badge Text",
+      },
+      {
+        name: "productCount",
+        type: "number",
+        friendlyName: "Product Count",
+      },
+      {
+        name: "productCountSuffix",
+        type: "string",
+        defaultValue: "products",
+        friendlyName: "Count Suffix",
+      },
+    ],
+  },
+
+  // LP Filter Chips (Mobile)
+  {
+    component: LPFilterChips,
+    name: "LPFilterChips",
+    friendlyName: "LP - Filter Chips (Mobile)",
+    description: "Horizontal scrolling filter pills for mobile product filtering",
+    inputs: [
+      {
+        name: "chips",
+        type: "list",
+        friendlyName: "Filter Chips",
+        subFields: [
+          { name: "label", type: "string", friendlyName: "Chip Label" },
+          { name: "value", type: "string", friendlyName: "Chip Value" },
+        ],
+      },
+      {
+        name: "showAllOption",
+        type: "boolean",
+        defaultValue: true,
+        friendlyName: "Show 'All' Option",
+      },
+      {
+        name: "allOptionLabel",
+        type: "string",
+        defaultValue: "All",
+        friendlyName: "'All' Option Label",
+      },
+      {
+        name: "selectedValue",
+        type: "string",
+        friendlyName: "Default Selected",
+        helperText: "Value of the chip to select by default",
+      },
+    ],
+  },
+
+  // LP Quote Modal (Mobile)
+  {
+    component: LPQuoteModal,
+    name: "LPQuoteModal",
+    friendlyName: "LP - Quote Modal (Mobile)",
+    description: "Slide-up modal form for mobile quote requests",
+    inputs: [
+      {
+        name: "title",
+        type: "string",
+        defaultValue: "Get a Quote",
+        friendlyName: "Modal Title",
+      },
+      {
+        name: "subtitle",
+        type: "string",
+        friendlyName: "Modal Subtitle",
+      },
+      {
+        name: "submitText",
+        type: "string",
+        defaultValue: "Get My Quote",
+        friendlyName: "Submit Button Text",
+      },
+      {
+        name: "equipmentOptions",
+        type: "list",
+        friendlyName: "Equipment Options",
+        subFields: [
+          { name: "label", type: "string", friendlyName: "Option Label" },
+          { name: "value", type: "string", friendlyName: "Option Value" },
+        ],
+      },
+      {
+        name: "formAction",
+        type: "string",
+        friendlyName: "Form Action URL",
+      },
+    ],
+  },
+
+  // LP Trust Scroll (Mobile)
+  {
+    component: LPTrustScroll,
+    name: "LPTrustScroll",
+    friendlyName: "LP - Trust Scroll (Mobile)",
+    description: "Horizontal scrolling trust badges/stats for mobile",
+    inputs: [
+      {
+        name: "stats",
+        type: "list",
+        friendlyName: "Trust Stats",
+        defaultValue: [
+          { value: "7,500", label: "Equipment Units" },
+          { value: "24/7", label: "Support" },
+          { value: "20+", label: "Locations" },
+          { value: "Same Day", label: "Delivery" },
+        ],
+        subFields: [
+          { name: "value", type: "string", friendlyName: "Value" },
+          { name: "label", type: "string", friendlyName: "Label" },
+        ],
+      },
+      {
+        name: "variant",
+        type: "enum",
+        enum: ["light", "white"],
+        defaultValue: "white",
+        friendlyName: "Background",
+      },
+    ],
+  },
+
+  // LP Load More Button
+  {
+    component: LPLoadMore,
+    name: "LPLoadMore",
+    friendlyName: "LP - Load More Button",
+    description: "Button for loading more items in a list/grid",
+    inputs: [
+      {
+        name: "text",
+        type: "string",
+        defaultValue: "Load More",
+        friendlyName: "Button Text",
+      },
+      {
+        name: "loadingText",
+        type: "string",
+        defaultValue: "Loading...",
+        friendlyName: "Loading Text",
+      },
+      {
+        name: "variant",
+        type: "enum",
+        enum: ["primary", "outline"],
+        defaultValue: "outline",
+        friendlyName: "Button Style",
       },
     ],
   },

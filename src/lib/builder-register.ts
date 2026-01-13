@@ -113,6 +113,12 @@ import {
   LPFooter,
   LPBreadcrumb,
   LPStickyForm,
+  LPStickyBottomCTA,
+  LPFilterBar,
+  LPFilterChips,
+  LPQuoteModal,
+  LPTrustScroll,
+  LPLoadMore,
 } from "../components/builder/lp";
 import {
   FigmaButton,
@@ -306,6 +312,43 @@ if (typeof window !== "undefined") {
       name: "LPStickyForm",
       friendlyName: "LP - Sticky Sidebar Form",
       component: LPStickyForm,
+    });
+
+    // Mobile-specific components
+    register("editor.component", {
+      name: "LPStickyBottomCTA",
+      friendlyName: "LP - Sticky Bottom CTA (Mobile)",
+      component: LPStickyBottomCTA,
+    });
+
+    register("editor.component", {
+      name: "LPFilterBar",
+      friendlyName: "LP - Filter Bar (Desktop)",
+      component: LPFilterBar,
+    });
+
+    register("editor.component", {
+      name: "LPFilterChips",
+      friendlyName: "LP - Filter Chips (Mobile)",
+      component: LPFilterChips,
+    });
+
+    register("editor.component", {
+      name: "LPQuoteModal",
+      friendlyName: "LP - Quote Modal (Mobile)",
+      component: LPQuoteModal,
+    });
+
+    register("editor.component", {
+      name: "LPTrustScroll",
+      friendlyName: "LP - Trust Scroll (Mobile)",
+      component: LPTrustScroll,
+    });
+
+    register("editor.component", {
+      name: "LPLoadMore",
+      friendlyName: "LP - Load More Button",
+      component: LPLoadMore,
     });
   });
 }

@@ -40,3 +40,22 @@ export type { LPBreadcrumbProps } from "./LPBreadcrumb";
 
 export { LPStickyForm } from "./LPStickyForm";
 export type { LPStickyFormProps } from "./LPStickyForm";
+
+// Mobile-specific components
+export { LPStickyBottomCTA } from "./LPStickyBottomCTA";
+export type { LPStickyBottomCTAProps } from "./LPStickyBottomCTA";
+
+export { LPFilterBar } from "./LPFilterBar";
+export type { LPFilterBarProps, FilterConfig, FilterOption } from "./LPFilterBar";
+
+export { LPFilterChips } from "./LPFilterChips";
+export type { LPFilterChipsProps, FilterChip } from "./LPFilterChips";
+
+export { LPQuoteModal } from "./LPQuoteModal";
+export type { LPQuoteModalProps, EquipmentOption } from "./LPQuoteModal";
+
+export { LPTrustScroll } from "./LPTrustScroll";
+export type { LPTrustScrollProps, TrustStat } from "./LPTrustScroll";
+
+export { LPLoadMore } from "./LPLoadMore";
+export type { LPLoadMoreProps } from "./LPLoadMore";
