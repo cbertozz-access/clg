@@ -14,11 +14,19 @@ import {
   LPBreadcrumb,
   LPStickyForm,
 } from "../components/builder/lp";
+import {
+  FigmaButton,
+  FigmaInput,
+  FigmaDialog,
+  FigmaProductCard,
+  FigmaHero,
+} from "../components/builder/figma";
 
 /**
  * Builder.io Component Registry
  *
  * Naming Convention:
+ * - "Figma" prefix = Figma-generated components with CSS variable theming
  * - "CC" suffix = CLG-39 created (CLG-39)
  * - "LP" prefix = Landing Page components (CLG-39)
  * - No suffix = Builder.io AI created (CLG-38)
@@ -26,6 +34,313 @@ import {
 
 // Define custom components for Builder.io
 export const customComponents: RegisteredComponent[] = [
+  // ============================================
+  // FIGMA COMPONENTS (Whitelabel/Multi-brand)
+  // Uses CSS variables for theming
+  // ============================================
+
+  // Figma Button
+  {
+    component: FigmaButton,
+    name: "FigmaButton",
+    friendlyName: "Figma - Button",
+    description: "Multi-brand button component with CSS variable theming. Supports primary, secondary, and outline variants.",
+    inputs: [
+      {
+        name: "label",
+        type: "string",
+        defaultValue: "Button",
+        friendlyName: "Label",
+        helperText: "Button text",
+      },
+      {
+        name: "variant",
+        type: "enum",
+        enum: ["primary", "secondary", "outline"],
+        defaultValue: "primary",
+        friendlyName: "Variant",
+        helperText: "Visual style of the button",
+      },
+      {
+        name: "size",
+        type: "enum",
+        enum: ["sm", "md", "lg"],
+        defaultValue: "md",
+        friendlyName: "Size",
+      },
+      {
+        name: "fullWidth",
+        type: "boolean",
+        defaultValue: false,
+        friendlyName: "Full Width",
+        helperText: "Make button span full container width",
+      },
+      {
+        name: "href",
+        type: "url",
+        friendlyName: "Link URL",
+        helperText: "If set, button renders as a link",
+      },
+      {
+        name: "type",
+        type: "enum",
+        enum: ["button", "submit", "reset"],
+        defaultValue: "button",
+        friendlyName: "Button Type",
+        helperText: "HTML button type (for forms)",
+      },
+    ],
+  },
+
+  // Figma Input
+  {
+    component: FigmaInput,
+    name: "FigmaInput",
+    friendlyName: "Figma - Input Field",
+    description: "Multi-brand form input with label, validation states, and CSS variable theming.",
+    inputs: [
+      {
+        name: "label",
+        type: "string",
+        defaultValue: "Label",
+        friendlyName: "Label",
+      },
+      {
+        name: "placeholder",
+        type: "string",
+        defaultValue: "Enter value",
+        friendlyName: "Placeholder",
+      },
+      {
+        name: "type",
+        type: "enum",
+        enum: ["text", "email", "tel", "password", "number"],
+        defaultValue: "text",
+        friendlyName: "Input Type",
+      },
+      {
+        name: "name",
+        type: "string",
+        friendlyName: "Field Name",
+        helperText: "Form field name/ID",
+      },
+      {
+        name: "required",
+        type: "boolean",
+        defaultValue: false,
+        friendlyName: "Required",
+      },
+      {
+        name: "helperText",
+        type: "string",
+        friendlyName: "Helper Text",
+        helperText: "Help text shown below input",
+      },
+      {
+        name: "error",
+        type: "boolean",
+        defaultValue: false,
+        friendlyName: "Error State",
+      },
+      {
+        name: "errorMessage",
+        type: "string",
+        friendlyName: "Error Message",
+        helperText: "Shown when error is true",
+      },
+    ],
+  },
+
+  // Figma Dialog
+  {
+    component: FigmaDialog,
+    name: "FigmaDialog",
+    friendlyName: "Figma - Dialog/Modal",
+    description: "Email subscription dialog with CSS variable theming. Includes title, description, email input, and submit button.",
+    inputs: [
+      {
+        name: "title",
+        type: "string",
+        defaultValue: "Stay Ahead with Exclusive Deals & Updates!",
+        friendlyName: "Title",
+      },
+      {
+        name: "description",
+        type: "longText",
+        defaultValue: "Sign up for the latest offers on forklift, generator, and earthmover hires and sales—plus expert tips and industry news!",
+        friendlyName: "Description",
+      },
+      {
+        name: "inputPlaceholder",
+        type: "string",
+        defaultValue: "Your Email",
+        friendlyName: "Input Placeholder",
+      },
+      {
+        name: "buttonText",
+        type: "string",
+        defaultValue: "Subscribe",
+        friendlyName: "Button Text",
+      },
+      {
+        name: "showCloseButton",
+        type: "boolean",
+        defaultValue: true,
+        friendlyName: "Show Close Button",
+      },
+      {
+        name: "formAction",
+        type: "url",
+        friendlyName: "Form Action URL",
+        helperText: "URL to submit the form to",
+      },
+    ],
+  },
+
+  // Figma Product Card
+  {
+    component: FigmaProductCard,
+    name: "FigmaProductCard",
+    friendlyName: "Figma - Product Card",
+    description: "Equipment product listing card with image, specs, pricing, and CTA. Uses CSS variable theming.",
+    inputs: [
+      {
+        name: "imageUrl",
+        type: "file",
+        allowedFileTypes: ["jpeg", "jpg", "png", "webp"],
+        friendlyName: "Product Image",
+      },
+      {
+        name: "logoUrl",
+        type: "file",
+        allowedFileTypes: ["jpeg", "jpg", "png", "svg", "webp"],
+        friendlyName: "Brand Logo",
+        helperText: "Optional brand logo shown above product",
+      },
+      {
+        name: "fuelType",
+        type: "string",
+        defaultValue: "Diesel",
+        friendlyName: "Fuel Type",
+      },
+      {
+        name: "modelNumber",
+        type: "string",
+        defaultValue: "340AJ",
+        friendlyName: "Model Number",
+      },
+      {
+        name: "title",
+        type: "string",
+        defaultValue: "33ft Articulating Boom Lift",
+        friendlyName: "Title",
+      },
+      {
+        name: "spec1",
+        type: "string",
+        defaultValue: "Reach: 19' 11\"/6.06M",
+        friendlyName: "Spec Line 1",
+      },
+      {
+        name: "spec2",
+        type: "string",
+        defaultValue: "Height: 33' 9\"/10.28M",
+        friendlyName: "Spec Line 2",
+      },
+      {
+        name: "dailyPrice",
+        type: "string",
+        defaultValue: "$149.00",
+        friendlyName: "Daily Price",
+      },
+      {
+        name: "weeklyPrice",
+        type: "string",
+        defaultValue: "$301.00",
+        friendlyName: "Weekly Price",
+      },
+      {
+        name: "ctaText",
+        type: "string",
+        defaultValue: "View details",
+        friendlyName: "CTA Text",
+      },
+      {
+        name: "ctaLink",
+        type: "url",
+        defaultValue: "#",
+        friendlyName: "CTA Link",
+      },
+    ],
+  },
+
+  // Figma Hero
+  {
+    component: FigmaHero,
+    name: "FigmaHero",
+    friendlyName: "Figma - Hero Section",
+    description: "Full-width hero with background image, headline, subheadline, and CTAs. Uses CSS variable theming for multi-brand support.",
+    inputs: [
+      {
+        name: "backgroundImage",
+        type: "file",
+        allowedFileTypes: ["jpeg", "jpg", "png", "webp"],
+        friendlyName: "Background Image",
+      },
+      {
+        name: "overlayOpacity",
+        type: "number",
+        defaultValue: 60,
+        friendlyName: "Overlay Opacity",
+        helperText: "Darkness of overlay (0-100)",
+      },
+      {
+        name: "headline",
+        type: "string",
+        defaultValue: "Equipment Hire Across Australia",
+        friendlyName: "Headline",
+      },
+      {
+        name: "subheadline",
+        type: "longText",
+        defaultValue: "Get competitive quotes from Australia's largest privately-owned equipment fleet.",
+        friendlyName: "Subheadline",
+      },
+      {
+        name: "primaryCtaText",
+        type: "string",
+        defaultValue: "Get a Quote",
+        friendlyName: "Primary CTA Text",
+      },
+      {
+        name: "primaryCtaLink",
+        type: "url",
+        defaultValue: "#quote",
+        friendlyName: "Primary CTA Link",
+      },
+      {
+        name: "secondaryCtaText",
+        type: "string",
+        defaultValue: "Browse Equipment",
+        friendlyName: "Secondary CTA Text",
+      },
+      {
+        name: "secondaryCtaLink",
+        type: "url",
+        defaultValue: "#equipment",
+        friendlyName: "Secondary CTA Link",
+      },
+      {
+        name: "minHeight",
+        type: "enum",
+        enum: ["sm", "md", "lg", "full"],
+        defaultValue: "md",
+        friendlyName: "Minimum Height",
+        helperText: "sm: 300px, md: 450px, lg: 600px, full: 100vh",
+      },
+    ],
+  },
+
   // ============================================
   // CATEGORY HERO (Original)
   // ============================================

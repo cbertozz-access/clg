@@ -1,4 +1,6 @@
 import { BuilderContent } from "@/components/builder/BuilderContent";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { getBrandThemeFromContent } from "@/lib/builder/brand-model";
 import { getBuilderSearchParams } from "@builder.io/sdk-react-nextjs";
 
 const BUILDER_API_KEY = process.env.NEXT_PUBLIC_BUILDER_API_KEY!.trim();
@@ -95,30 +97,35 @@ export default async function EquipmentPage({
   // Fetch content from Builder.io using direct API with visual editor params
   const content = await fetchBuilderContent(urlPath, resolvedSearchParams);
 
-  return (
-    <main className="min-h-screen">
-      {/* Always render BuilderContent in preview mode for drag-drop to work */}
-      {(content || isPreviewMode) ? (
-        <BuilderContent
-          content={content}
-          apiKey={BUILDER_API_KEY}
-          model={MODEL_NAME}
-        />
-      ) : (
-        <div className="p-8 text-center min-h-[60vh] flex flex-col items-center justify-center">
-          <h1 className="text-2xl font-semibold text-gray-700 mb-4">Equipment</h1>
-          <p className="text-gray-500">No content found for this page</p>
-          <p className="text-sm text-gray-400 mt-2">
-            Add content in Builder.io editor for path: {urlPath}
-          </p>
-        </div>
-      )}
+  // Get brand theme from Builder.io content (supports both reference and simple ID)
+  const brandTheme = await getBrandThemeFromContent(content);
 
-      {/* Attribution footer for AI comparison */}
-      <footer className="bg-gray-100 py-4 text-center text-sm text-gray-500">
-        Page rendered via CLG-39
-      </footer>
-    </main>
+  return (
+    <ThemeProvider theme={brandTheme}>
+      <main className="min-h-screen">
+        {/* Always render BuilderContent in preview mode for drag-drop to work */}
+        {(content || isPreviewMode) ? (
+          <BuilderContent
+            content={content}
+            apiKey={BUILDER_API_KEY}
+            model={MODEL_NAME}
+          />
+        ) : (
+          <div className="p-8 text-center min-h-[60vh] flex flex-col items-center justify-center">
+            <h1 className="text-2xl font-semibold text-[var(--color-foreground)] mb-4">Equipment</h1>
+            <p className="text-[var(--color-muted-foreground)]">No content found for this page</p>
+            <p className="text-sm text-[var(--color-muted-foreground)] mt-2">
+              Add content in Builder.io editor for path: {urlPath}
+            </p>
+          </div>
+        )}
+
+        {/* Attribution footer for AI comparison */}
+        <footer className="bg-[var(--color-background-alt)] py-4 text-center text-sm text-[var(--color-muted-foreground)]">
+          Page rendered via CLG-39
+        </footer>
+      </main>
+    </ThemeProvider>
   );
 }
 

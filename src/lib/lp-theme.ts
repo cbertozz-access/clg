@@ -1,30 +1,34 @@
 /**
  * Landing Page Design Tokens
  *
- * Consistent design system for all LP components.
- * Based on Access Group brand guidelines.
+ * DEPRECATED: Use src/lib/themes instead for multi-brand support.
+ * This file is kept for backwards compatibility.
+ *
+ * For new components, use CSS variables:
+ * - bg-[var(--color-primary)] instead of bg-[#E63229]
+ * - text-[var(--color-foreground)] instead of text-[#1A1A1A]
  */
 
 export const lpTheme = {
   colors: {
-    // Primary
-    accessRed: "#E63229",
-    accessRedDark: "#C42920",
+    // Primary - USE var(--color-primary) INSTEAD
+    accessRed: "var(--color-primary)",
+    accessRedDark: "var(--color-primary-dark)",
 
-    // Neutrals
-    accessBlack: "#1A1A1A",
-    accessGray: "#6B7280",
-    accessLight: "#F3F4F6",
-    white: "#FFFFFF",
+    // Neutrals - USE CSS VARIABLES INSTEAD
+    accessBlack: "var(--color-foreground)",
+    accessGray: "var(--color-muted-foreground)",
+    accessLight: "var(--color-background-alt)",
+    white: "var(--color-background)",
 
     // Semantic
-    success: "#22C55E",
-    warning: "#F59E0B",
-    error: "#EF4444",
+    success: "var(--color-success)",
+    warning: "var(--color-warning)",
+    error: "var(--color-error)",
   },
 
   fonts: {
-    sans: "'Inter', system-ui, sans-serif",
+    sans: "var(--font-body)",
   },
 
   spacing: {
@@ -36,31 +40,34 @@ export const lpTheme = {
   },
 
   borderRadius: {
-    sm: "rounded",
-    md: "rounded-lg",
-    lg: "rounded-xl",
+    sm: "rounded-[var(--radius-sm)]",
+    md: "rounded-[var(--radius)]",
+    lg: "rounded-[var(--radius-lg)]",
     xl: "rounded-2xl",
     full: "rounded-full",
   },
 } as const;
 
-// Tailwind class utilities
+/**
+ * Tailwind class utilities - THEME-AWARE VERSION
+ * These use CSS variables and will adapt to the active brand
+ */
 export const lpClasses = {
-  // Buttons
-  buttonPrimary: "bg-[#E63229] hover:bg-[#C42920] text-white px-8 py-4 rounded-lg font-semibold transition-colors",
-  buttonSecondary: "bg-white/10 hover:bg-white/20 text-white px-8 py-4 rounded-lg font-semibold transition-colors",
-  buttonOutline: "border border-gray-300 hover:bg-gray-50 text-gray-900 px-8 py-4 rounded-lg font-semibold transition-colors",
+  // Buttons - Theme-aware
+  buttonPrimary: "bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-[var(--color-primary-foreground)] px-8 py-4 rounded-[var(--radius)] font-semibold transition-colors",
+  buttonSecondary: "bg-white/10 hover:bg-white/20 text-white px-8 py-4 rounded-[var(--radius)] font-semibold transition-colors",
+  buttonOutline: "border border-[var(--color-border)] hover:bg-[var(--color-background-alt)] text-[var(--color-foreground)] px-8 py-4 rounded-[var(--radius)] font-semibold transition-colors",
 
-  // Inputs
-  input: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E63229] focus:border-[#E63229] outline-none transition-all",
-  select: "w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E63229] focus:border-[#E63229] outline-none transition-all bg-white",
+  // Inputs - Theme-aware
+  input: "w-full px-4 py-3 border border-[var(--color-input)] rounded-[var(--radius-sm)] focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none transition-all",
+  select: "w-full px-4 py-3 border border-[var(--color-input)] rounded-[var(--radius-sm)] focus:ring-2 focus:ring-[var(--color-primary)] focus:border-[var(--color-primary)] outline-none transition-all bg-[var(--color-background)]",
 
   // Text
-  heading1: "text-4xl md:text-5xl lg:text-6xl font-bold",
-  heading2: "text-3xl font-bold",
-  heading3: "text-xl font-bold",
-  body: "text-base",
-  bodySmall: "text-sm",
+  heading1: "text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--color-foreground)]",
+  heading2: "text-3xl font-bold text-[var(--color-foreground)]",
+  heading3: "text-xl font-bold text-[var(--color-foreground)]",
+  body: "text-base text-[var(--color-foreground)]",
+  bodySmall: "text-sm text-[var(--color-muted-foreground)]",
 
   // Layout
   section: "py-16",

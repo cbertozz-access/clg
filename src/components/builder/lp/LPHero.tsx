@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * LPHero Component
+ *
+ * Hero section with headline, subheadline, and CTAs.
+ * Uses CSS variables for theming - colors adapt to active brand.
+ */
+
 interface BenefitItem {
   text: string;
 }
@@ -38,10 +45,10 @@ export function LPHero(props: Partial<LPHeroProps>) {
   ];
   const showBadge = props.showBadge ?? true;
   const badgeText = props.badgeText || "Lorem Ipsum Dolor";
-  // Replace highlight word in headline
+  // Replace highlight word in headline - uses CSS variable for brand color
   const formattedHeadline = headline.replace(
     new RegExp(`(${highlightWord})`, "i"),
-    '<span class="text-[#E63229]">$1</span>'
+    '<span class="text-[var(--color-primary)]">$1</span>'
   );
 
   const backgroundStyle = backgroundImage
@@ -54,13 +61,13 @@ export function LPHero(props: Partial<LPHeroProps>) {
 
   if (variant === "product-focused") {
     return (
-      <div className="bg-white border-b">
+      <div className="bg-[var(--color-background)] border-b border-[var(--color-border)]">
         <div className="max-w-7xl mx-auto px-4 py-8">
           <h1
-            className="text-3xl md:text-4xl font-bold text-[#1A1A1A] mb-2"
+            className="text-3xl md:text-4xl font-bold text-[var(--color-foreground)] mb-2"
             dangerouslySetInnerHTML={{ __html: formattedHeadline }}
           />
-          <p className="text-[#6B7280] text-lg">{subheadline}</p>
+          <p className="text-[var(--color-muted-foreground)] text-lg">{subheadline}</p>
         </div>
       </div>
     );
@@ -159,13 +166,13 @@ export function LPHero(props: Partial<LPHeroProps>) {
             <div className="flex flex-wrap gap-4">
               <a
                 href={primaryCtaLink}
-                className="bg-[#E63229] hover:bg-[#C42920] text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors"
+                className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-[var(--color-primary-foreground)] px-8 py-4 rounded-[var(--radius)] font-semibold text-lg transition-colors"
               >
                 {primaryCtaText}
               </a>
               <a
                 href={secondaryCtaLink}
-                className="bg-white/10 hover:bg-white/20 text-white px-8 py-4 rounded-lg font-semibold text-lg transition-colors"
+                className="bg-white/10 hover:bg-white/20 text-white px-8 py-4 rounded-[var(--radius)] font-semibold text-lg transition-colors"
               >
                 {secondaryCtaText}
               </a>
