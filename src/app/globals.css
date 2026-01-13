@@ -1,6 +1,20 @@
 @import "tailwindcss";
 
 /**
+ * Builder.io Block Resets
+ * Remove default margins/padding from Builder blocks
+ */
+.builder-block {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* Reset Builder.io default component spacing */
+[builder-component] > div:first-child {
+  margin-top: 0 !important;
+}
+
+/**
  * Brand Theme CSS Variables
  *
  * Default values - overridden by ThemeProvider at runtime.

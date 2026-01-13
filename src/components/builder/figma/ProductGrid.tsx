@@ -175,7 +175,7 @@ export function FigmaProductGrid({
   };
 
   return (
-    <section className="py-12 px-4 bg-[var(--color-background-alt,#f3f4f6)]">
+    <section className="pb-12 px-4 bg-[var(--color-background-alt,#f3f4f6)]">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">

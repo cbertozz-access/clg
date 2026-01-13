@@ -52,6 +52,8 @@ register("dataSource", {
 
 // Register Design Tokens with Builder.io visual editor
 register("editor.settings", {
+  // Remove default 20px margin from blocks
+  customInsertMenu: true,
   designTokens: {
     colors: [
       { name: "Primary", value: "var(--color-primary, #0f172a)" },
