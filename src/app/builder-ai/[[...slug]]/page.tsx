@@ -1,13 +1,13 @@
 import { BuilderContent } from "@/components/builder/BuilderContent";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { getBrandThemeFromContent } from "@/lib/builder/brand-model";
-import { getBuilderSearchParams } from "@builder.io/sdk-react-nextjs";
+import { fetchOneEntry, getBuilderSearchParams } from "@builder.io/sdk-react-nextjs";
 
 const BUILDER_API_KEY = process.env.NEXT_PUBLIC_BUILDER_API_KEY!.trim();
 const MODEL_NAME = "builder-test-ai";
 
 /**
- * Fetch from Builder.io CDN API with visual editor support
+ * Fetch from Builder.io using SDK for proper visual editor support
  */
 async function fetchBuilderContent(
   urlPath: string,
@@ -24,36 +24,21 @@ async function fetchBuilderContent(
     }
   }
 
-  const builderParams = getBuilderSearchParams(urlSearchParams);
+  try {
+    const content = await fetchOneEntry({
+      model: MODEL_NAME,
+      apiKey: BUILDER_API_KEY,
+      userAttributes: {
+        urlPath,
+      },
+      options: getBuilderSearchParams(urlSearchParams),
+    });
 
-  const apiParams = new URLSearchParams({
-    apiKey: BUILDER_API_KEY,
-    "userAttributes.urlPath": urlPath,
-    limit: "1",
-  });
-
-  if (builderParams) {
-    for (const [key, value] of Object.entries(builderParams)) {
-      if (value !== undefined) {
-        apiParams.set(key, String(value));
-      }
-    }
-  }
-
-  const apiUrl = `https://cdn.builder.io/api/v3/content/${MODEL_NAME}?${apiParams.toString()}`;
-
-  const response = await fetch(apiUrl, {
-    headers: { Accept: "application/json" },
-    cache: "no-store",
-  });
-
-  if (!response.ok) {
-    console.error("Builder.io API error:", response.status);
+    return content;
+  } catch (error) {
+    console.error("Builder.io fetch error:", error);
     return null;
   }
-
-  const data = await response.json();
-  return data.results?.[0] || null;
 }
 
 /**

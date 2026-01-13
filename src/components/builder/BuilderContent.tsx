@@ -1,6 +1,6 @@
 "use client";
 
-import { Content, isPreviewing } from "@builder.io/sdk-react-nextjs";
+import { Content, isPreviewing, isEditing } from "@builder.io/sdk-react-nextjs";
 import { customComponents } from "@/lib/builder-registry";
 
 // Register components with Builder.io visual editor
@@ -14,14 +14,21 @@ interface BuilderContentProps {
 }
 
 export function BuilderContent({ content, apiKey, model }: BuilderContentProps) {
-  // Always render Content component immediately for visual editor to work
-  // The Content component creates the drop zone for drag-and-drop
+  // Enable live editing features in preview/edit mode
+  const showContent = content || isPreviewing() || isEditing();
+
+  if (!showContent) {
+    return null;
+  }
+
   return (
     <Content
       content={content}
       apiKey={apiKey}
       model={model}
       customComponents={customComponents}
+      // Enable live preview updates
+      enrich={true}
     />
   );
 }

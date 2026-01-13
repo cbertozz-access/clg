@@ -152,7 +152,8 @@ export async function fetchBrandById(entryId: string): Promise<BuilderBrand | nu
  * Handles both direct brandId and reference field structures
  */
 export async function getBrandThemeFromContent(
-  content: { data?: { brandId?: string; brand?: { id?: string; value?: { data?: BuilderBrand } } } } | null
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  content: any
 ): Promise<BrandTheme | null> {
   if (!content?.data) return null;
 
