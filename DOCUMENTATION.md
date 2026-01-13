@@ -241,7 +241,7 @@ These use CSS variables for automatic theming:
 |-----------|-------------|
 | `LPHeader` | Header with logo, nav, CTA |
 | `LPHero` | Hero with standard/squeeze/product-focused variants |
-| `LPTrustBadges` | Stats/trust indicators row |
+| `LPTrustBadges` | Stats/trust indicators row (desktop) |
 | `LPBenefits` | Benefits grid with icons |
 | `LPProductsGrid` | Products from API |
 | `LPTestimonials` | Customer testimonials |
@@ -251,6 +251,17 @@ These use CSS variables for automatic theming:
 | `LPFooter` | Footer with links |
 | `LPBreadcrumb` | Navigation breadcrumb |
 | `LPStickyForm` | Sticky sidebar form |
+
+### Mobile-Specific LP Components
+
+| Component | Description |
+|-----------|-------------|
+| `LPStickyBottomCTA` | Fixed bottom bar with Call + Quote buttons |
+| `LPFilterBar` | Horizontal filter dropdowns (desktop) |
+| `LPFilterChips` | Horizontal scrolling filter pills (mobile) |
+| `LPQuoteModal` | Slide-up modal form for quotes |
+| `LPTrustScroll` | Horizontal scrolling trust badges |
+| `LPLoadMore` | Pagination button for product grids |
 
 ### Other Components
 
