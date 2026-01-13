@@ -124,128 +124,189 @@ import {
   FigmaHero,
 } from "../components/builder/figma";
 
+// Product options cache for dropdown
+let productOptionsCache: Array<{ label: string; value: string }> = [];
+
+async function fetchProductOptions(): Promise<Array<{ label: string; value: string }>> {
+  if (productOptionsCache.length > 0) return productOptionsCache;
+
+  try {
+    const response = await fetch("https://acccessproducts.netlify.app/api/products");
+    const products = await response.json();
+    const productList = Array.isArray(products) ? products : products.products || [];
+
+    productOptionsCache = productList.map((p: { productId: string; model: string; category?: string }) => ({
+      label: `${p.model}${p.category ? ` (${p.category})` : ""}`,
+      value: p.productId,
+    }));
+
+    return productOptionsCache;
+  } catch (error) {
+    console.error("Failed to fetch products for dropdown:", error);
+    return [];
+  }
+}
+
 // Only register on client side
 if (typeof window !== "undefined") {
-  // Figma Components
-  register("editor.component", {
-    name: "FigmaButton",
-    friendlyName: "Figma - Button",
-    component: FigmaButton,
-  });
+  // Fetch products for dropdown, then register components
+  fetchProductOptions().then((productOptions) => {
+    // Figma Components
+    register("editor.component", {
+      name: "FigmaButton",
+      friendlyName: "Figma - Button",
+      component: FigmaButton,
+    });
 
-  register("editor.component", {
-    name: "FigmaInput",
-    friendlyName: "Figma - Input Field",
-    component: FigmaInput,
-  });
+    register("editor.component", {
+      name: "FigmaInput",
+      friendlyName: "Figma - Input Field",
+      component: FigmaInput,
+    });
 
-  register("editor.component", {
-    name: "FigmaDialog",
-    friendlyName: "Figma - Dialog/Modal",
-    component: FigmaDialog,
-  });
+    register("editor.component", {
+      name: "FigmaDialog",
+      friendlyName: "Figma - Dialog/Modal",
+      component: FigmaDialog,
+    });
 
-  register("editor.component", {
-    name: "FigmaProductCard",
-    friendlyName: "Figma - Product Card",
-    component: FigmaProductCard,
-  });
+    register("editor.component", {
+      name: "FigmaProductCard",
+      friendlyName: "Figma - Product Card",
+      component: FigmaProductCard,
+    });
 
-  register("editor.component", {
-    name: "FigmaProductCardAPI",
-    friendlyName: "Figma - Product Card (API Picker)",
-    component: FigmaProductCardAPI,
-  });
+    register("editor.component", {
+      name: "FigmaProductCardAPI",
+      friendlyName: "Figma - Product Card (API Picker)",
+      component: FigmaProductCardAPI,
+      inputs: [
+        {
+          name: "productId",
+          type: "string",
+          friendlyName: "Select Product",
+          helperText: "Choose a product from the API",
+          required: true,
+          enum: productOptions.length > 0 ? productOptions : undefined,
+        },
+        {
+          name: "ctaText",
+          type: "string",
+          defaultValue: "View Details",
+          friendlyName: "CTA Text",
+        },
+        {
+          name: "productBaseUrl",
+          type: "string",
+          defaultValue: "/equipment",
+          friendlyName: "Product Base URL",
+          advanced: true,
+        },
+        {
+          name: "showBrandLogo",
+          type: "boolean",
+          defaultValue: false,
+          friendlyName: "Show Brand Logo",
+        },
+        {
+          name: "brandLogoUrl",
+          type: "file",
+          allowedFileTypes: ["jpeg", "jpg", "png", "svg", "webp"],
+          friendlyName: "Brand Logo",
+        },
+      ],
+    });
 
-  register("editor.component", {
-    name: "FigmaProductGrid",
-    friendlyName: "Figma - Product Grid (API)",
-    component: FigmaProductGrid,
-  });
+    register("editor.component", {
+      name: "FigmaProductGrid",
+      friendlyName: "Figma - Product Grid (API)",
+      component: FigmaProductGrid,
+    });
 
-  register("editor.component", {
-    name: "FigmaHero",
-    friendlyName: "Figma - Hero Section",
-    component: FigmaHero,
-  });
+    register("editor.component", {
+      name: "FigmaHero",
+      friendlyName: "Figma - Hero Section",
+      component: FigmaHero,
+    });
 
-  // LP Components
-  register("editor.component", {
-    name: "CategoryHeroCC",
-    friendlyName: "Category Hero (CLG-39)",
-    component: CategoryHeroCC,
-  });
+    // LP Components
+    register("editor.component", {
+      name: "CategoryHeroCC",
+      friendlyName: "Category Hero (CLG-39)",
+      component: CategoryHeroCC,
+    });
 
-  register("editor.component", {
-    name: "LPHeader",
-    friendlyName: "LP - Header",
-    component: LPHeader,
-  });
+    register("editor.component", {
+      name: "LPHeader",
+      friendlyName: "LP - Header",
+      component: LPHeader,
+    });
 
-  register("editor.component", {
-    name: "LPHero",
-    friendlyName: "LP - Hero Section",
-    component: LPHero,
-  });
+    register("editor.component", {
+      name: "LPHero",
+      friendlyName: "LP - Hero Section",
+      component: LPHero,
+    });
 
-  register("editor.component", {
-    name: "LPTrustBadges",
-    friendlyName: "LP - Trust Badges / Stats",
-    component: LPTrustBadges,
-  });
+    register("editor.component", {
+      name: "LPTrustBadges",
+      friendlyName: "LP - Trust Badges / Stats",
+      component: LPTrustBadges,
+    });
 
-  register("editor.component", {
-    name: "LPBenefits",
-    friendlyName: "LP - Benefits Grid",
-    component: LPBenefits,
-  });
+    register("editor.component", {
+      name: "LPBenefits",
+      friendlyName: "LP - Benefits Grid",
+      component: LPBenefits,
+    });
 
-  register("editor.component", {
-    name: "LPProductsGrid",
-    friendlyName: "LP - Products Grid",
-    component: LPProductsGrid,
-  });
+    register("editor.component", {
+      name: "LPProductsGrid",
+      friendlyName: "LP - Products Grid",
+      component: LPProductsGrid,
+    });
 
-  register("editor.component", {
-    name: "LPTestimonials",
-    friendlyName: "LP - Testimonials",
-    component: LPTestimonials,
-  });
+    register("editor.component", {
+      name: "LPTestimonials",
+      friendlyName: "LP - Testimonials",
+      component: LPTestimonials,
+    });
 
-  register("editor.component", {
-    name: "LPQuoteForm",
-    friendlyName: "LP - Quote Form",
-    component: LPQuoteForm,
-  });
+    register("editor.component", {
+      name: "LPQuoteForm",
+      friendlyName: "LP - Quote Form",
+      component: LPQuoteForm,
+    });
 
-  register("editor.component", {
-    name: "LPFaq",
-    friendlyName: "LP - FAQ Accordion",
-    component: LPFaq,
-  });
+    register("editor.component", {
+      name: "LPFaq",
+      friendlyName: "LP - FAQ Accordion",
+      component: LPFaq,
+    });
 
-  register("editor.component", {
-    name: "LPCtaBanner",
-    friendlyName: "LP - CTA Banner",
-    component: LPCtaBanner,
-  });
+    register("editor.component", {
+      name: "LPCtaBanner",
+      friendlyName: "LP - CTA Banner",
+      component: LPCtaBanner,
+    });
 
-  register("editor.component", {
-    name: "LPFooter",
-    friendlyName: "LP - Footer",
-    component: LPFooter,
-  });
+    register("editor.component", {
+      name: "LPFooter",
+      friendlyName: "LP - Footer",
+      component: LPFooter,
+    });
 
-  register("editor.component", {
-    name: "LPBreadcrumb",
-    friendlyName: "LP - Breadcrumb",
-    component: LPBreadcrumb,
-  });
+    register("editor.component", {
+      name: "LPBreadcrumb",
+      friendlyName: "LP - Breadcrumb",
+      component: LPBreadcrumb,
+    });
 
-  register("editor.component", {
-    name: "LPStickyForm",
-    friendlyName: "LP - Sticky Sidebar Form",
-    component: LPStickyForm,
+    register("editor.component", {
+      name: "LPStickyForm",
+      friendlyName: "LP - Sticky Sidebar Form",
+      component: LPStickyForm,
+    });
   });
 }
 
