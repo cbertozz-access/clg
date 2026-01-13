@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Content, isPreviewing, isEditing } from "@builder.io/sdk-react-nextjs";
 import { customComponents } from "@/lib/builder-registry";
 
@@ -14,8 +15,16 @@ interface BuilderContentProps {
 }
 
 export function BuilderContent({ content, apiKey, model }: BuilderContentProps) {
+  // Track client-side preview state for hydration
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   // Enable live editing features in preview/edit mode
-  const showContent = content || isPreviewing() || isEditing();
+  const inEditorMode = isClient && (isPreviewing() || isEditing());
+  const showContent = content || inEditorMode;
 
   if (!showContent) {
     return null;

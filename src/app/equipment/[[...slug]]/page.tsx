@@ -6,6 +6,9 @@ import { fetchOneEntry, getBuilderSearchParams } from "@builder.io/sdk-react-nex
 const BUILDER_API_KEY = process.env.NEXT_PUBLIC_BUILDER_API_KEY!.trim();
 const MODEL_NAME = "cc-equipment-category";
 
+// Force dynamic rendering for live editing support
+export const dynamic = "force-dynamic";
+
 /**
  * Fetch from Builder.io using SDK for proper visual editor support
  */
