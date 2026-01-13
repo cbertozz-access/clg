@@ -19,6 +19,7 @@ import {
   FigmaInput,
   FigmaDialog,
   FigmaProductCard,
+  FigmaProductCardAPI,
   FigmaProductGrid,
   FigmaHero,
 } from "../components/builder/figma";
@@ -272,6 +273,56 @@ export const customComponents: RegisteredComponent[] = [
         defaultValue: "/product",
         friendlyName: "CTA Link",
         helperText: "Link to product details page",
+      },
+    ],
+  },
+
+  // Figma Product Card (API Connected - Single Product Picker)
+  {
+    component: FigmaProductCardAPI,
+    name: "FigmaProductCardAPI",
+    friendlyName: "Figma - Product Card (API Picker)",
+    description: "Select a specific product from the API to display.",
+    inputs: [
+      {
+        name: "productId",
+        type: "string",
+        friendlyName: "Product ID",
+        helperText: "Enter product ID or select from API. Copy ID from: https://acccessproducts.netlify.app/api/products",
+        required: true,
+      },
+      {
+        name: "apiEndpoint",
+        type: "string",
+        defaultValue: "https://acccessproducts.netlify.app/api/products",
+        friendlyName: "API Endpoint",
+        advanced: true,
+      },
+      {
+        name: "ctaText",
+        type: "string",
+        defaultValue: "View Details",
+        friendlyName: "CTA Text",
+      },
+      {
+        name: "productBaseUrl",
+        type: "string",
+        defaultValue: "/equipment",
+        friendlyName: "Product Base URL",
+        advanced: true,
+      },
+      {
+        name: "showBrandLogo",
+        type: "boolean",
+        defaultValue: false,
+        friendlyName: "Show Brand Logo",
+      },
+      {
+        name: "brandLogoUrl",
+        type: "file",
+        allowedFileTypes: ["jpeg", "jpg", "png", "svg", "webp"],
+        friendlyName: "Brand Logo",
+        showIf: "options.get('showBrandLogo')",
       },
     ],
   },

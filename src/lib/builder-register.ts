@@ -119,6 +119,7 @@ import {
   FigmaInput,
   FigmaDialog,
   FigmaProductCard,
+  FigmaProductCardAPI,
   FigmaProductGrid,
   FigmaHero,
 } from "../components/builder/figma";
@@ -148,6 +149,12 @@ if (typeof window !== "undefined") {
     name: "FigmaProductCard",
     friendlyName: "Figma - Product Card",
     component: FigmaProductCard,
+  });
+
+  register("editor.component", {
+    name: "FigmaProductCardAPI",
+    friendlyName: "Figma - Product Card (API Picker)",
+    component: FigmaProductCardAPI,
   });
 
   register("editor.component", {
