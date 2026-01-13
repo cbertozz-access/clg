@@ -65,18 +65,27 @@ export function FigmaProductCardAPI({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Debug: log received props
+  console.log("[FigmaProductCardAPI] rawProductId:", rawProductId);
+
   // Extract just the productId if it's in the format "productId - Model (Category)"
   const productId = rawProductId?.includes(" - ")
     ? rawProductId.split(" - ")[0].trim()
     : rawProductId;
 
+  console.log("[FigmaProductCardAPI] parsed productId:", productId);
+
   useEffect(() => {
+    console.log("[FigmaProductCardAPI] useEffect triggered, productId:", productId);
+
     if (!productId) {
+      console.log("[FigmaProductCardAPI] No productId, clearing product");
       setProduct(null);
       return;
     }
 
     async function fetchProduct() {
+      console.log("[FigmaProductCardAPI] Fetching from:", apiEndpoint);
       setLoading(true);
       try {
         const response = await fetch(apiEndpoint);
@@ -84,12 +93,15 @@ export function FigmaProductCardAPI({
 
         const data = await response.json();
         const products = Array.isArray(data) ? data : data.products || [];
+        console.log("[FigmaProductCardAPI] Got", products.length, "products");
 
         // Search by productId first, then by model name
         const found = products.find((p: Product) =>
           p.productId === productId ||
           p.model?.toLowerCase() === productId?.toLowerCase()
         );
+
+        console.log("[FigmaProductCardAPI] Found product:", found?.model || "none");
 
         if (found) {
           setProduct(found);
@@ -99,6 +111,7 @@ export function FigmaProductCardAPI({
           setProduct(null);
         }
       } catch (err) {
+        console.error("[FigmaProductCardAPI] Error:", err);
         setError(err instanceof Error ? err.message : "Error loading product");
         setProduct(null);
       } finally {
