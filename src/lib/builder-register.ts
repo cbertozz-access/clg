@@ -131,9 +131,9 @@ import {
 } from "../components/builder/figma";
 
 // Product options cache for dropdown
-let productOptionsCache: Array<{ label: string; value: string }> = [];
+let productOptionsCache: Array<string> = [];
 
-async function fetchProductOptions(): Promise<Array<{ label: string; value: string }>> {
+async function fetchProductOptions(): Promise<string[]> {
   if (productOptionsCache.length > 0) return productOptionsCache;
 
   try {
@@ -141,14 +141,15 @@ async function fetchProductOptions(): Promise<Array<{ label: string; value: stri
     const products = await response.json();
     const productList = Array.isArray(products) ? products : products.products || [];
 
-    productOptionsCache = productList.map((p: { productId: string; model: string; category?: string }) => ({
-      label: `${p.model}${p.category ? ` (${p.category})` : ""}`,
-      value: p.productId,
-    }));
+    // Builder.io enum works best with simple string arrays
+    productOptionsCache = productList.map((p: { productId: string; model: string; category?: string }) =>
+      `${p.productId} - ${p.model}${p.category ? ` (${p.category})` : ""}`
+    );
 
+    console.log("[Builder] Loaded", productOptionsCache.length, "products for dropdown");
     return productOptionsCache;
   } catch (error) {
-    console.error("Failed to fetch products for dropdown:", error);
+    console.error("[Builder] Failed to fetch products for dropdown:", error);
     return [];
   }
 }
@@ -182,45 +183,64 @@ if (typeof window !== "undefined") {
       component: FigmaProductCard,
     });
 
+    // Register with dynamic product dropdown
+    const productCardInputs: Array<{
+      name: string;
+      type: string;
+      friendlyName: string;
+      helperText?: string;
+      required?: boolean;
+      enum?: string[];
+      defaultValue?: string | boolean;
+      advanced?: boolean;
+      allowedFileTypes?: string[];
+    }> = [
+      {
+        name: "productId",
+        type: "string",
+        friendlyName: "Select Product",
+        helperText: productOptions.length > 0
+          ? "Choose a product from the dropdown"
+          : "Enter product ID (e.g., FOR-001)",
+        required: true,
+      },
+      {
+        name: "ctaText",
+        type: "string",
+        defaultValue: "View Details",
+        friendlyName: "CTA Text",
+      },
+      {
+        name: "productBaseUrl",
+        type: "string",
+        defaultValue: "/equipment",
+        friendlyName: "Product Base URL",
+        advanced: true,
+      },
+      {
+        name: "showBrandLogo",
+        type: "boolean",
+        defaultValue: false,
+        friendlyName: "Show Brand Logo",
+      },
+      {
+        name: "brandLogoUrl",
+        type: "file",
+        allowedFileTypes: ["jpeg", "jpg", "png", "svg", "webp"],
+        friendlyName: "Brand Logo",
+      },
+    ];
+
+    // Add enum to productId if we have products
+    if (productOptions.length > 0) {
+      productCardInputs[0].enum = productOptions;
+    }
+
     register("editor.component", {
       name: "FigmaProductCardAPI",
       friendlyName: "Figma - Product Card (API Picker)",
       component: FigmaProductCardAPI,
-      inputs: [
-        {
-          name: "productId",
-          type: "string",
-          friendlyName: "Select Product",
-          helperText: "Choose a product from the API",
-          required: true,
-          enum: productOptions.length > 0 ? productOptions : undefined,
-        },
-        {
-          name: "ctaText",
-          type: "string",
-          defaultValue: "View Details",
-          friendlyName: "CTA Text",
-        },
-        {
-          name: "productBaseUrl",
-          type: "string",
-          defaultValue: "/equipment",
-          friendlyName: "Product Base URL",
-          advanced: true,
-        },
-        {
-          name: "showBrandLogo",
-          type: "boolean",
-          defaultValue: false,
-          friendlyName: "Show Brand Logo",
-        },
-        {
-          name: "brandLogoUrl",
-          type: "file",
-          allowedFileTypes: ["jpeg", "jpg", "png", "svg", "webp"],
-          friendlyName: "Brand Logo",
-        },
-      ],
+      inputs: productCardInputs,
     });
 
     register("editor.component", {

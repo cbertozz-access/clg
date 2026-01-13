@@ -54,7 +54,7 @@ export interface FigmaProductCardAPIProps {
 }
 
 export function FigmaProductCardAPI({
-  productId,
+  productId: rawProductId,
   apiEndpoint = "https://acccessproducts.netlify.app/api/products",
   ctaText = "View Details",
   productBaseUrl = "/equipment",
@@ -64,6 +64,11 @@ export function FigmaProductCardAPI({
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Extract just the productId if it's in the format "productId - Model (Category)"
+  const productId = rawProductId?.includes(" - ")
+    ? rawProductId.split(" - ")[0].trim()
+    : rawProductId;
 
   useEffect(() => {
     if (!productId) {
@@ -85,7 +90,7 @@ export function FigmaProductCardAPI({
           setProduct(found);
           setError(null);
         } else {
-          setError("Product not found");
+          setError(`Product "${productId}" not found`);
           setProduct(null);
         }
       } catch (err) {
