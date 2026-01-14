@@ -2,103 +2,10 @@
 
 /**
  * Builder.io Component Registration (Client-side)
- *
- * This file registers components with Builder.io's visual editor.
- * It must run on the client side only.
+ * Using Gen 1 SDK for better live editing support
  */
 
-import { register } from "@builder.io/sdk-react-nextjs";
-
-// Register Data Sources for Builder.io data panel
-register("dataSource", {
-  name: "Products API",
-  description: "Equipment products from the live API",
-  // Default API endpoint
-  url: "https://acccessproducts.netlify.app/api/products",
-  // Define the data schema for binding
-  schema: {
-    type: "array",
-    items: {
-      type: "object",
-      properties: {
-        id: { type: "string" },
-        name: { type: "string" },
-        category: { type: "string" },
-        subcategory: { type: "string" },
-        fuel_type: { type: "string" },
-        model: { type: "string" },
-        image_url: { type: "string" },
-        slug: { type: "string" },
-        specs: {
-          type: "object",
-          properties: {
-            reach: { type: "string" },
-            height: { type: "string" },
-            capacity: { type: "string" },
-          },
-        },
-        pricing: {
-          type: "object",
-          properties: {
-            daily: { type: "number" },
-            weekly: { type: "number" },
-            monthly: { type: "number" },
-          },
-        },
-      },
-    },
-  },
-});
-
-// Register Design Tokens with Builder.io visual editor
-register("editor.settings", {
-  designTokens: {
-    colors: [
-      { name: "Primary", value: "var(--color-primary, #0f172a)" },
-      { name: "Primary Dark", value: "var(--color-primary-dark, #020617)" },
-      { name: "Primary Foreground", value: "var(--color-primary-foreground, #f8fafc)" },
-      { name: "Accent", value: "var(--color-accent, #3b82f6)" },
-      { name: "Accent Foreground", value: "var(--color-accent-foreground, #ffffff)" },
-      { name: "Background", value: "var(--color-background, #ffffff)" },
-      { name: "Background Alt", value: "var(--color-background-alt, #f3f4f6)" },
-      { name: "Foreground", value: "var(--color-foreground, #020617)" },
-      { name: "Muted Foreground", value: "var(--color-muted-foreground, #64748b)" },
-      { name: "Border", value: "var(--color-border, #e2e8f0)" },
-      { name: "Success", value: "var(--color-success, #22c55e)" },
-      { name: "Warning", value: "var(--color-warning, #f59e0b)" },
-      { name: "Error", value: "var(--color-error, #ef4444)" },
-    ],
-    spacing: [
-      { name: "XS", value: "4px" },
-      { name: "SM", value: "8px" },
-      { name: "MD", value: "16px" },
-      { name: "LG", value: "24px" },
-      { name: "XL", value: "32px" },
-      { name: "2XL", value: "48px" },
-    ],
-    fontFamily: [
-      { name: "Heading", value: "var(--font-heading, 'Inter', system-ui, sans-serif)" },
-      { name: "Body", value: "var(--font-body, 'Inter', system-ui, sans-serif)" },
-    ],
-    fontSize: [
-      { name: "XS", value: "12px" },
-      { name: "SM", value: "14px" },
-      { name: "Base", value: "16px" },
-      { name: "LG", value: "18px" },
-      { name: "XL", value: "20px" },
-      { name: "2XL", value: "24px" },
-      { name: "3XL", value: "30px" },
-      { name: "4XL", value: "36px" },
-    ],
-    borderRadius: [
-      { name: "None", value: "0" },
-      { name: "SM", value: "var(--radius-sm, 4px)" },
-      { name: "Default", value: "var(--radius, 8px)" },
-      { name: "LG", value: "var(--radius-lg, 12px)" },
-      { name: "Full", value: "9999px" },
-    ],
-  },
-});
+import { Builder, builder } from "@builder.io/react";
 import { CategoryHeroCC } from "../components/builder/CategoryHeroCC";
 import {
   LPHeader,
@@ -130,166 +37,330 @@ import {
   FigmaHero,
 } from "../components/builder/figma";
 
-// Only register on client side
-if (typeof window !== "undefined") {
-  // Figma Components
-  register("editor.component", {
-    name: "FigmaButton",
-    friendlyName: "Figma - Button",
-    component: FigmaButton,
-  });
+// Initialize Builder
+const BUILDER_API_KEY = process.env.NEXT_PUBLIC_BUILDER_API_KEY || "";
+builder.init(BUILDER_API_KEY);
 
-  register("editor.component", {
-    name: "FigmaInput",
-    friendlyName: "Figma - Input Field",
-    component: FigmaInput,
-  });
+// Figma Components
+Builder.registerComponent(FigmaButton, {
+  name: "FigmaButton",
+  friendlyName: "Figma - Button",
+  inputs: [
+    { name: "label", type: "string", defaultValue: "Button" },
+    { name: "variant", type: "enum", enum: ["primary", "secondary", "outline"], defaultValue: "primary" },
+    { name: "size", type: "enum", enum: ["sm", "md", "lg"], defaultValue: "md" },
+    { name: "fullWidth", type: "boolean", defaultValue: false },
+    { name: "href", type: "url" },
+  ],
+});
 
-  register("editor.component", {
-    name: "FigmaDialog",
-    friendlyName: "Figma - Dialog/Modal",
-    component: FigmaDialog,
-  });
+Builder.registerComponent(FigmaInput, {
+  name: "FigmaInput",
+  friendlyName: "Figma - Input Field",
+  inputs: [
+    { name: "label", type: "string", defaultValue: "Label" },
+    { name: "placeholder", type: "string", defaultValue: "Enter value" },
+    { name: "type", type: "enum", enum: ["text", "email", "tel", "password", "number"], defaultValue: "text" },
+    { name: "required", type: "boolean", defaultValue: false },
+    { name: "error", type: "boolean", defaultValue: false },
+    { name: "errorMessage", type: "string" },
+  ],
+});
 
-  register("editor.component", {
-    name: "FigmaProductCard",
-    friendlyName: "Figma - Product Card",
-    component: FigmaProductCard,
-  });
+Builder.registerComponent(FigmaDialog, {
+  name: "FigmaDialog",
+  friendlyName: "Figma - Dialog/Modal",
+  inputs: [
+    { name: "title", type: "string", defaultValue: "Stay Ahead with Exclusive Deals & Updates!" },
+    { name: "description", type: "longText", defaultValue: "Sign up for the latest offers!" },
+    { name: "buttonText", type: "string", defaultValue: "Subscribe" },
+    { name: "showCloseButton", type: "boolean", defaultValue: true },
+  ],
+});
 
-  register("editor.component", {
-    name: "FigmaProductCardAPI",
-    friendlyName: "Figma - Product Card (API Picker)",
-    component: FigmaProductCardAPI,
-  });
+Builder.registerComponent(FigmaProductCard, {
+  name: "FigmaProductCard",
+  friendlyName: "Figma - Product Card",
+  inputs: [
+    { name: "imageUrl", type: "file", allowedFileTypes: ["jpeg", "jpg", "png", "webp"] },
+    { name: "logoUrl", type: "file", allowedFileTypes: ["jpeg", "jpg", "png", "svg", "webp"] },
+    { name: "fuelType", type: "string", defaultValue: "Diesel" },
+    { name: "modelNumber", type: "string", defaultValue: "340AJ" },
+    { name: "title", type: "string", defaultValue: "33ft Articulating Boom Lift" },
+    { name: "spec1", type: "string", defaultValue: "Reach: 19' 11\"/6.06M" },
+    { name: "spec2", type: "string", defaultValue: "Height: 33' 9\"/10.28M" },
+    { name: "dailyPrice", type: "string", defaultValue: "$149.00" },
+    { name: "weeklyPrice", type: "string", defaultValue: "$301.00" },
+    { name: "ctaText", type: "string", defaultValue: "View details" },
+    { name: "ctaLink", type: "string", defaultValue: "/product" },
+  ],
+});
 
-  register("editor.component", {
-    name: "FigmaProductGrid",
-    friendlyName: "Figma - Product Grid (API)",
-    component: FigmaProductGrid,
-  });
+Builder.registerComponent(FigmaProductCardAPI, {
+  name: "FigmaProductCardAPI",
+  friendlyName: "Figma - Product Card (API Picker)",
+  inputs: [
+    { name: "productId", type: "string", helperText: "Enter product ID or model name (e.g., H48XM-12)" },
+    { name: "ctaText", type: "string", defaultValue: "View Details" },
+    { name: "productBaseUrl", type: "string", defaultValue: "/equipment" },
+    { name: "showBrandLogo", type: "boolean", defaultValue: false },
+    { name: "brandLogoUrl", type: "file", allowedFileTypes: ["jpeg", "jpg", "png", "svg", "webp"] },
+  ],
+});
 
-  register("editor.component", {
-    name: "FigmaHero",
-    friendlyName: "Figma - Hero Section",
-    component: FigmaHero,
-  });
+Builder.registerComponent(FigmaProductGrid, {
+  name: "FigmaProductGrid",
+  friendlyName: "Figma - Product Grid (API)",
+  inputs: [
+    { name: "sectionTitle", type: "string", defaultValue: "Featured Equipment" },
+    { name: "apiEndpoint", type: "string", defaultValue: "https://acccessproducts.netlify.app/api/products" },
+    { name: "category", type: "string", helperText: "Filter by category (e.g., Forklift)" },
+    { name: "columns", type: "enum", enum: ["2", "3", "4"], defaultValue: "3" },
+    { name: "maxProducts", type: "number", defaultValue: 6 },
+    { name: "viewAllLink", type: "string" },
+    { name: "viewAllText", type: "string", defaultValue: "View All Equipment" },
+  ],
+});
 
-  // LP Components
-  register("editor.component", {
-    name: "CategoryHeroCC",
-    friendlyName: "Category Hero (CLG-39)",
-    component: CategoryHeroCC,
-  });
+Builder.registerComponent(FigmaHero, {
+  name: "FigmaHero",
+  friendlyName: "Figma - Hero Section",
+  inputs: [
+    { name: "backgroundImage", type: "file", allowedFileTypes: ["jpeg", "jpg", "png", "webp"] },
+    { name: "overlayOpacity", type: "number", defaultValue: 60 },
+    { name: "headline", type: "string", defaultValue: "Equipment Hire Across Australia" },
+    { name: "subheadline", type: "longText", defaultValue: "Get competitive quotes from Australia's largest fleet." },
+    { name: "primaryCtaText", type: "string", defaultValue: "Get a Quote" },
+    { name: "primaryCtaLink", type: "url", defaultValue: "#quote" },
+    { name: "secondaryCtaText", type: "string", defaultValue: "Browse Equipment" },
+    { name: "secondaryCtaLink", type: "url", defaultValue: "#equipment" },
+  ],
+});
 
-  register("editor.component", {
-    name: "LPHeader",
-    friendlyName: "LP - Header",
-    component: LPHeader,
-  });
+// Category Hero
+Builder.registerComponent(CategoryHeroCC, {
+  name: "CategoryHeroCC",
+  friendlyName: "Category Hero (CLG-39)",
+  inputs: [
+    { name: "categoryName", type: "string", defaultValue: "Equipment Hire" },
+    { name: "valueProposition", type: "longText", defaultValue: "Access Australia's largest fleet" },
+    { name: "benefits", type: "list", subFields: [{ name: "benefit", type: "string" }] },
+    { name: "primaryButtonText", type: "string", defaultValue: "Get a Quote" },
+    { name: "primaryButtonLink", type: "url", defaultValue: "/quote" },
+    { name: "backgroundImage", type: "file", allowedFileTypes: ["jpeg", "jpg", "png", "webp"] },
+  ],
+});
 
-  register("editor.component", {
-    name: "LPHero",
-    friendlyName: "LP - Hero Section",
-    component: LPHero,
-  });
+// LP Components
+Builder.registerComponent(LPHeader, {
+  name: "LPHeader",
+  friendlyName: "LP - Header",
+  inputs: [
+    { name: "logoUrl", type: "file", allowedFileTypes: ["jpeg", "jpg", "png", "svg", "webp"] },
+    { name: "companyName", type: "string", defaultValue: "ACCESS HIRE" },
+    { name: "phoneNumber", type: "string", defaultValue: "13 4000" },
+    { name: "ctaText", type: "string", defaultValue: "Get a Quote" },
+    { name: "ctaLink", type: "url", defaultValue: "#quote-form" },
+  ],
+});
 
-  register("editor.component", {
-    name: "LPTrustBadges",
-    friendlyName: "LP - Trust Badges / Stats",
-    component: LPTrustBadges,
-  });
+Builder.registerComponent(LPHero, {
+  name: "LPHero",
+  friendlyName: "LP - Hero Section",
+  inputs: [
+    { name: "variant", type: "enum", enum: ["standard", "squeeze", "product-focused"], defaultValue: "standard" },
+    { name: "backgroundImage", type: "file", allowedFileTypes: ["jpeg", "jpg", "png", "webp"] },
+    { name: "headline", type: "string", defaultValue: "Equipment Hire Across Australia" },
+    { name: "subheadline", type: "longText" },
+    { name: "primaryCtaText", type: "string", defaultValue: "Get a Quote" },
+    { name: "primaryCtaLink", type: "url", defaultValue: "#quote-form" },
+  ],
+});
 
-  register("editor.component", {
-    name: "LPBenefits",
-    friendlyName: "LP - Benefits Grid",
-    component: LPBenefits,
-  });
+Builder.registerComponent(LPTrustBadges, {
+  name: "LPTrustBadges",
+  friendlyName: "LP - Trust Badges / Stats",
+  inputs: [
+    { name: "stats", type: "list", subFields: [
+      { name: "value", type: "string" },
+      { name: "label", type: "string" },
+    ]},
+    { name: "variant", type: "enum", enum: ["light", "dark"], defaultValue: "light" },
+  ],
+});
 
-  register("editor.component", {
-    name: "LPProductsGrid",
-    friendlyName: "LP - Products Grid",
-    component: LPProductsGrid,
-  });
+Builder.registerComponent(LPBenefits, {
+  name: "LPBenefits",
+  friendlyName: "LP - Benefits Grid",
+  inputs: [
+    { name: "sectionTitle", type: "string", defaultValue: "Why Choose Access Hire?" },
+    { name: "benefits", type: "list", subFields: [
+      { name: "icon", type: "enum", enum: ["shield", "clock", "location", "badge"] },
+      { name: "title", type: "string" },
+      { name: "description", type: "string" },
+    ]},
+    { name: "columns", type: "enum", enum: ["2", "3", "4"], defaultValue: "4" },
+  ],
+});
 
-  register("editor.component", {
-    name: "LPTestimonials",
-    friendlyName: "LP - Testimonials",
-    component: LPTestimonials,
-  });
+Builder.registerComponent(LPProductsGrid, {
+  name: "LPProductsGrid",
+  friendlyName: "LP - Products Grid",
+  inputs: [
+    { name: "sectionTitle", type: "string", defaultValue: "Featured Equipment" },
+    { name: "apiEndpoint", type: "string", defaultValue: "https://acccessproducts.netlify.app/api/products" },
+    { name: "category", type: "string", defaultValue: "Forklift" },
+    { name: "maxProducts", type: "number", defaultValue: 6 },
+  ],
+});
 
-  register("editor.component", {
-    name: "LPQuoteForm",
-    friendlyName: "LP - Quote Form",
-    component: LPQuoteForm,
-  });
+Builder.registerComponent(LPTestimonials, {
+  name: "LPTestimonials",
+  friendlyName: "LP - Testimonials",
+  inputs: [
+    { name: "sectionTitle", type: "string", defaultValue: "What Our Customers Say" },
+    { name: "testimonials", type: "list", subFields: [
+      { name: "quote", type: "longText" },
+      { name: "name", type: "string" },
+      { name: "company", type: "string" },
+    ]},
+  ],
+});
 
-  register("editor.component", {
-    name: "LPFaq",
-    friendlyName: "LP - FAQ Accordion",
-    component: LPFaq,
-  });
+Builder.registerComponent(LPQuoteForm, {
+  name: "LPQuoteForm",
+  friendlyName: "LP - Quote Form",
+  inputs: [
+    { name: "title", type: "string", defaultValue: "Request a Quote" },
+    { name: "subtitle", type: "string" },
+    { name: "submitButtonText", type: "string", defaultValue: "Submit" },
+  ],
+});
 
-  register("editor.component", {
-    name: "LPCtaBanner",
-    friendlyName: "LP - CTA Banner",
-    component: LPCtaBanner,
-  });
+Builder.registerComponent(LPFaq, {
+  name: "LPFaq",
+  friendlyName: "LP - FAQ Accordion",
+  inputs: [
+    { name: "sectionTitle", type: "string", defaultValue: "Frequently Asked Questions" },
+    { name: "items", type: "list", subFields: [
+      { name: "question", type: "string" },
+      { name: "answer", type: "longText" },
+    ]},
+  ],
+});
 
-  register("editor.component", {
-    name: "LPFooter",
-    friendlyName: "LP - Footer",
-    component: LPFooter,
-  });
+Builder.registerComponent(LPCtaBanner, {
+  name: "LPCtaBanner",
+  friendlyName: "LP - CTA Banner",
+  inputs: [
+    { name: "headline", type: "string", defaultValue: "Ready to Get Started?" },
+    { name: "subtext", type: "string" },
+    { name: "primaryCtaText", type: "string", defaultValue: "Get a Quote" },
+    { name: "primaryCtaLink", type: "url", defaultValue: "#quote-form" },
+  ],
+});
 
-  register("editor.component", {
-    name: "LPBreadcrumb",
-    friendlyName: "LP - Breadcrumb",
-    component: LPBreadcrumb,
-  });
+Builder.registerComponent(LPFooter, {
+  name: "LPFooter",
+  friendlyName: "LP - Footer",
+  inputs: [
+    { name: "logoUrl", type: "file", allowedFileTypes: ["jpeg", "jpg", "png", "svg", "webp"] },
+    { name: "companyName", type: "string", defaultValue: "ACCESS HIRE" },
+    { name: "phoneNumber", type: "string", defaultValue: "13 4000" },
+    { name: "email", type: "string", defaultValue: "info@accesshire.net" },
+  ],
+});
 
-  register("editor.component", {
-    name: "LPStickyForm",
-    friendlyName: "LP - Sticky Sidebar Form",
-    component: LPStickyForm,
-  });
+Builder.registerComponent(LPBreadcrumb, {
+  name: "LPBreadcrumb",
+  friendlyName: "LP - Breadcrumb",
+  inputs: [
+    { name: "items", type: "list", subFields: [
+      { name: "label", type: "string" },
+      { name: "href", type: "url" },
+    ]},
+    { name: "currentPage", type: "string", defaultValue: "Current Page" },
+  ],
+});
 
-  // Mobile-specific components
-  register("editor.component", {
-    name: "LPStickyBottomCTA",
-    friendlyName: "LP - Sticky Bottom CTA (Mobile)",
-    component: LPStickyBottomCTA,
-  });
+Builder.registerComponent(LPStickyForm, {
+  name: "LPStickyForm",
+  friendlyName: "LP - Sticky Sidebar Form",
+  inputs: [
+    { name: "title", type: "string", defaultValue: "Get a Quick Quote" },
+    { name: "submitButtonText", type: "string", defaultValue: "Get My Quote" },
+    { name: "phoneNumber", type: "string", defaultValue: "13 4000" },
+  ],
+});
 
-  register("editor.component", {
-    name: "LPFilterBar",
-    friendlyName: "LP - Filter Bar (Desktop)",
-    component: LPFilterBar,
-  });
+// Mobile-specific components
+Builder.registerComponent(LPStickyBottomCTA, {
+  name: "LPStickyBottomCTA",
+  friendlyName: "LP - Sticky Bottom CTA (Mobile)",
+  inputs: [
+    { name: "phoneNumber", type: "string", defaultValue: "13 4000" },
+    { name: "callText", type: "string", defaultValue: "Call" },
+    { name: "quoteText", type: "string", defaultValue: "Get Quote" },
+    { name: "quoteLink", type: "string", defaultValue: "#quote-form" },
+  ],
+});
 
-  register("editor.component", {
-    name: "LPFilterChips",
-    friendlyName: "LP - Filter Chips (Mobile)",
-    component: LPFilterChips,
-  });
+Builder.registerComponent(LPFilterBar, {
+  name: "LPFilterBar",
+  friendlyName: "LP - Filter Bar (Desktop)",
+  inputs: [
+    { name: "filters", type: "list", subFields: [
+      { name: "name", type: "string" },
+      { name: "label", type: "string" },
+      { name: "options", type: "list", subFields: [
+        { name: "label", type: "string" },
+        { name: "value", type: "string" },
+      ]},
+    ]},
+  ],
+});
 
-  register("editor.component", {
-    name: "LPQuoteModal",
-    friendlyName: "LP - Quote Modal (Mobile)",
-    component: LPQuoteModal,
-  });
+Builder.registerComponent(LPFilterChips, {
+  name: "LPFilterChips",
+  friendlyName: "LP - Filter Chips (Mobile)",
+  inputs: [
+    { name: "chips", type: "list", subFields: [
+      { name: "label", type: "string" },
+      { name: "value", type: "string" },
+    ]},
+    { name: "showAllOption", type: "boolean", defaultValue: true },
+  ],
+});
 
-  register("editor.component", {
-    name: "LPTrustScroll",
-    friendlyName: "LP - Trust Scroll (Mobile)",
-    component: LPTrustScroll,
-  });
+Builder.registerComponent(LPQuoteModal, {
+  name: "LPQuoteModal",
+  friendlyName: "LP - Quote Modal (Mobile)",
+  inputs: [
+    { name: "title", type: "string", defaultValue: "Get a Quote" },
+    { name: "submitText", type: "string", defaultValue: "Get My Quote" },
+  ],
+});
 
-  register("editor.component", {
-    name: "LPLoadMore",
-    friendlyName: "LP - Load More Button",
-    component: LPLoadMore,
-  });
-}
+Builder.registerComponent(LPTrustScroll, {
+  name: "LPTrustScroll",
+  friendlyName: "LP - Trust Scroll (Mobile)",
+  inputs: [
+    { name: "stats", type: "list", subFields: [
+      { name: "value", type: "string" },
+      { name: "label", type: "string" },
+    ]},
+    { name: "variant", type: "enum", enum: ["light", "white"], defaultValue: "white" },
+  ],
+});
+
+Builder.registerComponent(LPLoadMore, {
+  name: "LPLoadMore",
+  friendlyName: "LP - Load More Button",
+  inputs: [
+    { name: "text", type: "string", defaultValue: "Load More" },
+    { name: "loadingText", type: "string", defaultValue: "Loading..." },
+    { name: "variant", type: "enum", enum: ["primary", "outline"], defaultValue: "outline" },
+  ],
+});
 
 export {};
