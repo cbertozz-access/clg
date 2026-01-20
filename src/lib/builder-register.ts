@@ -429,7 +429,7 @@ Builder.registerComponent(EquipmentGrid, {
     { name: "productBaseUrl", type: "string", defaultValue: "/equipment", friendlyName: "Product Detail URL Base" },
     { name: "cardVariant", type: "enum", enum: ["default", "compact", "featured"], defaultValue: "default", friendlyName: "Card Style" },
     { name: "showPricing", type: "boolean", defaultValue: true, friendlyName: "Show Pricing" },
-    { name: "background", type: "enum", enum: ["white", "light", "none"], defaultValue: "light", friendlyName: "Background" },
+    { name: "background", type: "enum", enum: ["white", "light", "none"], defaultValue: "none", friendlyName: "Background" },
   ],
 });
 
