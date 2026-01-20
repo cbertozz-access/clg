@@ -99,12 +99,22 @@ export function VisitorDebugPanel() {
       const sid = localStorage.getItem(VISITOR_STORAGE_KEY);
       setStorageId(sid);
 
-      // Check for CLGVisitor SDK
+      // Check for CLGVisitor SDK - but don't overwrite "ready" status if we already have data
       if (window.CLGVisitor) {
-        setSdkStatus(window.CLGVisitor.initialized ? "ready" : "loading");
-        setVisitorId(window.CLGVisitor.getVisitorId());
-        setProfile(window.CLGVisitor.getProfile());
-      } else {
+        const sdkInitialized = window.CLGVisitor.initialized;
+        const sdkProfile = window.CLGVisitor.getProfile();
+
+        // Only update status if SDK has better data, or we don't have data yet
+        if (sdkInitialized && sdkProfile) {
+          setSdkStatus("ready");
+          setVisitorId(window.CLGVisitor.getVisitorId());
+          setProfile(sdkProfile);
+        } else if (!profile) {
+          // Only set loading if we don't already have profile from direct fetch
+          setSdkStatus(sdkInitialized ? "ready" : "loading");
+          setVisitorId(window.CLGVisitor.getVisitorId() || cid || sid || null);
+        }
+      } else if (!profile) {
         setSdkStatus("not-loaded");
         // Use cookie/storage as fallback
         setVisitorId(cid || sid || null);
