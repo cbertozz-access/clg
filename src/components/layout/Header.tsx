@@ -11,14 +11,6 @@ import Image from "next/image";
  * Features service tabs, phone number, and mobile navigation.
  */
 
-const serviceLinks = [
-  { label: "HIRE", href: "/hire", active: true },
-  { label: "SALES", href: "/sales" },
-  { label: "SERVICE", href: "/service" },
-  { label: "LEASE", href: "/lease" },
-  { label: "TRANSPORT", href: "/transport" },
-];
-
 const navLinks = [
   { label: "Equipment", href: "/equipment" },
   { label: "Locations", href: "/locations" },
@@ -31,27 +23,10 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
-      {/* Top Bar - Service Tabs */}
+      {/* Top Bar - Phone Number */}
       <div className="bg-[#E31937]">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-between">
-            {/* Service Tabs */}
-            <nav className="hidden md:flex">
-              {serviceLinks.map((link) => (
-                <Link
-                  key={link.label}
-                  href={link.href}
-                  className={`px-4 py-2 text-sm font-semibold transition-colors ${
-                    link.active
-                      ? "bg-white text-[#E31937]"
-                      : "text-white hover:bg-white/10"
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-
+          <div className="flex items-center justify-end">
             {/* Phone Number */}
             <a
               href="tel:134000"
@@ -122,23 +97,6 @@ export function Header() {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="md:hidden bg-white border-t border-gray-200">
-          {/* Mobile Service Tabs */}
-          <div className="grid grid-cols-5 border-b border-gray-200">
-            {serviceLinks.map((link) => (
-              <Link
-                key={link.label}
-                href={link.href}
-                className={`py-3 text-center text-xs font-semibold ${
-                  link.active
-                    ? "bg-[#E31937] text-white"
-                    : "text-[#1A1A1A] hover:bg-gray-100"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-
           {/* Mobile Nav Links */}
           <nav className="py-4">
             {navLinks.map((link) => (
