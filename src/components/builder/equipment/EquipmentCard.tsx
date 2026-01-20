@@ -114,7 +114,7 @@ export function EquipmentCard({
       `}
     >
       {/* Image Container */}
-      <div className={`relative ${isCompact ? "h-40" : "h-48 md:h-56"} overflow-hidden bg-[var(--color-background-alt,#ffffff)]`}>
+      <div className={`relative ${isCompact ? "h-40" : "h-48 md:h-56"} overflow-hidden bg-white`}>
         <img
           src={imageUrl || placeholderImage}
           alt={name || model || "Equipment"}
