@@ -17,6 +17,7 @@ interface CLGVisitorSDK {
   visitorId: string | null;
   profile: VisitorProfile | null;
   initialized: boolean;
+  init: () => Promise<VisitorProfile | null>;
   getVisitorId: () => string | null;
   getProfile: () => VisitorProfile | null;
 }
