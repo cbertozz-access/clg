@@ -131,10 +131,11 @@ Builder.registerComponent(FigmaHero, {
   name: "FigmaHero",
   friendlyName: "Figma - Hero Section",
   inputs: [
-    { name: "backgroundImage", type: "file", allowedFileTypes: ["jpeg", "jpg", "png", "webp"], friendlyName: "Background Image" },
+    { name: "backgroundImage", type: "file", allowedFileTypes: ["jpeg", "jpg", "png", "webp"], friendlyName: "Background Image", helperText: "Optional - uses campaign image if not set" },
+    { name: "useCampaignImage", type: "boolean", defaultValue: true, friendlyName: "Use Campaign Image", helperText: "Use Big Red campaign hero image based on utm_campaign" },
     { name: "overlayIntensity", type: "enum", enum: ["none", "light", "medium", "dark"], defaultValue: "light", friendlyName: "Overlay Intensity", helperText: "Light overlay shows more of the image" },
-    { name: "headline", type: "string", defaultValue: "Equipment Hire Across Australia", friendlyName: "Headline", helperText: "Use {{geo}} for location personalization" },
-    { name: "subheadline", type: "longText", defaultValue: "Get competitive quotes from Australia's largest fleet.", friendlyName: "Subheadline" },
+    { name: "headline", type: "string", friendlyName: "Headline", helperText: "Leave blank to use campaign content" },
+    { name: "subheadline", type: "longText", friendlyName: "Subheadline", helperText: "Leave blank to use campaign content" },
     { name: "highlightCategory", type: "boolean", defaultValue: true, friendlyName: "Highlight Category", helperText: "Highlight category keyword in brand color" },
     { name: "primaryCtaText", type: "string", defaultValue: "Get a Quote", friendlyName: "Primary Button Text" },
     { name: "primaryCtaLink", type: "url", defaultValue: "#quote", friendlyName: "Primary Button Link" },
@@ -146,6 +147,9 @@ Builder.registerComponent(FigmaHero, {
     { name: "contentMaxWidth", type: "enum", enum: ["sm", "md", "lg", "xl"], defaultValue: "lg", friendlyName: "Content Width" },
     { name: "showGreeting", type: "boolean", defaultValue: true, friendlyName: "Show Greeting", helperText: "Show personalized greeting when user is identified" },
     { name: "enablePersonalization", type: "boolean", defaultValue: true, friendlyName: "Enable Personalization", helperText: "Personalize content from URL params or Firebase" },
+    { name: "showBadge", type: "boolean", defaultValue: true, friendlyName: "Show Badge", helperText: "Show 'Supporting Australian Business' badge" },
+    { name: "badgeText", type: "string", defaultValue: "Supporting Australian Business", friendlyName: "Badge Text" },
+    { name: "showContactInfo", type: "boolean", defaultValue: true, friendlyName: "Show Contact Info", helperText: "Show phone number and website in top right" },
   ],
 });
 

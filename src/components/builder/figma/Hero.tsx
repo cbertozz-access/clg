@@ -5,6 +5,7 @@ import {
   buildPersonalizationContext,
   getUrlParams,
   categoryLabels,
+  defaultCampaignContent,
   type PersonalizationContext,
   type FirebaseUserData,
 } from "@/lib/personalization";
@@ -79,6 +80,14 @@ export interface FigmaHeroProps {
   textAlign?: "left" | "center";
   /** Content max width */
   contentMaxWidth?: "sm" | "md" | "lg" | "xl";
+  /** Show campaign badge */
+  showBadge?: boolean;
+  /** Badge text */
+  badgeText?: string;
+  /** Show contact info (phone/website) */
+  showContactInfo?: boolean;
+  /** Use campaign hero image from personalization */
+  useCampaignImage?: boolean;
 }
 
 export function FigmaHero({
@@ -98,6 +107,10 @@ export function FigmaHero({
   firebaseUser,
   textAlign = "left",
   contentMaxWidth = "lg",
+  showBadge = true,
+  badgeText = "Supporting Australian Business",
+  showContactInfo = true,
+  useCampaignImage = true,
 }: FigmaHeroProps) {
   const [context, setContext] = useState<PersonalizationContext | null>(null);
 
@@ -115,12 +128,14 @@ export function FigmaHero({
       });
       setContext(ctx);
     } else {
-      // No personalization - use props directly
+      // No personalization - use props directly with default campaign image
       setContext({
         category: "default",
         categoryLabel: "Equipment",
-        headline: headline || "Equipment Hire Across Australia",
-        subheadline: subheadline || "Get competitive quotes from Australia's largest privately-owned equipment fleet.",
+        headline: headline || defaultCampaignContent.headline,
+        subheadline: subheadline || defaultCampaignContent.subheadline,
+        heroImage: defaultCampaignContent.heroImage,
+        campaignContent: defaultCampaignContent,
       });
     }
   }, [enablePersonalization, firebaseUser, headline, subheadline]);
@@ -149,13 +164,16 @@ export function FigmaHero({
     return text;
   };
 
+  // Determine background image (priority: prop > campaign image)
+  const heroImageUrl = backgroundImage || (useCampaignImage && context?.heroImage) || defaultCampaignContent.heroImage;
+
   // Background styles
-  const bgStyle = backgroundImage
+  const bgStyle = heroImageUrl
     ? {
         backgroundImage:
           overlayIntensity === "none"
-            ? `url(${backgroundImage})`
-            : `${heroTokens.overlay[overlayIntensity]}, url(${backgroundImage})`,
+            ? `url(${heroImageUrl})`
+            : `${heroTokens.overlay[overlayIntensity]}, url(${heroImageUrl})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
       }
@@ -177,11 +195,43 @@ export function FigmaHero({
 
   return (
     <section
-      className={`relative flex items-center ${heroTokens.height[minHeight]} px-4 py-16`}
+      className={`relative flex items-center ${heroTokens.height[minHeight]} px-6 sm:px-10 md:px-16 lg:px-20 py-16`}
       style={bgStyle}
     >
+      {/* Contact info bar - top right */}
+      {showContactInfo && (
+        <div
+          className="absolute top-4 right-6 sm:right-10 md:right-16 lg:right-20 flex items-center gap-4 text-white text-sm"
+          style={{ textShadow: heroTokens.textShadow.subheadline }}
+        >
+          <a href="tel:134000" className="flex items-center gap-1.5 hover:text-white/80 transition-colors">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+            </svg>
+            <span className="font-semibold">13 4000</span>
+          </a>
+          <span className="hidden sm:block text-white/50">|</span>
+          <a href="https://accesshireaustralia.com.au" target="_blank" rel="noopener noreferrer" className="hidden sm:block hover:text-white/80 transition-colors">
+            accesshireaustralia.com.au
+          </a>
+        </div>
+      )}
+
       <div className={`w-full ${maxWidthClasses[contentMaxWidth]} ${textAlign === "center" ? "mx-auto" : ""}`}>
         <div className={`flex flex-col ${alignClasses[textAlign]}`}>
+          {/* Badge */}
+          {showBadge && badgeText && (
+            <div
+              className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 mb-4 w-fit"
+              style={{ textShadow: "none" }}
+            >
+              <svg className="w-4 h-4 text-[var(--color-primary,#E63229)]" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              <span className="text-white text-sm font-medium">{badgeText}</span>
+            </div>
+          )}
+
           {/* Personalized Greeting */}
           {showGreeting && context?.greeting && (
             <p
@@ -194,7 +244,7 @@ export function FigmaHero({
 
           {/* Headline */}
           <h1
-            className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight"
+            className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-4 leading-tight"
             style={{ textShadow: heroTokens.textShadow.headline }}
           >
             {renderHeadline()}
@@ -203,7 +253,7 @@ export function FigmaHero({
           {/* Subheadline */}
           {context?.subheadline && (
             <p
-              className="text-base md:text-lg text-white/90 mb-6 max-w-2xl"
+              className="text-base md:text-lg lg:text-xl text-white/90 mb-8 max-w-2xl"
               style={{ textShadow: heroTokens.textShadow.subheadline }}
             >
               {context.subheadline}

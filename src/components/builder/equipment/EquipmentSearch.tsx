@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { EquipmentCard } from "./EquipmentCard";
 import {
   searchProducts,
@@ -305,32 +305,25 @@ export function EquipmentSearch({
     }
   }, [equipment, categories.length, brands.length]);
 
-  // Build search filters - only use first selected category for Algolia
-  const buildFilters = useCallback((): SearchFilters => {
-    const filters: SearchFilters = {};
-    if (debouncedQuery) filters.query = debouncedQuery;
-    if (selectedCategories.length > 0) filters.category = selectedCategories[0];
-    if (selectedBrands.length > 0) filters.brand = selectedBrands[0];
-    if (isHire !== undefined) filters.isHire = isHire;
-    if (isSale !== undefined) filters.isSale = isSale;
-    if (inStockOnly) filters.inStock = true;
-    return filters;
-  }, [debouncedQuery, selectedCategories, selectedBrands, isHire, isSale, inStockOnly]);
-
-  // Search products with Algolia
-  const performSearch = useCallback(
-    async (page: number = 0) => {
+  // Perform search when filters change
+  useEffect(() => {
+    const doSearch = async () => {
       try {
         setLoading(true);
-        const filters = buildFilters();
+        const filters: SearchFilters = {};
+        if (debouncedQuery) filters.query = debouncedQuery;
+        if (selectedCategories.length > 0) filters.category = selectedCategories[0];
+        if (selectedBrands.length > 0) filters.brand = selectedBrands[0];
+        if (isHire !== undefined) filters.isHire = isHire;
+        if (isSale !== undefined) filters.isSale = isSale;
+        if (inStockOnly) filters.inStock = true;
 
         const result = await searchProducts({
-          page,
+          page: 0,
           hitsPerPage: productsPerPage,
           filters,
         });
 
-        // Map Algolia products to Equipment format
         let mappedEquipment = result.hits.map(mapAlgoliaToEquipment);
 
         // Client-side filtering for multiple selections and power source
@@ -366,36 +359,53 @@ export function EquipmentSearch({
           }
         });
 
-        if (page === 0) {
-          setEquipment(mappedEquipment);
-        } else {
-          setEquipment((prev) => [...prev, ...mappedEquipment]);
-        }
-
+        setEquipment(mappedEquipment);
         setTotalHits(result.nbHits);
         setCurrentPage(result.page);
         setTotalPages(result.nbPages);
         setError(null);
       } catch (err) {
+        console.error("Search error:", err);
         setError(err instanceof Error ? err.message : "Failed to search equipment");
         setEquipment([]);
       } finally {
         setLoading(false);
       }
-    },
-    [buildFilters, productsPerPage, sortBy, selectedCategories, selectedBrands, selectedPowerSources]
-  );
+    };
 
-  // Perform search when filters change
-  useEffect(() => {
-    performSearch(0);
-  }, [debouncedQuery, selectedCategories, selectedBrands, selectedPowerSources, sortBy, isHire, isSale, inStockOnly]);
+    doSearch();
+  }, [debouncedQuery, selectedCategories, selectedBrands, selectedPowerSources, sortBy, isHire, isSale, inStockOnly, productsPerPage]);
 
   const hasMore = currentPage < totalPages - 1;
 
-  const loadMore = () => {
-    if (hasMore && !loading) {
-      performSearch(currentPage + 1);
+  const loadMore = async () => {
+    if (!hasMore || loading) return;
+
+    try {
+      setLoading(true);
+      const filters: SearchFilters = {};
+      if (debouncedQuery) filters.query = debouncedQuery;
+      if (selectedCategories.length > 0) filters.category = selectedCategories[0];
+      if (selectedBrands.length > 0) filters.brand = selectedBrands[0];
+      if (isHire !== undefined) filters.isHire = isHire;
+      if (isSale !== undefined) filters.isSale = isSale;
+      if (inStockOnly) filters.inStock = true;
+
+      const result = await searchProducts({
+        page: currentPage + 1,
+        hitsPerPage: productsPerPage,
+        filters,
+      });
+
+      const mappedEquipment = result.hits.map(mapAlgoliaToEquipment);
+      setEquipment((prev) => [...prev, ...mappedEquipment]);
+      setTotalHits(result.nbHits);
+      setCurrentPage(result.page);
+      setTotalPages(result.nbPages);
+    } catch (err) {
+      console.error("Load more error:", err);
+    } finally {
+      setLoading(false);
     }
   };
 

@@ -60,6 +60,49 @@ export const stateNames: Record<string, string> = {
   'ACT': 'Australian Capital Territory',
 };
 
+// Campaign content mapping (based on utm_campaign parameter)
+export interface CampaignContent {
+  headline: string;
+  subheadline: string;
+  heroImage: string;
+  altImages?: string[];
+}
+
+export const campaignContentMap: Record<string, CampaignContent> = {
+  'building-australia-safely': {
+    headline: 'Building Australia Safely',
+    subheadline: 'Our rigorous maintenance schedules and comprehensive operator training ensure every job site meets the highest safety standards.',
+    heroImage: '/images/campaigns/big-red-wide-2.png',
+  },
+  'safety-priority': {
+    headline: 'Safety Is Our Priority',
+    subheadline: 'From pre-start inspections to ongoing equipment monitoring, we\'re committed to keeping your workers protected.',
+    heroImage: '/images/campaigns/big-red-wide-10.png',
+    altImages: ['/images/campaigns/big-red-wide-7.png'],
+  },
+  'right-machine': {
+    headline: 'The Right Machine For The Job, Every Time',
+    subheadline: 'Access to 15,000+ items of equipment across Australia. From scissor lifts to telehandlers, we match the equipment to your project requirements.',
+    heroImage: '/images/campaigns/big-red-wide-3b.png',
+    altImages: ['/images/campaigns/big-red-wide-9.png'],
+  },
+};
+
+// Default campaign content (no utm_campaign or unknown campaign)
+export const defaultCampaignContent: CampaignContent = {
+  headline: 'Australia\'s Equipment Hire Specialists',
+  subheadline: 'Access to 15,000+ items of equipment across Australia. Expert advice. Rapid delivery.',
+  heroImage: '/images/campaigns/big-red-wide-8.png',
+};
+
+/**
+ * Get campaign content based on utm_campaign parameter
+ */
+export function getCampaignContent(utmCampaign?: string | null): CampaignContent {
+  if (!utmCampaign) return defaultCampaignContent;
+  return campaignContentMap[utmCampaign.toLowerCase()] || defaultCampaignContent;
+}
+
 export interface PersonalizationContext {
   // User identity
   uid?: string;
@@ -81,9 +124,13 @@ export interface PersonalizationContext {
   utmCampaign?: string;
   utmTerm?: string;
 
+  // Campaign content
+  campaignContent?: CampaignContent;
+
   // Computed content
   headline: string;
   subheadline: string;
+  heroImage?: string;
   greeting?: string;
 }
 
@@ -175,6 +222,7 @@ export function buildPersonalizationContext(options: {
   const name = overrides.name || firebaseUser?.displayName || (urlParams.uid ? decodeUid(urlParams.uid) : null) || undefined;
   const geo = overrides.geo || firebaseUser?.preferences?.geo || urlParams.geo || undefined;
   const utmTerm = urlParams.utm_term || undefined;
+  const utmCampaign = urlParams.utm_campaign || undefined;
 
   // Detect category from utm_term or firebase preferences
   const categoryFromUtm = detectCategory(utmTerm);
@@ -185,10 +233,35 @@ export function buildPersonalizationContext(options: {
   const geoFull = geo ? stateNames[geo] || geo : undefined;
   const geoText = geo ? `in ${geo}` : 'Across Australia';
 
-  // Get content template
-  const template = heroContentTemplates[category] || heroContentTemplates['default'];
-  const headline = overrides.headline || template.headline.replace('{{geo}}', geoText);
-  const subheadline = overrides.subheadline || template.subheadline;
+  // Get campaign content if utm_campaign is present
+  const campaignContent = getCampaignContent(utmCampaign);
+  const hasCampaign = utmCampaign && campaignContentMap[utmCampaign.toLowerCase()];
+
+  // Content priority: overrides > campaign content > category template
+  let headline: string;
+  let subheadline: string;
+  let heroImage: string | undefined;
+
+  if (overrides.headline) {
+    headline = overrides.headline;
+  } else if (hasCampaign) {
+    headline = campaignContent.headline;
+  } else {
+    const template = heroContentTemplates[category] || heroContentTemplates['default'];
+    headline = template.headline.replace('{{geo}}', geoText);
+  }
+
+  if (overrides.subheadline) {
+    subheadline = overrides.subheadline;
+  } else if (hasCampaign) {
+    subheadline = campaignContent.subheadline;
+  } else {
+    const template = heroContentTemplates[category] || heroContentTemplates['default'];
+    subheadline = template.subheadline;
+  }
+
+  // Hero image from campaign
+  heroImage = campaignContent.heroImage;
 
   // Build greeting
   const greeting = name ? `G'day ${name}!` : undefined;
@@ -204,10 +277,12 @@ export function buildPersonalizationContext(options: {
     categoryLabel,
     utmSource: urlParams.utm_source || undefined,
     utmMedium: urlParams.utm_medium || undefined,
-    utmCampaign: urlParams.utm_campaign || undefined,
+    utmCampaign,
     utmTerm,
+    campaignContent,
     headline,
     subheadline,
+    heroImage,
     greeting,
   };
 }
