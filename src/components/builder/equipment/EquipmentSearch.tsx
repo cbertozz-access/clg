@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useRef } from "react";
 import { EquipmentCard } from "./EquipmentCard";
+import { EnquiryCartPanel } from "./EnquiryCartPanel";
+import { useEnquiryCart } from "@/lib/enquiry-cart";
 import {
   searchProducts,
   mapAlgoliaToEquipment,
@@ -220,6 +222,10 @@ export function EquipmentSearch({
     "power",
   ]);
   const [showTechnicalFilters, setShowTechnicalFilters] = useState(false);
+
+  // Enquiry cart state
+  const [enquiryPanelOpen, setEnquiryPanelOpen] = useState(false);
+  const { itemCount } = useEnquiryCart();
 
   // Debounce search query
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -921,6 +927,27 @@ export function EquipmentSearch({
           </div>
         </div>
       )}
+
+      {/* Floating Enquiry Cart Button */}
+      {itemCount > 0 && (
+        <button
+          onClick={() => setEnquiryPanelOpen(true)}
+          className="fixed bottom-6 right-6 z-40 flex items-center gap-3 px-6 py-4 bg-[var(--color-primary,#e31937)] text-white rounded-full shadow-lg hover:bg-[var(--color-primary-hover,#c42920)] transition-all hover:scale-105"
+        >
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          <span className="font-semibold">
+            Enquire ({itemCount} {itemCount === 1 ? "item" : "items"})
+          </span>
+        </button>
+      )}
+
+      {/* Enquiry Cart Panel */}
+      <EnquiryCartPanel
+        isOpen={enquiryPanelOpen}
+        onClose={() => setEnquiryPanelOpen(false)}
+      />
     </section>
   );
 }

@@ -1,5 +1,7 @@
 "use client";
 
+import { useEnquiryCart } from "@/lib/enquiry-cart";
+
 /**
  * Equipment Card Component
  *
@@ -38,6 +40,10 @@ export interface EquipmentCardProps {
   showPricing?: boolean;
   /** Show specs */
   showSpecs?: boolean;
+  /** Show add to enquiry button */
+  showEnquiryButton?: boolean;
+  /** Callback when equipment is added to enquiry */
+  onAddToEnquiry?: (item: { id: string; name: string; brand?: string; category?: string; imageUrl?: string }) => void;
 }
 
 export function EquipmentCard({
@@ -56,7 +62,30 @@ export function EquipmentCard({
   variant = "default",
   showPricing = true,
   showSpecs = true,
+  showEnquiryButton = true,
+  onAddToEnquiry,
 }: EquipmentCardProps) {
+  const { addItem, removeItem, isInCart } = useEnquiryCart();
+  const inCart = id ? isInCart(id) : false;
+
+  const handleEnquiryClick = () => {
+    if (!id) return;
+
+    const item = {
+      id,
+      name: name || model || "Equipment",
+      brand,
+      category,
+      imageUrl: imageUrl || undefined,
+    };
+
+    if (inCart) {
+      removeItem(id);
+    } else {
+      addItem(item);
+      onAddToEnquiry?.(item);
+    }
+  };
   const formatPrice = (price?: string | number): string => {
     if (!price) return "POA";
     if (typeof price === "string") return price;
@@ -155,21 +184,56 @@ export function EquipmentCard({
           </div>
         )}
 
-        {/* CTA Button */}
-        <a
-          href={ctaLink || `#${id}`}
-          className={`
-            block w-full text-center font-medium
-            rounded-[var(--radius-sm,4px)]
-            transition-colors duration-200
-            bg-[var(--color-primary,#e31937)]
-            hover:bg-[var(--color-primary-hover,#841020)]
-            text-[var(--color-primary-foreground,white)]
-            ${isCompact ? "py-2 text-sm" : "py-2.5 text-base"}
-          `}
-        >
-          {ctaText}
-        </a>
+        {/* Action Buttons */}
+        <div className={`flex gap-2 ${showEnquiryButton ? "" : ""}`}>
+          {showEnquiryButton && id && (
+            <button
+              onClick={handleEnquiryClick}
+              className={`
+                flex-1 flex items-center justify-center gap-1.5 font-medium
+                rounded-[var(--radius-sm,4px)]
+                transition-colors duration-200
+                border-2
+                ${inCart
+                  ? "bg-[var(--color-primary,#e31937)] border-[var(--color-primary,#e31937)] text-[var(--color-primary-foreground,white)]"
+                  : "bg-transparent border-[var(--color-primary,#e31937)] text-[var(--color-primary,#e31937)] hover:bg-[var(--color-primary,#e31937)]/10"
+                }
+                ${isCompact ? "py-2 text-sm" : "py-2.5 text-base"}
+              `}
+            >
+              {inCart ? (
+                <>
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                  Added
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Enquire
+                </>
+              )}
+            </button>
+          )}
+
+          <a
+            href={ctaLink || `#${id}`}
+            className={`
+              ${showEnquiryButton && id ? "flex-1" : "w-full"} block text-center font-medium
+              rounded-[var(--radius-sm,4px)]
+              transition-colors duration-200
+              bg-[var(--color-primary,#e31937)]
+              hover:bg-[var(--color-primary-hover,#841020)]
+              text-[var(--color-primary-foreground,white)]
+              ${isCompact ? "py-2 text-sm" : "py-2.5 text-base"}
+            `}
+          >
+            {ctaText}
+          </a>
+        </div>
       </div>
     </div>
   );

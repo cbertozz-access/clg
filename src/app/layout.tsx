@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Lato, Roboto } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
+import { EnquiryCartProvider } from "@/lib/enquiry-cart";
 
 const lato = Lato({
   weight: ["300", "400", "700", "900"],
@@ -34,7 +35,9 @@ export default function RootLayout({
       <body
         className={`${lato.variable} ${roboto.variable} antialiased`}
       >
-        {children}
+        <EnquiryCartProvider>
+          {children}
+        </EnquiryCartProvider>
         {/* Builder.io Visual Editor Script */}
         <Script
           src="https://cdn.builder.io/js/webcomponents"

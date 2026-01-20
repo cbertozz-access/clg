@@ -28,11 +28,12 @@ export interface LPQuoteFormProps {
 const defaultFields: FormField[] = [
   { name: "firstName", label: "First Name", type: "text", placeholder: "Enter First Name", required: true },
   { name: "surname", label: "Surname", type: "text", placeholder: "Enter Surname", required: true },
-  { name: "phone", label: "Mobile Phone", type: "tel", placeholder: "04XX XXX XXX", required: true },
+  { name: "phone", label: "Mobile Phone", type: "tel", placeholder: "Enter Mobile Phone", required: true },
   { name: "email", label: "Email", type: "email", placeholder: "Enter Email", required: true },
-  { name: "industry", label: "Industry", type: "select", required: true, options: ["Construction", "Mining", "Manufacturing", "Warehousing & Logistics", "Events", "Film & TV", "Facility Maintenance", "Agriculture", "Government", "Other"] },
+  { name: "industry", label: "Industry", type: "select", required: true, options: ["Select your Industry Type", "Construction", "Mining", "Manufacturing", "Warehousing & Logistics", "Events", "Film & TV", "Facility Maintenance", "Agriculture", "Government", "Other"] },
   { name: "company", label: "Company Name", type: "text", placeholder: "Enter Company Name" },
-  { name: "branch", label: "Select Branch", type: "select", required: true, options: ["Perth, WA", "Sydney, NSW", "Melbourne, VIC", "Brisbane, QLD", "Adelaide, SA", "Darwin, NT", "Newcastle, NSW", "Central Coast, NSW"] },
+  { name: "country", label: "Country", type: "select", options: ["Australia", "New Zealand", "United States", "United Kingdom", "Other"] },
+  { name: "branch", label: "Select Branch", type: "select", required: true, options: ["Choose Your Branch", "Perth, WA", "Sydney, NSW", "Melbourne, VIC", "Brisbane, QLD", "Adelaide, SA", "Darwin, NT", "Newcastle, NSW", "Central Coast, NSW"] },
   { name: "projectLocation", label: "Project Location Suburb", type: "text", placeholder: "Enter Project Location Suburb", required: true },
   { name: "message", label: "Enquiry Message", type: "textarea", placeholder: "Enter Enquiry Message", required: true },
 ];
@@ -168,7 +169,7 @@ export function LPQuoteForm(props: Partial<LPQuoteFormProps>) {
     }
   };
 
-  // Group fields for two-column layout
+  // Group fields for two-column layout (pairs will be rendered side by side)
   const pairedFields = ["firstName", "surname", "phone", "email", "industry", "company", "country", "branch"];
 
   return (
