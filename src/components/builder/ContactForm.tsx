@@ -6,8 +6,8 @@ import { submitContactRequest, type ContactRequestData } from "@/lib/api/contact
 /**
  * Contact Form Component
  *
- * Matches the Contact Request API fields exactly.
- * Clean, simple implementation with all required fields.
+ * Self-contained quote request form that integrates with the Contact Request API.
+ * Designed to work on any background and match page design language.
  */
 
 const industries = [
@@ -34,14 +34,6 @@ const branches = [
   "Central Coast, NSW",
 ];
 
-const countries = [
-  "Australia",
-  "New Zealand",
-  "United States",
-  "United Kingdom",
-  "Other",
-];
-
 const equipmentTypes = [
   "Scissor Lift",
   "Boom Lift",
@@ -57,12 +49,29 @@ const equipmentTypes = [
 ];
 
 export interface ContactFormProps {
+  /** Form title */
   title?: string;
+  /** Subtitle shown below title */
+  subtitle?: string;
+  /** Submit button text */
+  submitButtonText?: string;
+  /** Show phone CTA below form */
+  showPhoneCta?: boolean;
+  /** Phone number for CTA */
+  phoneNumber?: string;
+  /** Variant: full (all fields) or compact (essential fields only) */
+  variant?: "full" | "compact";
+  /** Background style */
   backgroundColor?: "white" | "gray" | "none";
 }
 
 export function ContactForm({
-  title = "CONTACT US",
+  title = "Request a Quote",
+  subtitle = "Tell us about your project — we respond within 2 hours",
+  submitButtonText = "Get Your Quote",
+  showPhoneCta = true,
+  phoneNumber = "13 4000",
+  variant = "full",
   backgroundColor = "gray",
 }: ContactFormProps) {
   const [formData, setFormData] = useState({
@@ -73,7 +82,6 @@ export function ContactForm({
     equipmentType: "",
     industry: "",
     company: "",
-    country: "Australia",
     branch: "",
     projectLocation: "",
     message: "",
@@ -102,7 +110,7 @@ export function ContactForm({
       contactMessage: formData.message,
       contactType: "General Inquiry",
       sourceDepot: formData.branch || "Website",
-      contactCountry: formData.country,
+      contactCountry: "Australia",
       contactIndustry: formData.industry,
       projectLocationSuburb: formData.projectLocation,
       productEnquiry: formData.equipmentType || undefined,
@@ -122,7 +130,6 @@ export function ContactForm({
           equipmentType: "",
           industry: "",
           company: "",
-          country: "Australia",
           branch: "",
           projectLocation: "",
           message: "",
@@ -141,260 +148,291 @@ export function ContactForm({
 
   const bgClass = {
     white: "bg-white",
-    gray: "bg-[#F3F4F6]",
+    gray: "bg-[#F8FAFC]",
     none: "",
   };
 
   const inputClass =
-    "w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E31937] focus:border-[#E31937] outline-none transition-colors";
+    "w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-[#1A1A1A] placeholder:text-gray-400 focus:ring-2 focus:ring-[#E31937]/20 focus:border-[#E31937] outline-none transition-all";
 
-  const labelClass = "block text-sm font-semibold text-[#1A1A1A] mb-1";
+  const labelClass = "block text-sm font-medium text-[#374151] mb-1.5";
+
+  const isCompact = variant === "compact";
 
   return (
-    <section id="quote-form" className={`py-12 ${bgClass[backgroundColor]}`}>
-      <div className="max-w-3xl mx-auto px-4">
-        <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
-          <h2 className="text-2xl font-bold text-[#1A1A1A] mb-8">{title}</h2>
+    <section id="quote-form" className={`py-12 md:py-16 ${bgClass[backgroundColor]}`}>
+      <div className={`mx-auto px-4 ${isCompact ? "max-w-xl" : "max-w-2xl"}`}>
+        {/* Card Container */}
+        <div className="bg-white rounded-2xl shadow-lg shadow-gray-200/50 border border-gray-100 overflow-hidden">
+          {/* Header */}
+          <div className="px-6 md:px-8 pt-6 md:pt-8 pb-6 border-b border-gray-100">
+            <h2 className="text-2xl md:text-3xl font-bold text-[#1A1A1A]">{title}</h2>
+            {subtitle && (
+              <p className="mt-2 text-gray-500">{subtitle}</p>
+            )}
+          </div>
 
-          {submitStatus === "success" ? (
-            <div className="text-center py-8">
-              <svg
-                className="w-16 h-16 text-green-500 mx-auto mb-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <h3 className="text-xl font-bold text-[#1A1A1A] mb-2">Thank You!</h3>
-              <p className="text-gray-600">
-                Your enquiry has been submitted. We&apos;ll be in touch shortly.
-              </p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Row 1: First Name, Surname */}
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className={labelClass}>
-                    First Name<span className="text-[#E31937]">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.firstName}
-                    onChange={(e) => handleChange("firstName", e.target.value)}
-                    placeholder="Enter First Name"
-                    required
-                    className={inputClass}
-                  />
-                </div>
-                <div>
-                  <label className={labelClass}>
-                    Surname<span className="text-[#E31937]">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.surname}
-                    onChange={(e) => handleChange("surname", e.target.value)}
-                    placeholder="Enter Surname"
-                    required
-                    className={inputClass}
-                  />
-                </div>
-              </div>
-
-              {/* Row 2: Mobile Phone, Email */}
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className={labelClass}>
-                    Mobile Phone<span className="text-[#E31937]">*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => handleChange("phone", e.target.value)}
-                    placeholder="Enter Mobile Phone"
-                    required
-                    className={inputClass}
-                  />
-                </div>
-                <div>
-                  <label className={labelClass}>
-                    Email<span className="text-[#E31937]">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleChange("email", e.target.value)}
-                    placeholder="Enter Email"
-                    required
-                    className={inputClass}
-                  />
-                </div>
-              </div>
-
-              {/* Row 3: Equipment Type, Industry */}
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className={labelClass}>
-                    Equipment Type<span className="text-[#E31937]">*</span>
-                  </label>
-                  <select
-                    value={formData.equipmentType}
-                    onChange={(e) => handleChange("equipmentType", e.target.value)}
-                    required
-                    className={inputClass}
+          {/* Form Content */}
+          <div className="px-6 md:px-8 py-6 md:py-8">
+            {submitStatus === "success" ? (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg
+                    className="w-8 h-8 text-green-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
                   >
-                    <option value="">What equipment do you need?</option>
-                    {equipmentTypes.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
-                  </select>
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
                 </div>
-                <div>
-                  <label className={labelClass}>
-                    Industry<span className="text-[#E31937]">*</span>
-                  </label>
-                  <select
-                    value={formData.industry}
-                    onChange={(e) => handleChange("industry", e.target.value)}
-                    required
-                    className={inputClass}
-                  >
-                    <option value="">Select your Industry Type</option>
-                    {industries.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <h3 className="text-xl font-bold text-[#1A1A1A] mb-2">Thank You!</h3>
+                <p className="text-gray-500 mb-6">
+                  Your enquiry has been submitted. We&apos;ll be in touch within 2 hours.
+                </p>
+                <button
+                  onClick={() => setSubmitStatus("idle")}
+                  className="text-[#E31937] font-medium hover:underline"
+                >
+                  Submit another enquiry
+                </button>
               </div>
-
-              {/* Row 4: Company Name, Country */}
-              <div className="grid md:grid-cols-2 gap-4">
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Section: Contact Details */}
                 <div>
-                  <label className={labelClass}>Company Name</label>
-                  <input
-                    type="text"
-                    value={formData.company}
-                    onChange={(e) => handleChange("company", e.target.value)}
-                    placeholder="Enter Company Name"
-                    className={inputClass}
-                  />
-                </div>
-                <div>
-                  <label className={labelClass}>Country</label>
-                  <select
-                    value={formData.country}
-                    onChange={(e) => handleChange("country", e.target.value)}
-                    className={inputClass}
-                  >
-                    {countries.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Row 5: Branch, Project Location */}
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label className={labelClass}>
-                    Select Branch<span className="text-[#E31937]">*</span>
-                  </label>
-                  <select
-                    value={formData.branch}
-                    onChange={(e) => handleChange("branch", e.target.value)}
-                    required
-                    className={inputClass}
-                  >
-                    <option value="">Choose Your Branch</option>
-                    {branches.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className={labelClass}>
-                    Project Location Suburb<span className="text-[#E31937]">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.projectLocation}
-                    onChange={(e) => handleChange("projectLocation", e.target.value)}
-                    placeholder="Enter Project Location Suburb"
-                    required
-                    className={inputClass}
-                  />
-                </div>
-              </div>
-
-              {/* Row 6: Enquiry Message */}
-              <div>
-                <label className={labelClass}>
-                  Enquiry Message<span className="text-[#E31937]">*</span>
-                </label>
-                <textarea
-                  value={formData.message}
-                  onChange={(e) => handleChange("message", e.target.value)}
-                  placeholder="Enter Enquiry Message"
-                  required
-                  rows={4}
-                  className={`${inputClass} resize-none`}
-                />
-              </div>
-
-              {/* Error Message */}
-              {submitStatus === "error" && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-center text-red-700 text-sm">
-                  {errorMessage}
-                </div>
-              )}
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-[#E31937] hover:bg-[#C42920] disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-4 rounded-lg font-bold text-lg transition-colors flex items-center justify-center gap-2"
-              >
-                {isSubmitting ? (
-                  <>
-                    <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                        fill="none"
+                  <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
+                    Contact Details
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className={labelClass}>
+                        First Name <span className="text-[#E31937]">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.firstName}
+                        onChange={(e) => handleChange("firstName", e.target.value)}
+                        placeholder="John"
+                        required
+                        className={inputClass}
                       />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    </div>
+                    <div>
+                      <label className={labelClass}>
+                        Surname <span className="text-[#E31937]">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.surname}
+                        onChange={(e) => handleChange("surname", e.target.value)}
+                        placeholder="Smith"
+                        required
+                        className={inputClass}
                       />
+                    </div>
+                    <div>
+                      <label className={labelClass}>
+                        Mobile <span className="text-[#E31937]">*</span>
+                      </label>
+                      <input
+                        type="tel"
+                        value={formData.phone}
+                        onChange={(e) => handleChange("phone", e.target.value)}
+                        placeholder="0400 000 000"
+                        required
+                        className={inputClass}
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClass}>
+                        Email <span className="text-[#E31937]">*</span>
+                      </label>
+                      <input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => handleChange("email", e.target.value)}
+                        placeholder="john@company.com"
+                        required
+                        className={inputClass}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section: Project Details */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
+                    Project Details
+                  </h3>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className={labelClass}>
+                          Equipment Type <span className="text-[#E31937]">*</span>
+                        </label>
+                        <select
+                          value={formData.equipmentType}
+                          onChange={(e) => handleChange("equipmentType", e.target.value)}
+                          required
+                          className={inputClass}
+                        >
+                          <option value="">Select equipment</option>
+                          {equipmentTypes.map((opt) => (
+                            <option key={opt} value={opt}>
+                              {opt}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className={labelClass}>
+                          Branch <span className="text-[#E31937]">*</span>
+                        </label>
+                        <select
+                          value={formData.branch}
+                          onChange={(e) => handleChange("branch", e.target.value)}
+                          required
+                          className={inputClass}
+                        >
+                          <option value="">Select branch</option>
+                          {branches.map((opt) => (
+                            <option key={opt} value={opt}>
+                              {opt}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {!isCompact && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className={labelClass}>Industry</label>
+                          <select
+                            value={formData.industry}
+                            onChange={(e) => handleChange("industry", e.target.value)}
+                            className={inputClass}
+                          >
+                            <option value="">Select industry</option>
+                            {industries.map((opt) => (
+                              <option key={opt} value={opt}>
+                                {opt}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className={labelClass}>Company</label>
+                          <input
+                            type="text"
+                            value={formData.company}
+                            onChange={(e) => handleChange("company", e.target.value)}
+                            placeholder="Company name"
+                            className={inputClass}
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    <div>
+                      <label className={labelClass}>
+                        Project Location <span className="text-[#E31937]">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.projectLocation}
+                        onChange={(e) => handleChange("projectLocation", e.target.value)}
+                        placeholder="Suburb or site address"
+                        required
+                        className={inputClass}
+                      />
+                    </div>
+
+                    <div>
+                      <label className={labelClass}>
+                        Message <span className="text-[#E31937]">*</span>
+                      </label>
+                      <textarea
+                        value={formData.message}
+                        onChange={(e) => handleChange("message", e.target.value)}
+                        placeholder="Tell us about your project requirements, dates needed, etc."
+                        required
+                        rows={isCompact ? 3 : 4}
+                        className={`${inputClass} resize-none`}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Error Message */}
+                {submitStatus === "error" && (
+                  <div className="bg-red-50 border border-red-100 rounded-lg p-4 flex items-start gap-3">
+                    <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                     </svg>
-                    Submitting...
-                  </>
-                ) : (
-                  "SUBMIT"
+                    <p className="text-red-700 text-sm">{errorMessage}</p>
+                  </div>
                 )}
-              </button>
-            </form>
-          )}
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-[#E31937] hover:bg-[#C42920] disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-4 rounded-lg font-semibold text-lg transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#E31937]/25 hover:shadow-xl hover:shadow-[#E31937]/30"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                          fill="none"
+                        />
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        />
+                      </svg>
+                      Submitting...
+                    </>
+                  ) : (
+                    <>
+                      {submitButtonText}
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                      </svg>
+                    </>
+                  )}
+                </button>
+
+                {/* Phone CTA */}
+                {showPhoneCta && (
+                  <div className="text-center pt-2">
+                    <p className="text-gray-500 text-sm">
+                      Need help now?{" "}
+                      <a
+                        href={`tel:${phoneNumber.replace(/\s/g, "")}`}
+                        className="text-[#E31937] font-semibold hover:underline"
+                      >
+                        Call {phoneNumber}
+                      </a>
+                    </p>
+                  </div>
+                )}
+              </form>
+            )}
+          </div>
         </div>
       </div>
     </section>
