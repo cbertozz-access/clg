@@ -354,109 +354,110 @@ export function EquipmentSearch({
     fetchFilterOptions();
   }, []);
 
-  // Perform search when filters change
+  // Store all products for client-side filtering
+  const [allProducts, setAllProducts] = useState<Equipment[]>([]);
+
+  // Fetch all products once on mount
   useEffect(() => {
-    const doSearch = async () => {
+    const fetchAllProducts = async () => {
       try {
         setLoading(true);
         const filters: SearchFilters = {};
-        if (debouncedQuery) filters.query = debouncedQuery;
-        if (selectedCategories.length > 0) filters.category = selectedCategories[0];
-        if (selectedBrands.length > 0) filters.brand = selectedBrands[0];
         if (isHire !== undefined) filters.isHire = isHire;
         if (isSale !== undefined) filters.isSale = isSale;
         if (inStockOnly) filters.inStock = true;
 
         const result = await searchProducts({
           page: 0,
-          hitsPerPage: productsPerPage,
+          hitsPerPage: 500, // Get all products
           filters,
         });
 
-        let mappedEquipment = result.hits.map(mapAlgoliaToEquipment);
-
-        // Client-side filtering for multiple selections and power source
-        if (selectedCategories.length > 1) {
-          mappedEquipment = mappedEquipment.filter((e) =>
-            selectedCategories.includes(e.category)
-          );
-        }
-        if (selectedBrands.length > 1) {
-          mappedEquipment = mappedEquipment.filter((e) =>
-            selectedBrands.includes(e.brand)
-          );
-        }
-        if (selectedPowerSources.length > 0) {
-          mappedEquipment = mappedEquipment.filter(
-            (e) =>
-              e.energySource &&
-              selectedPowerSources.includes(e.energySource.toLowerCase().replace(/\s+/g, "-"))
-          );
-        }
-
-        // Sort client-side
-        mappedEquipment.sort((a, b) => {
-          switch (sortBy) {
-            case "name-asc":
-              return a.name.localeCompare(b.name);
-            case "name-desc":
-              return b.name.localeCompare(a.name);
-            case "category":
-              return a.category.localeCompare(b.category);
-            default:
-              return 0;
-          }
-        });
-
-        setEquipment(mappedEquipment);
-        setTotalHits(result.nbHits);
-        setCurrentPage(result.page);
-        setTotalPages(result.nbPages);
-        setError(null);
+        const mapped = result.hits.map(mapAlgoliaToEquipment);
+        setAllProducts(mapped);
+        setTotalHits(mapped.length);
       } catch (err) {
-        console.error("Search error:", err);
-        setError(err instanceof Error ? err.message : "Failed to search equipment");
-        setEquipment([]);
+        console.error("Failed to fetch products:", err);
+        setError(err instanceof Error ? err.message : "Failed to load equipment");
       } finally {
         setLoading(false);
       }
     };
 
-    doSearch();
-  }, [debouncedQuery, selectedCategories, selectedBrands, selectedPowerSources, sortBy, isHire, isSale, inStockOnly, productsPerPage]);
+    fetchAllProducts();
+  }, [isHire, isSale, inStockOnly]);
 
-  const hasMore = currentPage < totalPages - 1;
+  // Filter and sort products client-side when filters change
+  useEffect(() => {
+    if (allProducts.length === 0) return;
 
-  const loadMore = async () => {
-    if (!hasMore || loading) return;
+    let filtered = [...allProducts];
 
-    try {
-      setLoading(true);
-      const filters: SearchFilters = {};
-      if (debouncedQuery) filters.query = debouncedQuery;
-      if (selectedCategories.length > 0) filters.category = selectedCategories[0];
-      if (selectedBrands.length > 0) filters.brand = selectedBrands[0];
-      if (isHire !== undefined) filters.isHire = isHire;
-      if (isSale !== undefined) filters.isSale = isSale;
-      if (inStockOnly) filters.inStock = true;
-
-      const result = await searchProducts({
-        page: currentPage + 1,
-        hitsPerPage: productsPerPage,
-        filters,
-      });
-
-      const mappedEquipment = result.hits.map(mapAlgoliaToEquipment);
-      setEquipment((prev) => [...prev, ...mappedEquipment]);
-      setTotalHits(result.nbHits);
-      setCurrentPage(result.page);
-      setTotalPages(result.nbPages);
-    } catch (err) {
-      console.error("Load more error:", err);
-    } finally {
-      setLoading(false);
+    // Text search
+    if (debouncedQuery) {
+      const query = debouncedQuery.toLowerCase();
+      filtered = filtered.filter(
+        (e) =>
+          e.name.toLowerCase().includes(query) ||
+          e.model.toLowerCase().includes(query) ||
+          e.brand.toLowerCase().includes(query) ||
+          e.category.toLowerCase().includes(query)
+      );
     }
+
+    // Category filter
+    if (selectedCategories.length > 0) {
+      filtered = filtered.filter((e) => selectedCategories.includes(e.category));
+    }
+
+    // Brand filter
+    if (selectedBrands.length > 0) {
+      filtered = filtered.filter((e) => selectedBrands.includes(e.brand));
+    }
+
+    // Power source filter
+    if (selectedPowerSources.length > 0) {
+      filtered = filtered.filter(
+        (e) =>
+          e.energySource &&
+          selectedPowerSources.includes(e.energySource.toLowerCase().replace(/\s+/g, "-"))
+      );
+    }
+
+    // Sort
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case "name-asc":
+          return a.name.localeCompare(b.name);
+        case "name-desc":
+          return b.name.localeCompare(a.name);
+        case "category":
+          return a.category.localeCompare(b.category);
+        default:
+          return 0;
+      }
+    });
+
+    // Paginate
+    const paginated = filtered.slice(0, (currentPage + 1) * productsPerPage);
+
+    setEquipment(paginated);
+    setTotalHits(filtered.length);
+    setTotalPages(Math.ceil(filtered.length / productsPerPage));
+    setError(null);
+  }, [allProducts, debouncedQuery, selectedCategories, selectedBrands, selectedPowerSources, sortBy, currentPage, productsPerPage]);
+
+  const hasMore = equipment.length < totalHits;
+
+  const loadMore = () => {
+    if (!hasMore) return;
+    setCurrentPage((prev) => prev + 1);
   };
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [debouncedQuery, selectedCategories, selectedBrands, selectedPowerSources]);
 
   const gridCols = {
     "2": "grid-cols-1 sm:grid-cols-2",
