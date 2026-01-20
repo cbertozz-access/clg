@@ -29,6 +29,11 @@ import {
   FigmaProductGrid,
   FigmaHero,
 } from "../components/builder/figma";
+import {
+  EquipmentCard,
+  EquipmentGrid,
+  EquipmentSearch,
+} from "../components/builder/equipment";
 
 /**
  * Builder.io Component Registry
@@ -1429,6 +1434,336 @@ export const customComponents: RegisteredComponent[] = [
         enum: ["primary", "outline"],
         defaultValue: "outline",
         friendlyName: "Button Style",
+      },
+    ],
+  },
+
+  // ============================================
+  // EQUIPMENT COMPONENTS (Theming-aware)
+  // Uses CSS variables for multi-brand theming
+  // ============================================
+
+  // Equipment Card
+  {
+    component: EquipmentCard,
+    name: "EquipmentCard",
+    friendlyName: "Equipment - Card",
+    description: "Single equipment card with image, specs, pricing, and CTA. Uses CSS variable theming.",
+    inputs: [
+      {
+        name: "id",
+        type: "string",
+        friendlyName: "Equipment ID",
+      },
+      {
+        name: "imageUrl",
+        type: "file",
+        allowedFileTypes: ["jpeg", "jpg", "png", "webp"],
+        friendlyName: "Product Image",
+      },
+      {
+        name: "brand",
+        type: "string",
+        friendlyName: "Brand",
+        helperText: "Equipment manufacturer (e.g., Genie, JLG)",
+      },
+      {
+        name: "model",
+        type: "string",
+        defaultValue: "Equipment",
+        friendlyName: "Model Number",
+      },
+      {
+        name: "name",
+        type: "string",
+        defaultValue: "Equipment Name",
+        friendlyName: "Display Name",
+      },
+      {
+        name: "category",
+        type: "string",
+        friendlyName: "Category",
+        helperText: "Equipment category (e.g., Scissor Lift, Forklift)",
+      },
+      {
+        name: "spec1",
+        type: "string",
+        friendlyName: "Spec Line 1",
+        helperText: "Primary specification (e.g., Capacity: 2.5T)",
+      },
+      {
+        name: "spec2",
+        type: "string",
+        friendlyName: "Spec Line 2",
+        helperText: "Secondary specification (e.g., Working Height: 12m)",
+      },
+      {
+        name: "dailyPrice",
+        type: "string",
+        defaultValue: "POA",
+        friendlyName: "Daily Price",
+      },
+      {
+        name: "weeklyPrice",
+        type: "string",
+        defaultValue: "POA",
+        friendlyName: "Weekly Price",
+      },
+      {
+        name: "ctaText",
+        type: "string",
+        defaultValue: "View Details",
+        friendlyName: "CTA Text",
+      },
+      {
+        name: "ctaLink",
+        type: "url",
+        defaultValue: "#",
+        friendlyName: "CTA Link",
+      },
+      {
+        name: "variant",
+        type: "enum",
+        enum: ["default", "compact", "featured"],
+        defaultValue: "default",
+        friendlyName: "Card Variant",
+        helperText: "default: full card, compact: smaller, featured: highlighted",
+      },
+      {
+        name: "showPricing",
+        type: "boolean",
+        defaultValue: true,
+        friendlyName: "Show Pricing",
+      },
+      {
+        name: "showSpecs",
+        type: "boolean",
+        defaultValue: true,
+        friendlyName: "Show Specs",
+      },
+    ],
+  },
+
+  // Equipment Grid
+  {
+    component: EquipmentGrid,
+    name: "EquipmentGrid",
+    friendlyName: "Equipment - Grid",
+    description: "Grid of equipment cards with search and category filtering. Fetches from live API.",
+    inputs: [
+      {
+        name: "title",
+        type: "string",
+        defaultValue: "Equipment",
+        friendlyName: "Section Title",
+      },
+      {
+        name: "subtitle",
+        type: "string",
+        friendlyName: "Subtitle",
+      },
+      {
+        name: "apiEndpoint",
+        type: "string",
+        defaultValue: "https://acccessproducts.netlify.app/api/products",
+        friendlyName: "API Endpoint",
+        advanced: true,
+      },
+      {
+        name: "category",
+        type: "string",
+        friendlyName: "Category Filter",
+        helperText: "Filter by category (e.g., Forklift, Scissor Lift)",
+      },
+      {
+        name: "subcategory",
+        type: "string",
+        friendlyName: "Subcategory Filter",
+      },
+      {
+        name: "brand",
+        type: "string",
+        friendlyName: "Brand Filter",
+      },
+      {
+        name: "columns",
+        type: "enum",
+        enum: ["2", "3", "4"],
+        defaultValue: "3",
+        friendlyName: "Columns",
+      },
+      {
+        name: "maxProducts",
+        type: "number",
+        defaultValue: 12,
+        friendlyName: "Max Products",
+      },
+      {
+        name: "showSearch",
+        type: "boolean",
+        defaultValue: false,
+        friendlyName: "Show Search",
+      },
+      {
+        name: "showCategoryFilter",
+        type: "boolean",
+        defaultValue: false,
+        friendlyName: "Show Category Dropdown",
+      },
+      {
+        name: "viewAllLink",
+        type: "url",
+        friendlyName: "View All Link",
+      },
+      {
+        name: "viewAllText",
+        type: "string",
+        defaultValue: "View All",
+        friendlyName: "View All Text",
+      },
+      {
+        name: "cardCtaText",
+        type: "string",
+        defaultValue: "View Details",
+        friendlyName: "Card CTA Text",
+      },
+      {
+        name: "productBaseUrl",
+        type: "string",
+        defaultValue: "/equipment",
+        friendlyName: "Product Base URL",
+        advanced: true,
+      },
+      {
+        name: "cardVariant",
+        type: "enum",
+        enum: ["default", "compact", "featured"],
+        defaultValue: "default",
+        friendlyName: "Card Style",
+      },
+      {
+        name: "showPricing",
+        type: "boolean",
+        defaultValue: true,
+        friendlyName: "Show Pricing",
+      },
+      {
+        name: "background",
+        type: "enum",
+        enum: ["white", "light", "none"],
+        defaultValue: "light",
+        friendlyName: "Background",
+      },
+    ],
+  },
+
+  // Equipment Search (Full Browse Page)
+  {
+    component: EquipmentSearch,
+    name: "EquipmentSearch",
+    friendlyName: "Equipment - Search/Browse",
+    description: "Full-featured equipment browser with search, filters, sort, and grid/list views. Perfect for equipment listing pages.",
+    inputs: [
+      {
+        name: "title",
+        type: "string",
+        defaultValue: "Browse Equipment",
+        friendlyName: "Page Title",
+      },
+      {
+        name: "subtitle",
+        type: "string",
+        defaultValue: "Find the right equipment for your project",
+        friendlyName: "Subtitle",
+      },
+      {
+        name: "apiEndpoint",
+        type: "string",
+        defaultValue: "https://acccessproducts.netlify.app/api/products",
+        friendlyName: "API Endpoint",
+        advanced: true,
+      },
+      {
+        name: "initialCategory",
+        type: "string",
+        friendlyName: "Initial Category",
+        helperText: "Pre-select a category filter",
+      },
+      {
+        name: "productsPerPage",
+        type: "number",
+        defaultValue: 12,
+        friendlyName: "Products Per Page",
+      },
+      {
+        name: "columns",
+        type: "enum",
+        enum: ["2", "3", "4"],
+        defaultValue: "3",
+        friendlyName: "Grid Columns",
+      },
+      {
+        name: "showCategoryFilter",
+        type: "boolean",
+        defaultValue: true,
+        friendlyName: "Show Category Filter",
+      },
+      {
+        name: "showBrandFilter",
+        type: "boolean",
+        defaultValue: true,
+        friendlyName: "Show Brand Filter",
+      },
+      {
+        name: "showSort",
+        type: "boolean",
+        defaultValue: true,
+        friendlyName: "Show Sort Options",
+      },
+      {
+        name: "showViewToggle",
+        type: "boolean",
+        defaultValue: true,
+        friendlyName: "Show Grid/List Toggle",
+      },
+      {
+        name: "showResultsCount",
+        type: "boolean",
+        defaultValue: true,
+        friendlyName: "Show Results Count",
+      },
+      {
+        name: "showLoadMore",
+        type: "boolean",
+        defaultValue: true,
+        friendlyName: "Show Load More Button",
+      },
+      {
+        name: "cardCtaText",
+        type: "string",
+        defaultValue: "View Details",
+        friendlyName: "Card CTA Text",
+      },
+      {
+        name: "productBaseUrl",
+        type: "string",
+        defaultValue: "/equipment",
+        friendlyName: "Product Base URL",
+        advanced: true,
+      },
+      {
+        name: "showPricing",
+        type: "boolean",
+        defaultValue: true,
+        friendlyName: "Show Pricing",
+      },
+      {
+        name: "filterPosition",
+        type: "enum",
+        enum: ["left", "top"],
+        defaultValue: "left",
+        friendlyName: "Filter Position",
+        helperText: "left: sidebar, top: horizontal bar",
       },
     ],
   },

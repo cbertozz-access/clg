@@ -5,13 +5,33 @@
  * Tokens are aligned with Figma variables from Whitelabel Master File.
  */
 
+export interface ColorScale {
+  50: string;
+  100: string;
+  200: string;
+  300: string;
+  400: string;
+  500: string;
+  600: string;
+  700: string;
+  800: string;
+  900: string;
+  950: string;
+}
+
 export interface BrandColors {
-  // Primary brand colors
+  // Full brand color scale
+  brand: ColorScale;
+
+  // Semantic colors with hover states
   primary: string;
-  primaryDark: string;
+  primaryHover: string;
   primaryForeground: string;
 
-  // Secondary/accent
+  secondary: string;
+  secondaryHover: string;
+  secondaryForeground: string;
+
   accent: string;
   accentForeground: string;
 
@@ -19,6 +39,7 @@ export interface BrandColors {
   background: string;
   backgroundAlt: string;
   card: string;
+  cardForeground: string;
 
   // Text
   foreground: string;
@@ -27,16 +48,23 @@ export interface BrandColors {
   // Borders
   border: string;
   input: string;
+  ring: string;
 
-  // Semantic
+  // Semantic status
   success: string;
+  successHover: string;
   warning: string;
   error: string;
+  errorHover: string;
+
+  // Equipment brand colors (optional)
+  equipmentBrands?: Record<string, string>;
 }
 
 export interface BrandFonts {
   heading: string;
   body: string;
+  mono?: string;
 }
 
 export interface BrandSpacing {

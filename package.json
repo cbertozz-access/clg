@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "setup:brands": "tsx scripts/setup-builder-brands.ts"
+    "setup:brand-model": "tsx scripts/setup-builder-brand-model.ts",
+    "setup:access-hire": "tsx scripts/create-access-hire-brand.ts"
   },
   "dependencies": {
     "@builder.io/react": "^9.1.0",

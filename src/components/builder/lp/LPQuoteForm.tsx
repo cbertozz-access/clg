@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { submitContactRequest, mapFormDataToContactRequest } from "@/lib/api/contact";
 
 interface FormField {
   name: string;
@@ -47,11 +48,33 @@ export function LPQuoteForm(props: Partial<LPQuoteFormProps>) {
   const backgroundColor = props.backgroundColor || "dark";
 
   const [formData, setFormData] = useState<Record<string, string>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    // Form submission logic here
+    setIsSubmitting(true);
+    setSubmitStatus('idle');
+    setErrorMessage('');
+
+    try {
+      const contactData = mapFormDataToContactRequest(formData);
+      const result = await submitContactRequest(contactData);
+
+      if (result.success) {
+        setSubmitStatus('success');
+        setFormData({}); // Clear form on success
+      } else {
+        setSubmitStatus('error');
+        setErrorMessage(result.error || 'Failed to submit. Please try again.');
+      }
+    } catch (error) {
+      setSubmitStatus('error');
+      setErrorMessage('An unexpected error occurred. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (name: string, value: string) => {
@@ -181,14 +204,43 @@ export function LPQuoteForm(props: Partial<LPQuoteFormProps>) {
               return <div key={field.name}>{renderField(field)}</div>;
             })}
 
-            <button
-              type="submit"
-              className="w-full bg-[#E63229] hover:bg-[#C42920] text-white py-4 rounded-lg font-semibold text-lg transition-colors"
-            >
-              {submitButtonText}
-            </button>
+            {submitStatus === 'success' ? (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-center">
+                <svg className="w-12 h-12 text-green-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h3 className="text-lg font-semibold text-green-800 mb-1">Thank You!</h3>
+                <p className="text-green-700">Your enquiry has been submitted. We&apos;ll be in touch shortly.</p>
+              </div>
+            ) : (
+              <>
+                {submitStatus === 'error' && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-center text-red-700 text-sm">
+                    {errorMessage}
+                  </div>
+                )}
 
-            {showPrivacyNote && (
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-[#E63229] hover:bg-[#C42920] disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-4 rounded-lg font-semibold text-lg transition-colors flex items-center justify-center gap-2"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Submitting...
+                    </>
+                  ) : (
+                    submitButtonText
+                  )}
+                </button>
+              </>
+            )}
+
+            {showPrivacyNote && submitStatus !== 'success' && (
               <p className="text-center text-xs text-[#6B7280]">
                 {privacyNoteText}
               </p>

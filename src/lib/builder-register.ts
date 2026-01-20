@@ -36,6 +36,11 @@ import {
   FigmaProductGrid,
   FigmaHero,
 } from "../components/builder/figma";
+import {
+  EquipmentCard,
+  EquipmentGrid,
+  EquipmentSearch,
+} from "../components/builder/equipment";
 
 // Initialize Builder
 const BUILDER_API_KEY = process.env.NEXT_PUBLIC_BUILDER_API_KEY || "";
@@ -360,6 +365,64 @@ Builder.registerComponent(LPLoadMore, {
     { name: "text", type: "string", defaultValue: "Load More" },
     { name: "loadingText", type: "string", defaultValue: "Loading..." },
     { name: "variant", type: "enum", enum: ["primary", "outline"], defaultValue: "outline" },
+  ],
+});
+
+// Equipment Components
+Builder.registerComponent(EquipmentCard, {
+  name: "EquipmentCard",
+  friendlyName: "Equipment - Card",
+  description: "Single equipment card with image, specs, pricing, and CTA",
+  inputs: [
+    { name: "id", type: "string", friendlyName: "Equipment ID" },
+    { name: "imageUrl", type: "file", allowedFileTypes: ["jpeg", "jpg", "png", "webp"], friendlyName: "Product Image" },
+    { name: "brand", type: "string", friendlyName: "Brand", helperText: "Equipment manufacturer (e.g., Genie, JLG)" },
+    { name: "model", type: "string", defaultValue: "Equipment", friendlyName: "Model Number" },
+    { name: "name", type: "string", defaultValue: "Equipment Name", friendlyName: "Display Name" },
+    { name: "category", type: "string", friendlyName: "Category" },
+    { name: "spec1", type: "string", friendlyName: "Spec Line 1", helperText: "Primary specification (e.g., Capacity: 2.5T)" },
+    { name: "spec2", type: "string", friendlyName: "Spec Line 2" },
+    { name: "spec3", type: "string", friendlyName: "Spec Line 3" },
+    { name: "priceFrom", type: "string", friendlyName: "Price From", helperText: "e.g., $149/day" },
+    { name: "ctaText", type: "string", defaultValue: "Get Quote", friendlyName: "CTA Button Text" },
+    { name: "ctaLink", type: "string", defaultValue: "#quote", friendlyName: "CTA Link" },
+    { name: "variant", type: "enum", enum: ["default", "compact", "featured"], defaultValue: "default" },
+  ],
+});
+
+Builder.registerComponent(EquipmentGrid, {
+  name: "EquipmentGrid",
+  friendlyName: "Equipment - Grid",
+  description: "Grid of equipment cards with filtering and category tabs",
+  inputs: [
+    { name: "title", type: "string", defaultValue: "Our Equipment", friendlyName: "Section Title" },
+    { name: "subtitle", type: "string", friendlyName: "Section Subtitle" },
+    { name: "showCategoryTabs", type: "boolean", defaultValue: true, friendlyName: "Show Category Tabs" },
+    { name: "showFilters", type: "boolean", defaultValue: true, friendlyName: "Show Filters" },
+    { name: "columns", type: "enum", enum: ["2", "3", "4"], defaultValue: "3", friendlyName: "Grid Columns" },
+    { name: "maxItems", type: "number", defaultValue: 12, friendlyName: "Max Items to Show" },
+    { name: "category", type: "string", friendlyName: "Filter by Category", helperText: "Leave empty to show all" },
+    { name: "showLoadMore", type: "boolean", defaultValue: true, friendlyName: "Show Load More Button" },
+    { name: "ctaText", type: "string", defaultValue: "Get Quote", friendlyName: "Card CTA Text" },
+    { name: "productBaseUrl", type: "string", defaultValue: "/equipment", friendlyName: "Product Detail URL Base" },
+  ],
+});
+
+Builder.registerComponent(EquipmentSearch, {
+  name: "EquipmentSearch",
+  friendlyName: "Equipment - Search & Filter",
+  description: "Full equipment search page with filters, search, and results grid",
+  inputs: [
+    { name: "title", type: "string", defaultValue: "Find Equipment", friendlyName: "Page Title" },
+    { name: "subtitle", type: "string", friendlyName: "Page Subtitle" },
+    { name: "showSearch", type: "boolean", defaultValue: true, friendlyName: "Show Search Bar" },
+    { name: "showFilters", type: "boolean", defaultValue: true, friendlyName: "Show Filter Sidebar" },
+    { name: "showCategoryNav", type: "boolean", defaultValue: true, friendlyName: "Show Category Navigation" },
+    { name: "columns", type: "enum", enum: ["2", "3", "4"], defaultValue: "3", friendlyName: "Results Columns" },
+    { name: "resultsPerPage", type: "number", defaultValue: 12, friendlyName: "Results Per Page" },
+    { name: "defaultCategory", type: "string", friendlyName: "Default Category" },
+    { name: "ctaText", type: "string", defaultValue: "Get Quote", friendlyName: "Card CTA Text" },
+    { name: "productBaseUrl", type: "string", defaultValue: "/equipment", friendlyName: "Product Detail URL Base" },
   ],
 });
 
