@@ -64,7 +64,7 @@ export function Footer() {
   return (
     <footer className="bg-[#E31937] text-white">
       {/* Location Tabs */}
-      <div className="border-b border-white/20">
+      <div>
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between">
             <div className="flex">
@@ -96,7 +96,7 @@ export function Footer() {
       </div>
 
       {/* Location Info Bar - same red color */}
-      <div className="border-b border-white/20">
+      <div>
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-sm">
             <div className="flex items-center gap-4">
@@ -163,7 +163,7 @@ export function Footer() {
       </div>
 
       {/* Bottom Bar */}
-      <div className="border-t border-white/20">
+      <div>
         <div className="max-w-7xl mx-auto px-4 py-4">
           <p className="text-sm text-white/70 text-center md:text-left">
             &copy; {new Date().getFullYear()} Access Hire Australia. All rights reserved.
