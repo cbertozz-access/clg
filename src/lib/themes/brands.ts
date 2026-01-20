@@ -46,7 +46,7 @@ export const brands: Record<string, BrandTheme> = {
 
       // Backgrounds
       background: "rgb(255 255 255)",
-      backgroundAlt: "rgb(248 250 252)", // slate-50
+      backgroundAlt: "rgb(255 255 255)", // white
       card: "rgb(255 255 255)",
       cardForeground: "rgb(15 23 42)", // slate-900
 

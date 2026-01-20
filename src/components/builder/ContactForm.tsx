@@ -148,7 +148,7 @@ export function ContactForm({
 
   const bgClass = {
     white: "bg-white",
-    gray: "bg-[#F8FAFC]",
+    gray: "bg-[#FFFFFF]",
     none: "",
   };
 

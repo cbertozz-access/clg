@@ -96,7 +96,7 @@ export function EquipmentGrid({
   productBaseUrl = "/equipment",
   cardVariant = "default",
   showPricing = true,
-  background = "light",
+  background = "none",
 }: EquipmentGridProps) {
   // URL parameters for deep linking
   const searchParams = useSearchParams();
