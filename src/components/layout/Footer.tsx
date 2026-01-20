@@ -133,12 +133,9 @@ export function Footer() {
           {/* Brand Column */}
           <div className="lg:col-span-1">
             <div className="mb-6">
-              {/* White Logo Text */}
-              <div className="text-3xl font-black italic tracking-tight">
-                ACCESS
-              </div>
-              <div className="text-sm font-semibold tracking-wider">
-                HIRE AUSTRALIA
+              {/* Placeholder for white/reversed logo */}
+              <div className="w-[180px] h-[50px] bg-white/20 rounded flex items-center justify-center text-white/60 text-xs">
+                Logo (white version)
               </div>
             </div>
             <p className="text-white/80 text-sm mb-6">
