@@ -716,7 +716,7 @@ export function EquipmentSearch({
   };
 
   return (
-    <section className="min-h-screen bg-[var(--color-background-alt,#ffffff)]">
+    <section className="min-h-screen bg-white">
       {/* Header */}
       {showHeader && (
         <div className="bg-white border-b border-[var(--color-border,#e2e8f0)]">
