@@ -1,56 +1,54 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { EquipmentCard } from "./EquipmentCard";
+import {
+  searchProducts,
+  getCategories,
+  getBrands,
+  mapAlgoliaToEquipment,
+  type SearchFilters,
+} from "@/lib/api/algolia";
 
 /**
  * Equipment Search Component
  *
  * Full-featured equipment browser with search, filters, and grid/list view.
- * Similar to the equipment-platform browse functionality.
+ * Uses Algolia for fast, server-side search and filtering.
  * Uses CSS variables for multi-brand theming.
  */
 
-interface Product {
-  productId: string;
+interface Equipment {
+  id: string;
+  objectId: string;
+  name: string;
   model: string;
-  description?: string;
-  brand?: string;
+  brand: string;
   category: string;
-  subCategory?: string;
-  heroLabel?: string;
-  productImages?: Array<{
-    imageUrl: string;
-    imageThumbUrl?: string;
-    imageAltText?: string;
-  }>;
-  operationalSpecification?: {
-    horizontalReachFt?: string;
-    horizontalReachM?: number;
-    platformHeightFt?: string;
-    platformHeightM?: number;
-    workingHeightFt?: string;
-    workingHeightM?: number;
-    capacityKg?: number;
-    capacityT?: number;
+  subcategory?: string;
+  slug: string;
+  imageUrl?: string;
+  images: string[];
+  specs: {
+    workingHeight?: string;
+    horizontalReach?: string;
+    capacity?: string;
   };
-  pricing?: {
-    daily?: number;
-    weekly?: number;
-    monthly?: number;
-  };
+  energySource?: string;
+  isHire: boolean;
+  isSale: boolean;
+  isUsed: boolean;
+  isInStock: boolean;
 }
 
 type ViewMode = "grid" | "list";
-type SortOption = "name-asc" | "name-desc" | "price-asc" | "price-desc" | "category";
+type SortOption = "name-asc" | "name-desc" | "category";
 
 export interface EquipmentSearchProps {
   /** Page title */
   title?: string;
   /** Page subtitle */
   subtitle?: string;
-  /** API endpoint URL */
-  apiEndpoint?: string;
   /** Initial category filter */
   initialCategory?: string;
   /** Products per page */
@@ -79,12 +77,17 @@ export interface EquipmentSearchProps {
   filterPosition?: "left" | "top";
   /** Mobile filter style */
   mobileFilterStyle?: "drawer" | "dropdown" | "chips";
+  /** Filter by hire availability */
+  isHire?: boolean;
+  /** Filter by sale availability */
+  isSale?: boolean;
+  /** Filter by stock status */
+  inStockOnly?: boolean;
 }
 
 export function EquipmentSearch({
   title = "Browse Equipment",
   subtitle = "Find the right equipment for your project",
-  apiEndpoint = "https://acccessproducts.netlify.app/api/products",
   initialCategory,
   productsPerPage = 12,
   columns = "3",
@@ -96,139 +99,175 @@ export function EquipmentSearch({
   showLoadMore = true,
   cardCtaText = "View Details",
   productBaseUrl = "/equipment",
-  showPricing = true,
+  showPricing = false,
   filterPosition = "left",
-  mobileFilterStyle = "drawer",
+  isHire,
+  isSale,
+  inStockOnly,
 }: EquipmentSearchProps) {
-  const [products, setProducts] = useState<Product[]>([]);
+  // Equipment state from Algolia
+  const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [totalHits, setTotalHits] = useState(0);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
-  // Filters
+  // Filter options from Algolia facets
+  const [categories, setCategories] = useState<{ name: string; count: number }[]>([]);
+  const [brands, setBrands] = useState<{ name: string; count: number }[]>([]);
+
+  // User filters
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(initialCategory || "");
   const [selectedBrand, setSelectedBrand] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("name-asc");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
-  const [visibleCount, setVisibleCount] = useState(productsPerPage);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  // Derived data
-  const categories = useMemo(() => {
-    return Array.from(new Set(products.map(p => p.category))).sort();
-  }, [products]);
+  // Debounce search query
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [debouncedQuery, setDebouncedQuery] = useState("");
 
-  const brands = useMemo(() => {
-    return Array.from(new Set(products.filter(p => p.brand).map(p => p.brand!))).sort();
-  }, [products]);
-
-  // Filtered and sorted products
-  const filteredProducts = useMemo(() => {
-    let result = [...products];
-
-    // Apply category filter
-    if (selectedCategory) {
-      result = result.filter(p => p.category?.toLowerCase() === selectedCategory.toLowerCase());
-    }
-
-    // Apply brand filter
-    if (selectedBrand) {
-      result = result.filter(p => p.brand?.toLowerCase() === selectedBrand.toLowerCase());
-    }
-
-    // Apply search
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      result = result.filter(p =>
-        p.model?.toLowerCase().includes(query) ||
-        p.category?.toLowerCase().includes(query) ||
-        p.brand?.toLowerCase().includes(query) ||
-        p.description?.toLowerCase().includes(query)
-      );
-    }
-
-    // Sort
-    result.sort((a, b) => {
-      switch (sortBy) {
-        case "name-asc":
-          return a.model.localeCompare(b.model);
-        case "name-desc":
-          return b.model.localeCompare(a.model);
-        case "price-asc":
-          return (a.pricing?.daily || 0) - (b.pricing?.daily || 0);
-        case "price-desc":
-          return (b.pricing?.daily || 0) - (a.pricing?.daily || 0);
-        case "category":
-          return a.category.localeCompare(b.category);
-        default:
-          return 0;
-      }
-    });
-
-    return result;
-  }, [products, selectedCategory, selectedBrand, searchQuery, sortBy]);
-
-  const visibleProducts = filteredProducts.slice(0, visibleCount);
-  const hasMore = visibleCount < filteredProducts.length;
-
-  // Fetch products
+  // Debounce the search query
   useEffect(() => {
-    async function fetchProducts() {
-      try {
-        setLoading(true);
-        const response = await fetch(apiEndpoint);
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    searchTimeoutRef.current = setTimeout(() => {
+      setDebouncedQuery(searchQuery);
+      setCurrentPage(0); // Reset to first page on new search
+    }, 300);
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchQuery]);
 
-        if (!response.ok) {
-          throw new Error(`API error: ${response.status}`);
+  // Fetch categories and brands on mount
+  // Also extract from search results as fallback if facets aren't configured
+  useEffect(() => {
+    async function fetchFacets() {
+      const [cats, brnds] = await Promise.all([getCategories(), getBrands()]);
+      // Only set if we actually got facet data
+      if (cats.length > 0) setCategories(cats);
+      if (brnds.length > 0) setBrands(brnds);
+    }
+    fetchFacets();
+  }, []);
+
+  // Extract categories and brands from results as fallback
+  useEffect(() => {
+    if (equipment.length > 0 && categories.length === 0) {
+      const uniqueCats = new Map<string, number>();
+      equipment.forEach(item => {
+        if (item.category) {
+          uniqueCats.set(item.category, (uniqueCats.get(item.category) || 0) + 1);
         }
-
-        const data = await response.json();
-        const allProducts: Product[] = Array.isArray(data) ? data : data.products || [];
-        setProducts(allProducts);
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load products");
-        setProducts([]);
-      } finally {
-        setLoading(false);
-      }
+      });
+      const catList = Array.from(uniqueCats.entries())
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count);
+      if (catList.length > 0) setCategories(catList);
     }
 
-    fetchProducts();
-  }, [apiEndpoint]);
+    if (equipment.length > 0 && brands.length === 0) {
+      const uniqueBrands = new Map<string, number>();
+      equipment.forEach(item => {
+        if (item.brand && item.brand !== 'Unknown') {
+          uniqueBrands.set(item.brand, (uniqueBrands.get(item.brand) || 0) + 1);
+        }
+      });
+      const brandList = Array.from(uniqueBrands.entries())
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      if (brandList.length > 0) setBrands(brandList);
+    }
+  }, [equipment, categories.length, brands.length]);
 
-  // Reset visible count when filters change
+  // Build search filters
+  const buildFilters = useCallback((): SearchFilters => {
+    const filters: SearchFilters = {};
+    if (debouncedQuery) filters.query = debouncedQuery;
+    if (selectedCategory) filters.category = selectedCategory;
+    if (selectedBrand) filters.brand = selectedBrand;
+    if (isHire !== undefined) filters.isHire = isHire;
+    if (isSale !== undefined) filters.isSale = isSale;
+    if (inStockOnly) filters.inStock = true;
+    return filters;
+  }, [debouncedQuery, selectedCategory, selectedBrand, isHire, isSale, inStockOnly]);
+
+  // Search products with Algolia
+  const performSearch = useCallback(async (page: number = 0) => {
+    try {
+      setLoading(true);
+      const filters = buildFilters();
+
+      const result = await searchProducts({
+        page,
+        hitsPerPage: productsPerPage,
+        filters,
+      });
+
+      // Map Algolia products to Equipment format
+      const mappedEquipment = result.hits.map(mapAlgoliaToEquipment);
+
+      // Sort client-side since Algolia doesn't sort alphabetically by default
+      mappedEquipment.sort((a, b) => {
+        switch (sortBy) {
+          case "name-asc":
+            return a.name.localeCompare(b.name);
+          case "name-desc":
+            return b.name.localeCompare(a.name);
+          case "category":
+            return a.category.localeCompare(b.category);
+          default:
+            return 0;
+        }
+      });
+
+      if (page === 0) {
+        setEquipment(mappedEquipment);
+      } else {
+        // Append for load more
+        setEquipment(prev => [...prev, ...mappedEquipment]);
+      }
+
+      setTotalHits(result.nbHits);
+      setCurrentPage(result.page);
+      setTotalPages(result.nbPages);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to search equipment");
+      setEquipment([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [buildFilters, productsPerPage, sortBy]);
+
+  // Perform search when filters change
   useEffect(() => {
-    setVisibleCount(productsPerPage);
-  }, [selectedCategory, selectedBrand, searchQuery, productsPerPage]);
+    performSearch(0);
+  }, [debouncedQuery, selectedCategory, selectedBrand, sortBy, isHire, isSale, inStockOnly]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [selectedCategory, selectedBrand]);
+
+  const hasMore = currentPage < totalPages - 1;
+
+  const loadMore = () => {
+    if (hasMore && !loading) {
+      performSearch(currentPage + 1);
+    }
+  };
 
   const gridCols = {
     "2": "grid-cols-1 sm:grid-cols-2",
     "3": "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
     "4": "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
-  };
-
-  const getProductTitle = (product: Product): string => {
-    if (product.heroLabel) {
-      const match = product.heroLabel.match(/title="([^"]+)"/);
-      return match ? match[1] : product.model;
-    }
-    return product.model;
-  };
-
-  const getSpec1 = (product: Product): string => {
-    const ops = product.operationalSpecification;
-    if (ops?.capacityT) return `Capacity: ${ops.capacityT}T`;
-    if (ops?.platformHeightFt) return `Platform Height: ${ops.platformHeightFt}`;
-    if (ops?.horizontalReachFt && ops.horizontalReachFt !== "NA") return `Reach: ${ops.horizontalReachFt}`;
-    return "";
-  };
-
-  const getSpec2 = (product: Product): string => {
-    const ops = product.operationalSpecification;
-    if (ops?.workingHeightFt && ops.workingHeightFt !== "NA") return `Working Height: ${ops.workingHeightFt}`;
-    if (ops?.platformHeightM) return `Height: ${ops.platformHeightM}m`;
-    return "";
   };
 
   const clearFilters = () => {
@@ -275,7 +314,9 @@ export function EquipmentSearch({
           >
             <option value="">All Categories</option>
             {categories.map(cat => (
-              <option key={cat} value={cat}>{cat}</option>
+              <option key={cat.name} value={cat.name}>
+                {cat.name} ({cat.count})
+              </option>
             ))}
           </select>
         </div>
@@ -294,7 +335,9 @@ export function EquipmentSearch({
           >
             <option value="">All Brands</option>
             {brands.map(brand => (
-              <option key={brand} value={brand}>{brand}</option>
+              <option key={brand.name} value={brand.name}>
+                {brand.name} ({brand.count})
+              </option>
             ))}
           </select>
         </div>
@@ -372,7 +415,7 @@ export function EquipmentSearch({
               {/* Results Count */}
               {showResultsCount && !loading && (
                 <p className="text-sm text-[var(--color-muted-foreground,#64748b)]">
-                  {filteredProducts.length} {filteredProducts.length === 1 ? "result" : "results"}
+                  {totalHits} {totalHits === 1 ? "result" : "results"}
                 </p>
               )}
 
@@ -386,8 +429,6 @@ export function EquipmentSearch({
                   >
                     <option value="name-asc">Name: A-Z</option>
                     <option value="name-desc">Name: Z-A</option>
-                    <option value="price-asc">Price: Low to High</option>
-                    <option value="price-desc">Price: High to Low</option>
                     <option value="category">Category</option>
                   </select>
                 )}
@@ -462,25 +503,23 @@ export function EquipmentSearch({
               </div>
             )}
 
-            {/* Products Grid */}
-            {!loading && !error && visibleProducts.length > 0 && (
+            {/* Equipment Grid */}
+            {!loading && !error && equipment.length > 0 && (
               <>
                 <div className={viewMode === "grid" ? `grid ${gridCols[columns]} gap-4 md:gap-6` : "flex flex-col gap-4"}>
-                  {visibleProducts.map((product) => (
+                  {equipment.map((item) => (
                     <EquipmentCard
-                      key={product.productId}
-                      id={product.productId}
-                      imageUrl={product.productImages?.[0]?.imageUrl}
-                      brand={product.brand}
-                      model={product.model}
-                      name={getProductTitle(product)}
-                      category={product.category}
-                      spec1={getSpec1(product)}
-                      spec2={getSpec2(product)}
-                      dailyPrice={product.pricing?.daily}
-                      weeklyPrice={product.pricing?.weekly}
+                      key={item.objectId}
+                      id={item.id}
+                      imageUrl={item.imageUrl}
+                      brand={item.brand}
+                      model={item.model}
+                      name={item.name}
+                      category={item.category}
+                      spec1={item.specs.workingHeight ? `Working Height: ${item.specs.workingHeight}` : item.specs.capacity ? `Capacity: ${item.specs.capacity}` : ""}
+                      spec2={item.specs.horizontalReach ? `Reach: ${item.specs.horizontalReach}` : ""}
                       ctaText={cardCtaText}
-                      ctaLink={`${productBaseUrl}/${product.productId}`}
+                      ctaLink={`${productBaseUrl}/${item.slug}`}
                       variant={viewMode === "list" ? "compact" : "default"}
                       showPricing={showPricing}
                     />
@@ -491,10 +530,11 @@ export function EquipmentSearch({
                 {showLoadMore && hasMore && (
                   <div className="mt-8 text-center">
                     <button
-                      onClick={() => setVisibleCount(prev => prev + productsPerPage)}
-                      className="px-8 py-3 font-medium border-2 border-[var(--color-primary,#e31937)] text-[var(--color-primary,#e31937)] rounded-[var(--radius,8px)] hover:bg-[var(--color-primary,#e31937)] hover:text-white transition-colors"
+                      onClick={loadMore}
+                      disabled={loading}
+                      className="px-8 py-3 font-medium border-2 border-[var(--color-primary,#e31937)] text-[var(--color-primary,#e31937)] rounded-[var(--radius,8px)] hover:bg-[var(--color-primary,#e31937)] hover:text-white transition-colors disabled:opacity-50"
                     >
-                      Load More ({filteredProducts.length - visibleCount} remaining)
+                      {loading ? "Loading..." : `Load More (${totalHits - equipment.length} remaining)`}
                     </button>
                   </div>
                 )}
@@ -502,7 +542,7 @@ export function EquipmentSearch({
             )}
 
             {/* Empty State */}
-            {!loading && !error && filteredProducts.length === 0 && (
+            {!loading && !error && equipment.length === 0 && (
               <div className="text-center py-16">
                 <div className="mb-4">
                   <svg className="w-20 h-20 mx-auto text-[var(--color-muted-foreground,#64748b)]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
