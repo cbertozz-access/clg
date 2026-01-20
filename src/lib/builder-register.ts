@@ -41,6 +41,8 @@ import {
   EquipmentSearch,
 } from "../components/builder/equipment";
 import { ContactForm } from "../components/builder/ContactForm";
+import { Header } from "../components/layout/Header";
+import { Footer } from "../components/layout/Footer";
 
 // Initialize Builder
 const BUILDER_API_KEY = process.env.NEXT_PUBLIC_BUILDER_API_KEY || "";
@@ -442,6 +444,21 @@ Builder.registerComponent(EquipmentSearch, {
     { name: "inStockOnly", type: "boolean", friendlyName: "Filter: In Stock Only" },
     { name: "selectorUrl", type: "string", defaultValue: "/selector", friendlyName: "Equipment Selector URL" },
   ],
+});
+
+// Layout Components (can be added/removed per page)
+Builder.registerComponent(Header, {
+  name: "SiteHeader",
+  friendlyName: "Site Header",
+  description: "Landing page header with logo, phone number, and Get a Quote button",
+  inputs: [],
+});
+
+Builder.registerComponent(Footer, {
+  name: "SiteFooter",
+  friendlyName: "Site Footer",
+  description: "Red-branded footer with location tabs, contact info, and social links",
+  inputs: [],
 });
 
 export {};
