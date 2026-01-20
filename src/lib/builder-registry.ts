@@ -7,7 +7,6 @@ import {
   LPBenefits,
   LPProductsGrid,
   LPTestimonials,
-  LPQuoteForm,
   LPFaq,
   LPCtaBanner,
   LPFooter,
@@ -20,6 +19,7 @@ import {
   LPTrustScroll,
   LPLoadMore,
 } from "../components/builder/lp";
+import { ContactForm } from "../components/builder/ContactForm";
 import {
   FigmaButton,
   FigmaInput,
@@ -909,71 +909,25 @@ export const customComponents: RegisteredComponent[] = [
     ],
   },
 
-  // LP Quote Form
+  // Contact Form
   {
-    component: LPQuoteForm,
-    name: "LPQuoteForm",
-    friendlyName: "LP - Quote Form",
-    description: "Lead capture form with configurable fields",
+    component: ContactForm,
+    name: "ContactForm",
+    friendlyName: "Contact Form",
+    description: "Contact form matching the Contact Request API",
     inputs: [
       {
         name: "title",
         type: "string",
-        defaultValue: "Request a Quote",
+        defaultValue: "CONTACT US",
         friendlyName: "Form Title",
-      },
-      {
-        name: "subtitle",
-        type: "string",
-        defaultValue: "Fill in your details and we'll get back to you within 24 hours.",
-        friendlyName: "Subtitle",
-      },
-      {
-        name: "submitButtonText",
-        type: "string",
-        defaultValue: "Submit",
-        friendlyName: "Submit Button Text",
-      },
-      {
-        name: "fields",
-        type: "list",
-        friendlyName: "Form Fields",
-        subFields: [
-          { name: "name", type: "string", friendlyName: "Field Name (ID)" },
-          { name: "label", type: "string", friendlyName: "Label" },
-          { name: "type", type: "enum", enum: ["text", "email", "tel", "select", "textarea"], friendlyName: "Type" },
-          { name: "placeholder", type: "string", friendlyName: "Placeholder" },
-          { name: "required", type: "boolean", friendlyName: "Required" },
-          { name: "highlighted", type: "boolean", friendlyName: "Highlighted", helperText: "Show with red border emphasis" },
-          { name: "options", type: "list", friendlyName: "Options (for select)", subFields: [{ name: "option", type: "string" }] },
-          { name: "helperText", type: "string", friendlyName: "Helper Text" },
-        ],
-      },
-      {
-        name: "showPrivacyNote",
-        type: "boolean",
-        defaultValue: true,
-        friendlyName: "Show Privacy Note",
-      },
-      {
-        name: "privacyNoteText",
-        type: "string",
-        defaultValue: "Your information is secure and will never be shared",
-        friendlyName: "Privacy Note Text",
-      },
-      {
-        name: "variant",
-        type: "enum",
-        enum: ["standard", "compact"],
-        defaultValue: "standard",
-        friendlyName: "Variant",
       },
       {
         name: "backgroundColor",
         type: "enum",
-        enum: ["dark", "light", "none"],
-        defaultValue: "dark",
-        friendlyName: "Background",
+        enum: ["white", "gray", "none"],
+        defaultValue: "gray",
+        friendlyName: "Background Color",
       },
     ],
   },

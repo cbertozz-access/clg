@@ -14,7 +14,6 @@ import {
   LPBenefits,
   LPProductsGrid,
   LPTestimonials,
-  LPQuoteForm,
   LPFaq,
   LPCtaBanner,
   LPFooter,
@@ -41,6 +40,7 @@ import {
   EquipmentGrid,
   EquipmentSearch,
 } from "../components/builder/equipment";
+import { ContactForm } from "../components/builder/ContactForm";
 
 // Initialize Builder
 const BUILDER_API_KEY = process.env.NEXT_PUBLIC_BUILDER_API_KEY || "";
@@ -243,13 +243,12 @@ Builder.registerComponent(LPTestimonials, {
   ],
 });
 
-Builder.registerComponent(LPQuoteForm, {
-  name: "LPQuoteForm",
-  friendlyName: "LP - Quote Form",
+Builder.registerComponent(ContactForm, {
+  name: "ContactForm",
+  friendlyName: "Contact Form",
   inputs: [
-    { name: "title", type: "string", defaultValue: "Request a Quote" },
-    { name: "subtitle", type: "string" },
-    { name: "submitButtonText", type: "string", defaultValue: "Submit" },
+    { name: "title", type: "string", defaultValue: "CONTACT US" },
+    { name: "backgroundColor", type: "enum", enum: ["white", "gray", "none"], defaultValue: "gray" },
   ],
 });
 

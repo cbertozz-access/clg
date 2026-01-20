@@ -23,9 +23,6 @@ export type { LPProductsGridProps } from "./LPProductsGrid";
 export { LPTestimonials } from "./LPTestimonials";
 export type { LPTestimonialsProps } from "./LPTestimonials";
 
-export { LPQuoteForm } from "./LPQuoteForm";
-export type { LPQuoteFormProps } from "./LPQuoteForm";
-
 export { LPFaq } from "./LPFaq";
 export type { LPFaqProps } from "./LPFaq";
 
