@@ -53,6 +53,38 @@ export function VisitorDebugPanel() {
     setShouldShow(urlParams.get("debug") === "true" || process.env.NODE_ENV === "development");
   }, []);
 
+  // Fetch visitor data directly from API as fallback
+  const fetchVisitorDirect = async () => {
+    try {
+      const existingId = getCookie(VISITOR_COOKIE_KEY) || localStorage.getItem(VISITOR_STORAGE_KEY);
+      const params = new URLSearchParams();
+      if (existingId) params.set("vid", existingId);
+      params.set("source", "debug-panel");
+
+      const response = await fetch(
+        `https://australia-southeast1-composable-lg.cloudfunctions.net/visitorId?${params}`,
+        { method: "GET" } // No credentials to avoid CORS issue
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setVisitorId(data.visitor_id);
+        setProfile(data);
+        setSdkStatus("ready");
+
+        // Store locally
+        if (data.visitor_id) {
+          localStorage.setItem(VISITOR_STORAGE_KEY, data.visitor_id);
+          document.cookie = `${VISITOR_COOKIE_KEY}=${data.visitor_id}; path=/; max-age=31536000; SameSite=Lax`;
+          setStorageId(data.visitor_id);
+          setCookieId(data.visitor_id);
+        }
+      }
+    } catch (err) {
+      console.error("[Debug] Direct fetch failed:", err);
+    }
+  };
+
   // Load visitor data
   useEffect(() => {
     if (!shouldShow) return;
@@ -86,6 +118,13 @@ export function VisitorDebugPanel() {
     // Initial load
     loadData();
 
+    // If no visitor data after 2 seconds, try direct fetch
+    const fallbackTimeout = setTimeout(() => {
+      if (!visitorId && !cookieId && !storageId) {
+        fetchVisitorDirect();
+      }
+    }, 2000);
+
     // Listen for SDK ready event
     const handleVisitorReady = (e: CustomEvent) => {
       setSdkStatus("ready");
@@ -102,6 +141,7 @@ export function VisitorDebugPanel() {
     return () => {
       window.removeEventListener("clg:visitor:ready", handleVisitorReady as EventListener);
       clearInterval(interval);
+      clearTimeout(fallbackTimeout);
     };
   }, [shouldShow]);
 
@@ -240,6 +280,12 @@ export function VisitorDebugPanel() {
 
             {/* Actions */}
             <div className="pt-2 border-t border-gray-700 space-y-2">
+              <button
+                onClick={fetchVisitorDirect}
+                className="w-full px-2 py-1.5 bg-green-600 hover:bg-green-700 rounded text-white text-xs font-medium transition-colors"
+              >
+                Fetch Visitor Data
+              </button>
               <button
                 onClick={() => {
                   localStorage.removeItem(VISITOR_STORAGE_KEY);
