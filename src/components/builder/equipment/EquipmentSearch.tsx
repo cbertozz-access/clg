@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { EquipmentCard } from "./EquipmentCard";
 import { EnquiryCartPanel } from "./EnquiryCartPanel";
 import { useEnquiryCart } from "@/lib/enquiry-cart";
@@ -193,6 +194,9 @@ export function EquipmentSearch({
   inStockOnly,
   selectorUrl = "/selector",
 }: EquipmentSearchProps) {
+  // URL parameters for deep linking
+  const searchParams = useSearchParams();
+
   // Equipment state from Algolia
   const [equipment, setEquipment] = useState<Equipment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -226,6 +230,46 @@ export function EquipmentSearch({
   // Enquiry cart state
   const [enquiryPanelOpen, setEnquiryPanelOpen] = useState(false);
   const { itemCount } = useEnquiryCart();
+
+  // Track if URL params have been applied
+  const urlParamsApplied = useRef(false);
+
+  // Read URL parameters on mount
+  useEffect(() => {
+    if (urlParamsApplied.current) return;
+    urlParamsApplied.current = true;
+
+    // Get URL parameters
+    const categoryParam = searchParams.get("category");
+    const brandParam = searchParams.get("brand");
+    const searchParam = searchParams.get("q") || searchParams.get("search");
+    const powerParam = searchParams.get("power");
+
+    // Apply category filter from URL (supports comma-separated values)
+    if (categoryParam) {
+      const cats = categoryParam.split(",").map((c) => c.trim());
+      setSelectedCategories(cats);
+    }
+
+    // Apply brand filter from URL
+    if (brandParam) {
+      const brands = brandParam.split(",").map((b) => b.trim());
+      setSelectedBrands(brands);
+      setShowTechnicalFilters(true); // Show technical filters if brand is set
+      setExpandedSections((prev) => [...prev, "brand"]);
+    }
+
+    // Apply search query from URL
+    if (searchParam) {
+      setSearchQuery(searchParam);
+    }
+
+    // Apply power source filter from URL
+    if (powerParam) {
+      const powers = powerParam.split(",").map((p) => p.trim().toLowerCase().replace(/\s+/g, "-"));
+      setSelectedPowerSources(powers);
+    }
+  }, [searchParams]);
 
   // Debounce search query
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
