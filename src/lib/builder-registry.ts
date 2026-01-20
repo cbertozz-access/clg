@@ -34,6 +34,8 @@ import {
   EquipmentGrid,
   EquipmentSearch,
 } from "../components/builder/equipment";
+import { Header } from "../components/layout/Header";
+import { Footer } from "../components/layout/Footer";
 
 /**
  * Builder.io Component Registry
@@ -1719,7 +1721,60 @@ export const customComponents: RegisteredComponent[] = [
         friendlyName: "Filter Position",
         helperText: "left: sidebar, top: horizontal bar",
       },
+      {
+        name: "showHeader",
+        type: "boolean",
+        defaultValue: true,
+        friendlyName: "Show Header",
+        helperText: "Show the page header with title and subtitle",
+      },
+      {
+        name: "showFilters",
+        type: "boolean",
+        defaultValue: true,
+        friendlyName: "Show Filters",
+        helperText: "Show the filter sidebar/mobile filters",
+      },
+      {
+        name: "allowedCategories",
+        type: "list",
+        friendlyName: "Allowed Categories",
+        helperText: "Limit to specific categories. Leave empty for all.",
+        subFields: [
+          { name: "category", type: "string", friendlyName: "Category Name" },
+        ],
+      },
+      {
+        name: "useQuickView",
+        type: "boolean",
+        defaultValue: true,
+        friendlyName: "Use Quick View Modal",
+        helperText: "Open details in modal instead of navigating to page",
+      },
     ],
+  },
+
+  // ============================================
+  // LAYOUT COMPONENTS
+  // Header and Footer can be added/removed per page
+  // ============================================
+
+  // Site Header
+  {
+    component: Header,
+    name: "Header",
+    friendlyName: "Site Header",
+    description: "Landing page header with logo, phone number, and Get a Quote button. Can be added/removed per page.",
+    inputs: [],
+  },
+
+  // Site Footer
+  {
+    component: Footer,
+    name: "Footer",
+    friendlyName: "Site Footer",
+    description: "Red-branded footer with location tabs, contact info, and social links. Can be added/removed per page.",
+    inputs: [],
   },
 ];
 

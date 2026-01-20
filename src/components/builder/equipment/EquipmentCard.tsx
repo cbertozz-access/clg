@@ -44,6 +44,8 @@ export interface EquipmentCardProps {
   showEnquiryButton?: boolean;
   /** Callback when equipment is added to enquiry */
   onAddToEnquiry?: (item: { id: string; name: string; brand?: string; category?: string; imageUrl?: string }) => void;
+  /** Callback for quick view - when provided, View Details becomes a button instead of link */
+  onQuickView?: (equipment: EquipmentCardProps) => void;
 }
 
 export function EquipmentCard({
@@ -64,6 +66,7 @@ export function EquipmentCard({
   showSpecs = true,
   showEnquiryButton = true,
   onAddToEnquiry,
+  onQuickView,
 }: EquipmentCardProps) {
   const { addItem, removeItem, isInCart } = useEnquiryCart();
   const inCart = id ? isInCart(id) : false;
@@ -115,7 +118,7 @@ export function EquipmentCard({
         <img
           src={imageUrl || placeholderImage}
           alt={name || model || "Equipment"}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+          className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
           loading="lazy"
         />
 
@@ -219,20 +222,50 @@ export function EquipmentCard({
             </button>
           )}
 
-          <a
-            href={ctaLink || `#${id}`}
-            className={`
-              ${showEnquiryButton && id ? "flex-1" : "w-full"} block text-center font-medium
-              rounded-[var(--radius-sm,4px)]
-              transition-colors duration-200
-              bg-[var(--color-primary,#e31937)]
-              hover:bg-[var(--color-primary-hover,#841020)]
-              text-[var(--color-primary-foreground,white)]
-              ${isCompact ? "py-2 text-sm" : "py-2.5 text-base"}
-            `}
-          >
-            {ctaText}
-          </a>
+          {onQuickView ? (
+            <button
+              onClick={() => onQuickView({
+                id,
+                imageUrl,
+                brand,
+                model,
+                name,
+                category,
+                spec1,
+                spec2,
+                dailyPrice,
+                weeklyPrice,
+                ctaText,
+                ctaLink,
+              })}
+              className={`
+                ${showEnquiryButton && id ? "flex-1" : "w-full"} block text-center font-medium
+                rounded-[var(--radius-sm,4px)]
+                transition-colors duration-200
+                bg-[var(--color-primary,#e31937)]
+                hover:bg-[var(--color-primary-hover,#841020)]
+                text-[var(--color-primary-foreground,white)]
+                ${isCompact ? "py-2 text-sm" : "py-2.5 text-base"}
+              `}
+            >
+              {ctaText}
+            </button>
+          ) : (
+            <a
+              href={ctaLink || `#${id}`}
+              className={`
+                ${showEnquiryButton && id ? "flex-1" : "w-full"} block text-center font-medium
+                rounded-[var(--radius-sm,4px)]
+                transition-colors duration-200
+                bg-[var(--color-primary,#e31937)]
+                hover:bg-[var(--color-primary-hover,#841020)]
+                text-[var(--color-primary-foreground,white)]
+                ${isCompact ? "py-2 text-sm" : "py-2.5 text-base"}
+              `}
+            >
+              {ctaText}
+            </a>
+          )}
         </div>
       </div>
     </div>

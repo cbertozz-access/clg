@@ -3,8 +3,6 @@ import { Lato, Roboto } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { EnquiryCartProvider } from "@/lib/enquiry-cart";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 
 const lato = Lato({
   weight: ["300", "400", "700", "900"],
@@ -38,11 +36,7 @@ export default function RootLayout({
         className={`${lato.variable} ${roboto.variable} antialiased`}
       >
         <EnquiryCartProvider>
-          <Header />
-          <main className="min-h-screen">
-            {children}
-          </main>
-          <Footer />
+          {children}
         </EnquiryCartProvider>
         {/* Builder.io Visual Editor Script */}
         <Script

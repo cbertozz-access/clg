@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 
 /**
  * Footer Component
  *
  * Access Hire Australia branded footer with red background.
- * Features location tabs, contact info, and social links.
+ * Features location tabs and contact info.
  */
 
 const locations = [
@@ -17,22 +16,6 @@ const locations = [
   { id: "nsw", label: "NSW", city: "Sydney", phone: "02 9756 3688", address: "90 Equipment St, Wetherill Park NSW 2164" },
   { id: "vic", label: "VIC", city: "Melbourne", phone: "03 9357 8922", address: "56 Hire Lane, Campbellfield VIC 3061" },
   { id: "sa", label: "SA", city: "Adelaide", phone: "08 8349 7955", address: "34 Access Rd, Wingfield SA 5013" },
-];
-
-const quickLinks = [
-  { label: "Hire Equipment", href: "/hire" },
-  { label: "Buy Equipment", href: "/sales" },
-  { label: "Service & Parts", href: "/service" },
-  { label: "Lease Options", href: "/lease" },
-  { label: "Transport", href: "/transport" },
-];
-
-const resourceLinks = [
-  { label: "About Us", href: "/about" },
-  { label: "Careers", href: "/careers" },
-  { label: "News & Updates", href: "/news" },
-  { label: "Safety Resources", href: "/safety" },
-  { label: "FAQs", href: "/faqs" },
 ];
 
 const socialLinks = [
@@ -112,13 +95,13 @@ export function Footer() {
         </div>
       </div>
 
-      {/* Location Info Bar */}
-      <div className="bg-[#C42920]">
+      {/* Location Info Bar - same red color */}
+      <div className="border-b border-white/20">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-sm">
             <div className="flex items-center gap-4">
               <span className="font-bold">{currentLocation.city}</span>
-              <span>{currentLocation.address}</span>
+              <span className="text-white/80">{currentLocation.address}</span>
             </div>
             <a href={`tel:${currentLocation.phone.replace(/\s/g, "")}`} className="font-semibold hover:underline">
               {currentLocation.phone}
@@ -127,23 +110,41 @@ export function Footer() {
         </div>
       </div>
 
-      {/* Main Footer Content */}
-      <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {/* Brand Column */}
-          <div className="lg:col-span-1">
-            <div className="mb-6">
-              {/* Placeholder for white/reversed logo */}
-              <div className="w-[180px] h-[50px] bg-white/20 rounded flex items-center justify-center text-white/60 text-xs">
-                Logo (white version)
+      {/* Main Footer Content - Simplified */}
+      <div className="max-w-7xl mx-auto px-4 py-10">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
+          {/* Brand */}
+          <div className="flex-shrink-0">
+            {/* Placeholder for white/reversed logo */}
+            <div className="w-[180px] h-[50px] bg-white/20 rounded flex items-center justify-center text-white/60 text-xs mb-4">
+              Logo (white version)
+            </div>
+            <p className="text-white/80 text-sm max-w-xs">
+              Australia&apos;s leading elevated work platform and materials handling equipment hire company.
+            </p>
+          </div>
+
+          {/* Contact Info */}
+          <div className="flex flex-col md:flex-row md:items-center gap-6 md:gap-10">
+            <div className="flex items-center gap-3">
+              <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+              </svg>
+              <div>
+                <p className="font-bold text-lg">13 4000</p>
+                <p className="text-white/70 text-xs">24/7 Support</p>
               </div>
             </div>
-            <p className="text-white/80 text-sm mb-6">
-              Australia&apos;s leading elevated work platform and materials handling equipment hire company.
-              Servicing all major cities and regional areas.
-            </p>
+
+            <a href="mailto:info@accesshire.net" className="flex items-center gap-3 hover:underline">
+              <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+              </svg>
+              info@accesshire.net
+            </a>
+
             {/* Social Links */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               {socialLinks.map((social) => (
                 <a
                   key={social.label}
@@ -158,101 +159,15 @@ export function Footer() {
               ))}
             </div>
           </div>
-
-          {/* Quick Links */}
-          <div>
-            <h3 className="font-bold text-lg mb-4">Services</h3>
-            <ul className="space-y-2">
-              {quickLinks.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="text-white/80 hover:text-white hover:underline transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Resources */}
-          <div>
-            <h3 className="font-bold text-lg mb-4">Resources</h3>
-            <ul className="space-y-2">
-              {resourceLinks.map((link) => (
-                <li key={link.label}>
-                  <Link
-                    href={link.href}
-                    className="text-white/80 hover:text-white hover:underline transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Contact */}
-          <div>
-            <h3 className="font-bold text-lg mb-4">Contact Us</h3>
-            <ul className="space-y-4">
-              <li className="flex items-start gap-3">
-                <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
-                </svg>
-                <div>
-                  <p className="font-bold text-xl">13 4000</p>
-                  <p className="text-white/80 text-sm">24/7 Support</p>
-                </div>
-              </li>
-              <li className="flex items-start gap-3">
-                <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
-                </svg>
-                <div>
-                  <a href="mailto:info@accesshire.net" className="hover:underline">
-                    info@accesshire.net
-                  </a>
-                </div>
-              </li>
-              <li className="flex items-start gap-3">
-                <svg className="w-5 h-5 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                </svg>
-                <div>
-                  <a
-                    href="https://accesshire.net"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:underline"
-                  >
-                    accesshire.net
-                  </a>
-                </div>
-              </li>
-            </ul>
-          </div>
         </div>
       </div>
 
       {/* Bottom Bar */}
       <div className="border-t border-white/20">
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-sm text-white/80">
-            <p>&copy; {new Date().getFullYear()} Access Hire Australia. All rights reserved.</p>
-            <div className="flex items-center gap-6">
-              <Link href="/privacy" className="hover:text-white hover:underline">
-                Privacy Policy
-              </Link>
-              <Link href="/terms" className="hover:text-white hover:underline">
-                Terms of Use
-              </Link>
-              <Link href="/sitemap" className="hover:text-white hover:underline">
-                Sitemap
-              </Link>
-            </div>
-          </div>
+          <p className="text-sm text-white/70 text-center md:text-left">
+            &copy; {new Date().getFullYear()} Access Hire Australia. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

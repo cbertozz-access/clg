@@ -2,8 +2,9 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import { EquipmentCard } from "./EquipmentCard";
+import { EquipmentCard, EquipmentCardProps } from "./EquipmentCard";
 import { EnquiryCartPanel } from "./EnquiryCartPanel";
+import { QuickViewModal } from "./QuickViewModal";
 import { useEnquiryCart } from "@/lib/enquiry-cart";
 import {
   searchProducts,
@@ -50,12 +51,16 @@ export interface EquipmentSearchProps {
   title?: string;
   /** Page subtitle */
   subtitle?: string;
+  /** Show page header with title/subtitle */
+  showHeader?: boolean;
   /** Initial category filter */
   initialCategory?: string;
   /** Products per page */
   productsPerPage?: number;
   /** Number of columns in grid view */
   columns?: "2" | "3" | "4";
+  /** Show filter sidebar */
+  showFilters?: boolean;
   /** Show category filter */
   showCategoryFilter?: boolean;
   /** Show brand filter */
@@ -84,6 +89,10 @@ export interface EquipmentSearchProps {
   inStockOnly?: boolean;
   /** Equipment selector URL */
   selectorUrl?: string;
+  /** Limit to specific categories only */
+  allowedCategories?: string[];
+  /** Use quick view modal instead of navigation */
+  useQuickView?: boolean;
 }
 
 // Chevron icon component
@@ -176,9 +185,11 @@ function FilterSection({
 export function EquipmentSearch({
   title = "Browse Equipment",
   subtitle = "Find the right equipment for your project",
+  showHeader = true,
   initialCategory,
   productsPerPage = 12,
   columns = "3",
+  showFilters = true,
   showCategoryFilter = true,
   showBrandFilter = true,
   showSort = true,
@@ -193,6 +204,8 @@ export function EquipmentSearch({
   isSale,
   inStockOnly,
   selectorUrl = "/selector",
+  allowedCategories,
+  useQuickView = true,
 }: EquipmentSearchProps) {
   // URL parameters for deep linking
   const searchParams = useSearchParams();
@@ -230,6 +243,15 @@ export function EquipmentSearch({
   // Enquiry cart state
   const [enquiryPanelOpen, setEnquiryPanelOpen] = useState(false);
   const { itemCount } = useEnquiryCart();
+
+  // Quick view modal state
+  const [quickViewOpen, setQuickViewOpen] = useState(false);
+  const [quickViewEquipment, setQuickViewEquipment] = useState<EquipmentCardProps | null>(null);
+
+  const handleQuickView = (equipment: EquipmentCardProps) => {
+    setQuickViewEquipment(equipment);
+    setQuickViewOpen(true);
+  };
 
   // Track if URL params have been applied
   const urlParamsApplied = useRef(false);
@@ -315,9 +337,18 @@ export function EquipmentSearch({
             uniqueCats.set(item.category, (uniqueCats.get(item.category) || 0) + 1);
           }
         });
-        const catList = Array.from(uniqueCats.entries())
+        let catList = Array.from(uniqueCats.entries())
           .map(([name, count]) => ({ name, count }))
           .sort((a, b) => b.count - a.count);
+
+        // Filter by allowedCategories if provided
+        if (allowedCategories && allowedCategories.length > 0) {
+          catList = catList.filter((cat) =>
+            allowedCategories.some((allowed) =>
+              cat.name.toLowerCase().includes(allowed.toLowerCase())
+            )
+          );
+        }
         if (catList.length > 0) setCategories(catList);
 
         // Build brand counts
@@ -405,6 +436,15 @@ export function EquipmentSearch({
       );
     }
 
+    // Filter by allowedCategories if no specific categories selected
+    if (allowedCategories && allowedCategories.length > 0 && selectedCategories.length === 0) {
+      filtered = filtered.filter((e) =>
+        allowedCategories.some((allowed) =>
+          e.category.toLowerCase().includes(allowed.toLowerCase())
+        )
+      );
+    }
+
     // Category filter
     if (selectedCategories.length > 0) {
       filtered = filtered.filter((e) => selectedCategories.includes(e.category));
@@ -445,7 +485,7 @@ export function EquipmentSearch({
     setTotalHits(filtered.length);
     setTotalPages(Math.ceil(filtered.length / productsPerPage));
     setError(null);
-  }, [allProducts, debouncedQuery, selectedCategories, selectedBrands, selectedPowerSources, sortBy, currentPage, productsPerPage]);
+  }, [allProducts, debouncedQuery, selectedCategories, selectedBrands, selectedPowerSources, sortBy, currentPage, productsPerPage, allowedCategories]);
 
   const hasMore = equipment.length < totalHits;
 
@@ -678,131 +718,137 @@ export function EquipmentSearch({
   return (
     <section className="min-h-screen bg-[var(--color-background-alt,#f8fafc)]">
       {/* Header */}
-      <div className="bg-white border-b border-[var(--color-border,#e2e8f0)]">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-[var(--color-foreground,#0f172a)]">
-                {title}
-              </h1>
-              {subtitle && (
-                <p className="mt-1 text-[var(--color-muted-foreground,#64748b)]">
-                  {subtitle}
-                </p>
-              )}
-            </div>
-          </div>
-
-          {/* Search and Sort Row */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            {/* Mobile Search */}
-            <div className="relative flex-1 lg:hidden">
-              <input
-                type="text"
-                placeholder="Search equipment..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-[var(--color-border,#e2e8f0)] rounded-lg bg-white"
-              />
-              <svg
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted-foreground,#64748b)]"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </div>
-
-            {/* Mobile Filter Button */}
-            <button
-              onClick={() => setMobileFiltersOpen(true)}
-              className="lg:hidden flex items-center justify-center gap-2 px-4 py-2.5 border border-[var(--color-border,#e2e8f0)] rounded-lg bg-white"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
-                />
-              </svg>
-              Filters
-              {totalActiveFilters > 0 && (
-                <span className="bg-[var(--color-primary,#e31937)] text-white text-xs px-2 py-0.5 rounded-full">
-                  {totalActiveFilters}
-                </span>
-              )}
-            </button>
-
-            {/* Sort */}
-            {showSort && (
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="px-4 py-2.5 border border-[var(--color-border,#e2e8f0)] rounded-lg bg-white text-[var(--color-foreground,#0f172a)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary,#e31937)]"
-              >
-                <option value="name-asc">Name: A-Z</option>
-                <option value="name-desc">Name: Z-A</option>
-                <option value="category">Category</option>
-              </select>
-            )}
-
-            {/* View Toggle */}
-            {showViewToggle && (
-              <div className="hidden sm:flex border border-[var(--color-border,#e2e8f0)] rounded-lg overflow-hidden">
-                <button
-                  onClick={() => setViewMode("grid")}
-                  className={`p-2.5 ${
-                    viewMode === "grid"
-                      ? "bg-[var(--color-primary,#e31937)] text-white"
-                      : "bg-white text-[var(--color-muted-foreground,#64748b)]"
-                  }`}
-                  aria-label="Grid view"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-                    />
-                  </svg>
-                </button>
-                <button
-                  onClick={() => setViewMode("list")}
-                  className={`p-2.5 ${
-                    viewMode === "list"
-                      ? "bg-[var(--color-primary,#e31937)] text-white"
-                      : "bg-white text-[var(--color-muted-foreground,#64748b)]"
-                  }`}
-                  aria-label="List view"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 6h16M4 12h16M4 18h16"
-                    />
-                  </svg>
-                </button>
+      {showHeader && (
+        <div className="bg-white border-b border-[var(--color-border,#e2e8f0)]">
+          <div className="max-w-7xl mx-auto px-4 py-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold text-[var(--color-foreground,#0f172a)]">
+                  {title}
+                </h1>
+                {subtitle && (
+                  <p className="mt-1 text-[var(--color-muted-foreground,#64748b)]">
+                    {subtitle}
+                  </p>
+                )}
               </div>
-            )}
+            </div>
+
+            {/* Search and Sort Row */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              {/* Mobile Search */}
+              {showFilters && (
+                <div className="relative flex-1 lg:hidden">
+                  <input
+                    type="text"
+                    placeholder="Search equipment..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 border border-[var(--color-border,#e2e8f0)] rounded-lg bg-white"
+                  />
+                  <svg
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-muted-foreground,#64748b)]"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </div>
+              )}
+
+              {/* Mobile Filter Button */}
+              {showFilters && (
+                <button
+                  onClick={() => setMobileFiltersOpen(true)}
+                  className="lg:hidden flex items-center justify-center gap-2 px-4 py-2.5 border border-[var(--color-border,#e2e8f0)] rounded-lg bg-white"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"
+                    />
+                  </svg>
+                  Filters
+                  {totalActiveFilters > 0 && (
+                    <span className="bg-[var(--color-primary,#e31937)] text-white text-xs px-2 py-0.5 rounded-full">
+                      {totalActiveFilters}
+                    </span>
+                  )}
+                </button>
+              )}
+
+              {/* Sort */}
+              {showSort && (
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as SortOption)}
+                  className="px-4 py-2.5 border border-[var(--color-border,#e2e8f0)] rounded-lg bg-white text-[var(--color-foreground,#0f172a)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary,#e31937)]"
+                >
+                  <option value="name-asc">Name: A-Z</option>
+                  <option value="name-desc">Name: Z-A</option>
+                  <option value="category">Category</option>
+                </select>
+              )}
+
+              {/* View Toggle */}
+              {showViewToggle && (
+                <div className="hidden sm:flex border border-[var(--color-border,#e2e8f0)] rounded-lg overflow-hidden">
+                  <button
+                    onClick={() => setViewMode("grid")}
+                    className={`p-2.5 ${
+                      viewMode === "grid"
+                        ? "bg-[var(--color-primary,#e31937)] text-white"
+                        : "bg-white text-[var(--color-muted-foreground,#64748b)]"
+                    }`}
+                    aria-label="Grid view"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => setViewMode("list")}
+                    className={`p-2.5 ${
+                      viewMode === "list"
+                        ? "bg-[var(--color-primary,#e31937)] text-white"
+                        : "bg-white text-[var(--color-muted-foreground,#64748b)]"
+                    }`}
+                    aria-label="List view"
+                  >
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 6h16M4 12h16M4 18h16"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex gap-8">
           {/* Desktop Filter Sidebar */}
-          {filterPosition === "left" && (
+          {showFilters && filterPosition === "left" && (
             <aside className="hidden lg:block w-72 flex-shrink-0">
               <div className="sticky top-4 bg-white rounded-xl border border-[var(--color-border,#e2e8f0)] p-4">
                 <FilterSidebar />
@@ -881,6 +927,7 @@ export function EquipmentSearch({
                       ctaLink={`${productBaseUrl}/${item.slug}`}
                       variant={viewMode === "list" ? "compact" : "default"}
                       showPricing={showPricing}
+                      onQuickView={useQuickView ? handleQuickView : undefined}
                     />
                   ))}
                 </div>
@@ -937,7 +984,7 @@ export function EquipmentSearch({
       </div>
 
       {/* Mobile Filter Drawer */}
-      {mobileFiltersOpen && (
+      {showFilters && mobileFiltersOpen && (
         <div className="fixed inset-0 z-50 lg:hidden">
           {/* Backdrop */}
           <div
@@ -992,6 +1039,13 @@ export function EquipmentSearch({
       <EnquiryCartPanel
         isOpen={enquiryPanelOpen}
         onClose={() => setEnquiryPanelOpen(false)}
+      />
+
+      {/* Quick View Modal */}
+      <QuickViewModal
+        isOpen={quickViewOpen}
+        onClose={() => setQuickViewOpen(false)}
+        equipment={quickViewEquipment}
       />
     </section>
   );
