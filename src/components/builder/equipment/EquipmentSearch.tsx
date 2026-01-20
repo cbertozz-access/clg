@@ -670,7 +670,7 @@ export function EquipmentSearch({
           </p>
           <a
             href={selectorUrl}
-            className="block w-full py-2.5 px-4 text-center text-sm font-medium border border-[var(--color-border,#e2e8f0)] rounded-lg hover:bg-[var(--color-background-alt,#f8fafc)] transition-colors"
+            className="block w-full py-2.5 px-4 text-center text-sm font-medium border border-[var(--color-border,#e2e8f0)] rounded-lg hover:bg-[var(--color-background-alt,#ffffff)] transition-colors"
           >
             Use Equipment Selector
           </a>
@@ -694,7 +694,7 @@ export function EquipmentSearch({
         {allFilters.map(({ type, value }) => (
           <span
             key={`${type}-${value}`}
-            className="inline-flex items-center gap-1 px-3 py-1 text-sm bg-[var(--color-background-alt,#f8fafc)] border border-[var(--color-border,#e2e8f0)] rounded-full"
+            className="inline-flex items-center gap-1 px-3 py-1 text-sm bg-[var(--color-background-alt,#ffffff)] border border-[var(--color-border,#e2e8f0)] rounded-full"
           >
             {getFilterLabel(type, value)}
             <button
@@ -716,7 +716,7 @@ export function EquipmentSearch({
   };
 
   return (
-    <section className="min-h-screen bg-[var(--color-background-alt,#f8fafc)]">
+    <section className="min-h-screen bg-[var(--color-background-alt,#ffffff)]">
       {/* Header */}
       {showHeader && (
         <div className="bg-white border-b border-[var(--color-border,#e2e8f0)]">
@@ -973,7 +973,7 @@ export function EquipmentSearch({
                 </p>
                 <button
                   onClick={clearFilters}
-                  className="px-6 py-2.5 font-medium border border-[var(--color-border,#e2e8f0)] rounded-lg hover:bg-[var(--color-background-alt,#f8fafc)] transition-colors"
+                  className="px-6 py-2.5 font-medium border border-[var(--color-border,#e2e8f0)] rounded-lg hover:bg-[var(--color-background-alt,#ffffff)] transition-colors"
                 >
                   Clear all filters
                 </button>
@@ -998,7 +998,7 @@ export function EquipmentSearch({
               <h2 className="font-semibold text-lg">Filters</h2>
               <button
                 onClick={() => setMobileFiltersOpen(false)}
-                className="p-2 hover:bg-[var(--color-background-alt,#f8fafc)] rounded-lg"
+                className="p-2 hover:bg-[var(--color-background-alt,#ffffff)] rounded-lg"
               >
                 <XIcon className="w-5 h-5" />
               </button>

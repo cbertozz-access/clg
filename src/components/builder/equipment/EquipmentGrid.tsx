@@ -214,7 +214,7 @@ export function EquipmentGrid({
 
   const bgClasses = {
     white: "bg-[var(--color-card,white)]",
-    light: "bg-[var(--color-background-alt,#f8fafc)]",
+    light: "bg-[var(--color-background-alt,#ffffff)]",
     none: "",
   };
 

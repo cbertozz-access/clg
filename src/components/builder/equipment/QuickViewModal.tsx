@@ -99,7 +99,7 @@ export function QuickViewModal({ isOpen, onClose, equipment }: QuickViewModalPro
 
         <div className="flex flex-col md:flex-row">
           {/* Image Section */}
-          <div className="md:w-1/2 bg-[#f8fafc] p-6 flex items-center justify-center">
+          <div className="md:w-1/2 bg-[#ffffff] p-6 flex items-center justify-center">
             <img
               src={equipment.imageUrl || placeholderImage}
               alt={equipment.name || equipment.model || "Equipment"}
