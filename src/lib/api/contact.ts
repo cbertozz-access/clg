@@ -2,9 +2,14 @@
  * Contact Request API Service
  *
  * Submits contact form data to the Access Group contact-request API
+ * Includes Firebase visitor ID integration for tracking
  */
 
 const CONTACT_API_URL = 'https://dev-agws.aghost.au/api/contact-request';
+
+// Cookie/localStorage keys for visitor ID (matches clg-visitor.js SDK)
+const VISITOR_COOKIE_KEY = 'clg_vid';
+const VISITOR_STORAGE_KEY = 'clg_visitor';
 
 export interface ContactRequestData {
   // Required fields
@@ -19,6 +24,7 @@ export interface ContactRequestData {
 
   // Optional fields
   contactRequestId?: string;
+  visitorId?: string; // Firebase visitor ID for tracking
   contactCountry?: string;
   contactIndustry?: string;
   projectLocationSuburb?: string;
@@ -52,6 +58,40 @@ function generateUUID(): string {
 }
 
 /**
+ * Get cookie value by name
+ */
+function getCookie(name: string): string | null {
+  if (typeof document === 'undefined') return null;
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? match[2] : null;
+}
+
+/**
+ * Get Firebase visitor ID from cookie or localStorage
+ * Matches the storage used by clg-visitor.js SDK
+ */
+export function getVisitorId(): string | null {
+  if (typeof window === 'undefined') return null;
+
+  // Try cookie first (set by clg-visitor.js)
+  const cookieId = getCookie(VISITOR_COOKIE_KEY);
+  if (cookieId) return cookieId;
+
+  // Fall back to localStorage
+  try {
+    const stored = localStorage.getItem(VISITOR_STORAGE_KEY);
+    if (stored) {
+      const data = JSON.parse(stored);
+      return data.id || data.visitorId || null;
+    }
+  } catch {
+    // localStorage not available or invalid JSON
+  }
+
+  return null;
+}
+
+/**
  * Get UTM parameters from URL
  */
 function getUtmParams(): Partial<ContactRequestData> {
@@ -67,6 +107,7 @@ function getUtmParams(): Partial<ContactRequestData> {
 
 /**
  * Submit a contact request to the API
+ * Automatically includes visitor ID if available
  */
 export async function submitContactRequest(
   data: Omit<ContactRequestData, 'contactRequestId'>
@@ -74,9 +115,11 @@ export async function submitContactRequest(
   try {
     const utmParams = getUtmParams();
     const refererURL = typeof window !== 'undefined' ? window.location.href : undefined;
+    const visitorId = getVisitorId();
 
     const requestBody: ContactRequestData = {
       contactRequestId: generateUUID(),
+      visitorId: visitorId || undefined,
       ...data,
       ...utmParams,
       refererURL,
