@@ -437,6 +437,7 @@ Builder.registerComponent(EquipmentSearch, {
     { name: "isHire", type: "boolean", friendlyName: "Filter: Only Hire Equipment" },
     { name: "isSale", type: "boolean", friendlyName: "Filter: Only Sale Equipment" },
     { name: "inStockOnly", type: "boolean", friendlyName: "Filter: In Stock Only" },
+    { name: "selectorUrl", type: "string", defaultValue: "/selector", friendlyName: "Equipment Selector URL" },
   ],
 });
 
