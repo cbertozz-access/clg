@@ -5,7 +5,8 @@
  * Includes Firebase visitor ID integration for tracking
  */
 
-const CONTACT_API_URL = 'https://dev-agws.aghost.au/api/contact-request';
+// Use local API route to avoid CORS issues (proxies to dev-agws.aghost.au)
+const CONTACT_API_URL = '/api/contact';
 
 // Cookie/localStorage keys for visitor ID (matches clg-visitor.js SDK)
 const VISITOR_COOKIE_KEY = 'clg_vid';
