@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { EquipmentCard } from "./EquipmentCard";
 
 /**
@@ -97,13 +98,39 @@ export function EquipmentGrid({
   showPricing = true,
   background = "light",
 }: EquipmentGridProps) {
+  // URL parameters for deep linking
+  const searchParams = useSearchParams();
+  const urlParamsApplied = useRef(false);
+
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(category || "");
+  const [selectedBrand, setSelectedBrand] = useState(brand || "");
   const [categories, setCategories] = useState<string[]>([]);
+
+  // Read URL parameters on mount
+  useEffect(() => {
+    if (urlParamsApplied.current) return;
+    urlParamsApplied.current = true;
+
+    const categoryParam = searchParams.get("category");
+    const brandParam = searchParams.get("brand");
+    const searchParam = searchParams.get("q") || searchParams.get("search");
+    const subcategoryParam = searchParams.get("subcategory");
+
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+    if (brandParam) {
+      setSelectedBrand(brandParam);
+    }
+    if (searchParam) {
+      setSearchQuery(searchParam);
+    }
+  }, [searchParams]);
 
   // Fetch products
   useEffect(() => {
@@ -140,7 +167,7 @@ export function EquipmentGrid({
   useEffect(() => {
     let filtered = [...products];
 
-    // Apply category filter from props or selection
+    // Apply category filter from props, URL param, or selection
     const activeCategory = selectedCategory || category;
     if (activeCategory) {
       filtered = filtered.filter(
@@ -155,10 +182,11 @@ export function EquipmentGrid({
       );
     }
 
-    // Apply brand filter
-    if (brand) {
+    // Apply brand filter from props, URL param, or selection
+    const activeBrand = selectedBrand || brand;
+    if (activeBrand) {
       filtered = filtered.filter(
-        p => p.brand?.toLowerCase() === brand.toLowerCase()
+        p => p.brand?.toLowerCase() === activeBrand.toLowerCase()
       );
     }
 
@@ -176,7 +204,7 @@ export function EquipmentGrid({
 
     // Limit results
     setFilteredProducts(filtered.slice(0, maxProducts));
-  }, [products, category, subcategory, brand, searchQuery, selectedCategory, maxProducts]);
+  }, [products, category, subcategory, brand, searchQuery, selectedCategory, selectedBrand, maxProducts]);
 
   const gridCols = {
     "2": "grid-cols-1 sm:grid-cols-2",
