@@ -40,6 +40,11 @@ export default function RootLayout({
           {children}
           <VisitorDebugPanel />
         </EnquiryCartProvider>
+        {/* CLG Visitor Tracking SDK */}
+        <Script
+          src="/clg-visitor.js"
+          strategy="afterInteractive"
+        />
         {/* Builder.io Visual Editor Script */}
         <Script
           src="https://cdn.builder.io/js/webcomponents"

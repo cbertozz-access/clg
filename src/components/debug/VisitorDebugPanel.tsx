@@ -2,17 +2,30 @@
 
 import { useState, useEffect } from "react";
 
-interface VisitorData {
-  id?: string;
-  visitorId?: string;
+interface VisitorProfile {
+  visitor_id?: string;
+  lead_score?: number;
+  segments?: string[];
   visits?: number;
-  firstVisit?: string;
-  lastVisit?: string;
-  utmSource?: string;
-  utmMedium?: string;
-  utmCampaign?: string;
-  referrer?: string;
+  first_visit?: string;
+  last_visit?: string;
+  dataLayer?: Record<string, unknown>;
   [key: string]: unknown;
+}
+
+interface CLGVisitorSDK {
+  visitorId: string | null;
+  profile: VisitorProfile | null;
+  initialized: boolean;
+  getVisitorId: () => string | null;
+  getProfile: () => VisitorProfile | null;
+}
+
+declare global {
+  interface Window {
+    CLGVisitor?: CLGVisitorSDK;
+    dataLayer?: Record<string, unknown>[];
+  }
 }
 
 const VISITOR_COOKIE_KEY = "clg_vid";
@@ -26,43 +39,75 @@ function getCookie(name: string): string | null {
 
 export function VisitorDebugPanel() {
   const [isOpen, setIsOpen] = useState(false);
-  const [visitorData, setVisitorData] = useState<VisitorData | null>(null);
+  const [visitorId, setVisitorId] = useState<string | null>(null);
   const [cookieId, setCookieId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Only run in development or when debug param is present
-    const urlParams = new URLSearchParams(window.location.search);
-    const isDebug = urlParams.get("debug") === "true" || process.env.NODE_ENV === "development";
-
-    if (!isDebug) return;
-
-    try {
-      // Get cookie ID
-      const cid = getCookie(VISITOR_COOKIE_KEY);
-      setCookieId(cid);
-
-      // Get localStorage data
-      const stored = localStorage.getItem(VISITOR_STORAGE_KEY);
-      if (stored) {
-        const data = JSON.parse(stored);
-        setVisitorData(data);
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to read visitor data");
-    }
-  }, []);
-
-  // Only show in development or with ?debug=true
+  const [storageId, setStorageId] = useState<string | null>(null);
+  const [profile, setProfile] = useState<VisitorProfile | null>(null);
+  const [sdkStatus, setSdkStatus] = useState<"loading" | "ready" | "not-loaded">("loading");
+  const [dataLayer, setDataLayer] = useState<Record<string, unknown>[] | null>(null);
   const [shouldShow, setShouldShow] = useState(false);
+
+  // Check if should show panel
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     setShouldShow(urlParams.get("debug") === "true" || process.env.NODE_ENV === "development");
   }, []);
 
+  // Load visitor data
+  useEffect(() => {
+    if (!shouldShow) return;
+
+    const loadData = () => {
+      // Get cookie ID
+      const cid = getCookie(VISITOR_COOKIE_KEY);
+      setCookieId(cid);
+
+      // Get localStorage ID (SDK stores just the ID string, not JSON)
+      const sid = localStorage.getItem(VISITOR_STORAGE_KEY);
+      setStorageId(sid);
+
+      // Check for CLGVisitor SDK
+      if (window.CLGVisitor) {
+        setSdkStatus(window.CLGVisitor.initialized ? "ready" : "loading");
+        setVisitorId(window.CLGVisitor.getVisitorId());
+        setProfile(window.CLGVisitor.getProfile());
+      } else {
+        setSdkStatus("not-loaded");
+        // Use cookie/storage as fallback
+        setVisitorId(cid || sid || null);
+      }
+
+      // Get dataLayer
+      if (window.dataLayer) {
+        setDataLayer(window.dataLayer);
+      }
+    };
+
+    // Initial load
+    loadData();
+
+    // Listen for SDK ready event
+    const handleVisitorReady = (e: CustomEvent) => {
+      setSdkStatus("ready");
+      setVisitorId(e.detail?.visitor_id);
+      setProfile(e.detail);
+      loadData();
+    };
+
+    window.addEventListener("clg:visitor:ready", handleVisitorReady as EventListener);
+
+    // Poll for updates (SDK might initialize after this component)
+    const interval = setInterval(loadData, 2000);
+
+    return () => {
+      window.removeEventListener("clg:visitor:ready", handleVisitorReady as EventListener);
+      clearInterval(interval);
+    };
+  }, [shouldShow]);
+
   if (!shouldShow) return null;
 
-  const visitorId = visitorData?.id || visitorData?.visitorId || cookieId || "Not set";
+  const displayId = visitorId || cookieId || storageId || "Not set";
 
   return (
     <>
@@ -77,7 +122,7 @@ export function VisitorDebugPanel() {
 
       {/* Panel */}
       {isOpen && (
-        <div className="fixed right-0 top-1/2 -translate-y-1/2 z-[9998] w-72 max-h-[80vh] overflow-y-auto bg-gray-900 text-white text-xs rounded-l-lg shadow-2xl mr-6">
+        <div className="fixed right-0 top-1/2 -translate-y-1/2 z-[9998] w-80 max-h-[80vh] overflow-y-auto bg-gray-900 text-white text-xs rounded-l-lg shadow-2xl mr-6">
           {/* Header */}
           <div className="sticky top-0 bg-gray-900 px-3 py-2 border-b border-gray-700 flex items-center justify-between">
             <span className="font-semibold text-sm">Visitor Debug</span>
@@ -90,108 +135,141 @@ export function VisitorDebugPanel() {
           </div>
 
           <div className="p-3 space-y-3">
-            {error ? (
-              <div className="text-red-400">{error}</div>
-            ) : (
+            {/* SDK Status */}
+            <div>
+              <div className="text-gray-400 mb-1">SDK Status</div>
+              <div className={`font-mono px-2 py-1 rounded ${
+                sdkStatus === "ready" ? "bg-green-900 text-green-300" :
+                sdkStatus === "loading" ? "bg-yellow-900 text-yellow-300" :
+                "bg-red-900 text-red-300"
+              }`}>
+                {sdkStatus === "ready" && "✓ Ready"}
+                {sdkStatus === "loading" && "⏳ Loading..."}
+                {sdkStatus === "not-loaded" && "✗ SDK not loaded"}
+              </div>
+              {sdkStatus === "not-loaded" && (
+                <p className="text-gray-500 text-[10px] mt-1">
+                  Add clg-visitor.js to page or GTM
+                </p>
+              )}
+            </div>
+
+            {/* Visitor ID */}
+            <div>
+              <div className="text-gray-400 mb-1">Visitor ID</div>
+              <div className="font-mono bg-gray-800 px-2 py-1 rounded break-all">
+                {displayId}
+              </div>
+            </div>
+
+            {/* Cookie */}
+            <div>
+              <div className="text-gray-400 mb-1">Cookie ({VISITOR_COOKIE_KEY})</div>
+              <div className="font-mono bg-gray-800 px-2 py-1 rounded break-all">
+                {cookieId || "Not set"}
+              </div>
+            </div>
+
+            {/* LocalStorage */}
+            <div>
+              <div className="text-gray-400 mb-1">LocalStorage ({VISITOR_STORAGE_KEY})</div>
+              <div className="font-mono bg-gray-800 px-2 py-1 rounded break-all">
+                {storageId || "Not set"}
+              </div>
+            </div>
+
+            {/* Profile Data (from SDK) */}
+            {profile && (
               <>
-                {/* Visitor ID */}
-                <div>
-                  <div className="text-gray-400 mb-1">Visitor ID</div>
-                  <div className="font-mono bg-gray-800 px-2 py-1 rounded break-all">
-                    {visitorId}
+                {profile.lead_score !== undefined && (
+                  <div>
+                    <div className="text-gray-400 mb-1">Lead Score</div>
+                    <div className="font-mono bg-gray-800 px-2 py-1 rounded">
+                      {profile.lead_score}
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {/* Cookie ID */}
-                <div>
-                  <div className="text-gray-400 mb-1">Cookie ({VISITOR_COOKIE_KEY})</div>
-                  <div className="font-mono bg-gray-800 px-2 py-1 rounded break-all">
-                    {cookieId || "Not set"}
+                {profile.segments && profile.segments.length > 0 && (
+                  <div>
+                    <div className="text-gray-400 mb-1">Segments</div>
+                    <div className="font-mono bg-gray-800 px-2 py-1 rounded">
+                      {profile.segments.join(", ")}
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {/* Visit Count */}
-                {visitorData?.visits !== undefined && (
+                {profile.visits !== undefined && (
                   <div>
                     <div className="text-gray-400 mb-1">Visits</div>
                     <div className="font-mono bg-gray-800 px-2 py-1 rounded">
-                      {visitorData.visits}
+                      {profile.visits}
                     </div>
                   </div>
                 )}
 
-                {/* First Visit */}
-                {visitorData?.firstVisit && (
-                  <div>
-                    <div className="text-gray-400 mb-1">First Visit</div>
-                    <div className="font-mono bg-gray-800 px-2 py-1 rounded">
-                      {new Date(visitorData.firstVisit).toLocaleString()}
-                    </div>
-                  </div>
-                )}
-
-                {/* Last Visit */}
-                {visitorData?.lastVisit && (
-                  <div>
-                    <div className="text-gray-400 mb-1">Last Visit</div>
-                    <div className="font-mono bg-gray-800 px-2 py-1 rounded">
-                      {new Date(visitorData.lastVisit).toLocaleString()}
-                    </div>
-                  </div>
-                )}
-
-                {/* UTM Params */}
-                {(visitorData?.utmSource || visitorData?.utmMedium || visitorData?.utmCampaign) && (
-                  <div>
-                    <div className="text-gray-400 mb-1">UTM Params</div>
-                    <div className="font-mono bg-gray-800 px-2 py-1 rounded space-y-1">
-                      {visitorData.utmSource && <div>source: {visitorData.utmSource}</div>}
-                      {visitorData.utmMedium && <div>medium: {visitorData.utmMedium}</div>}
-                      {visitorData.utmCampaign && <div>campaign: {visitorData.utmCampaign}</div>}
-                    </div>
-                  </div>
-                )}
-
-                {/* Referrer */}
-                {visitorData?.referrer && (
-                  <div>
-                    <div className="text-gray-400 mb-1">Referrer</div>
-                    <div className="font-mono bg-gray-800 px-2 py-1 rounded break-all">
-                      {visitorData.referrer}
-                    </div>
-                  </div>
-                )}
-
-                {/* Raw Data */}
                 <div>
-                  <div className="text-gray-400 mb-1">Raw localStorage</div>
+                  <div className="text-gray-400 mb-1">Full Profile</div>
                   <pre className="font-mono bg-gray-800 px-2 py-1 rounded overflow-x-auto text-[10px] max-h-32 overflow-y-auto">
-                    {visitorData ? JSON.stringify(visitorData, null, 2) : "No data"}
+                    {JSON.stringify(profile, null, 2)}
                   </pre>
-                </div>
-
-                {/* Actions */}
-                <div className="pt-2 border-t border-gray-700 space-y-2">
-                  <button
-                    onClick={() => {
-                      localStorage.removeItem(VISITOR_STORAGE_KEY);
-                      document.cookie = `${VISITOR_COOKIE_KEY}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-                      setVisitorData(null);
-                      setCookieId(null);
-                    }}
-                    className="w-full px-2 py-1.5 bg-red-600 hover:bg-red-700 rounded text-white text-xs font-medium transition-colors"
-                  >
-                    Clear Visitor Data
-                  </button>
-                  <button
-                    onClick={() => window.location.reload()}
-                    className="w-full px-2 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-white text-xs font-medium transition-colors"
-                  >
-                    Refresh
-                  </button>
                 </div>
               </>
             )}
+
+            {/* DataLayer */}
+            {dataLayer && dataLayer.length > 0 && (
+              <div>
+                <div className="text-gray-400 mb-1">DataLayer ({dataLayer.length} items)</div>
+                <pre className="font-mono bg-gray-800 px-2 py-1 rounded overflow-x-auto text-[10px] max-h-32 overflow-y-auto">
+                  {JSON.stringify(dataLayer.slice(-5), null, 2)}
+                </pre>
+                <p className="text-gray-500 text-[10px] mt-1">Showing last 5 entries</p>
+              </div>
+            )}
+
+            {/* URL Params */}
+            <div>
+              <div className="text-gray-400 mb-1">URL Params</div>
+              <pre className="font-mono bg-gray-800 px-2 py-1 rounded overflow-x-auto text-[10px] max-h-24 overflow-y-auto">
+                {typeof window !== "undefined"
+                  ? JSON.stringify(Object.fromEntries(new URLSearchParams(window.location.search)), null, 2)
+                  : "{}"}
+              </pre>
+            </div>
+
+            {/* Actions */}
+            <div className="pt-2 border-t border-gray-700 space-y-2">
+              <button
+                onClick={() => {
+                  localStorage.removeItem(VISITOR_STORAGE_KEY);
+                  document.cookie = `${VISITOR_COOKIE_KEY}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                  setVisitorId(null);
+                  setCookieId(null);
+                  setStorageId(null);
+                  setProfile(null);
+                }}
+                className="w-full px-2 py-1.5 bg-red-600 hover:bg-red-700 rounded text-white text-xs font-medium transition-colors"
+              >
+                Clear Visitor Data
+              </button>
+              <button
+                onClick={() => {
+                  if (window.CLGVisitor) {
+                    window.CLGVisitor.init?.();
+                  }
+                }}
+                className="w-full px-2 py-1.5 bg-blue-600 hover:bg-blue-700 rounded text-white text-xs font-medium transition-colors"
+              >
+                Re-init SDK
+              </button>
+              <button
+                onClick={() => window.location.reload()}
+                className="w-full px-2 py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-white text-xs font-medium transition-colors"
+              >
+                Refresh Page
+              </button>
+            </div>
           </div>
         </div>
       )}
