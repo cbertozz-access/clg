@@ -211,8 +211,8 @@ export function FigmaHero({
             <span className="font-semibold">13 4000</span>
           </a>
           <span className="hidden sm:block text-white/50">|</span>
-          <a href="https://accesshireaustralia.com.au" target="_blank" rel="noopener noreferrer" className="hidden sm:block hover:text-white/80 transition-colors">
-            accesshireaustralia.com.au
+          <a href="https://accesshire.net" target="_blank" rel="noopener noreferrer" className="hidden sm:block hover:text-white/80 transition-colors">
+            accesshire.net
           </a>
         </div>
       )}
