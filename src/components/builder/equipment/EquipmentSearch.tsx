@@ -4,8 +4,6 @@ import { useEffect, useState, useRef } from "react";
 import { EquipmentCard } from "./EquipmentCard";
 import {
   searchProducts,
-  getCategories,
-  getBrands,
   mapAlgoliaToEquipment,
   type SearchFilters,
 } from "@/lib/api/algolia";
@@ -246,23 +244,23 @@ export function EquipmentSearch({
     };
   }, [searchQuery]);
 
-  // Fetch categories and brands on mount
+  // Fetch all products on mount to build accurate filter counts
+  // Since the index only has ~276 products, fetching all is efficient
   useEffect(() => {
-    async function fetchFacets() {
-      const [cats, brnds] = await Promise.all([getCategories(), getBrands()]);
-      if (cats.length > 0) setCategories(cats);
-      if (brnds.length > 0) setBrands(brnds);
-    }
-    fetchFacets();
-  }, []);
+    async function fetchFilterOptions() {
+      try {
+        // Fetch all products to get accurate counts
+        const result = await searchProducts({
+          page: 0,
+          hitsPerPage: 500, // Get all products
+          filters: {},
+        });
 
-  // Extract categories, brands, and power sources from results as fallback
-  useEffect(() => {
-    if (equipment.length > 0) {
-      // Categories fallback
-      if (categories.length === 0) {
+        const allProducts = result.hits.map(mapAlgoliaToEquipment);
+
+        // Build category counts
         const uniqueCats = new Map<string, number>();
-        equipment.forEach((item) => {
+        allProducts.forEach((item) => {
           if (item.category) {
             uniqueCats.set(item.category, (uniqueCats.get(item.category) || 0) + 1);
           }
@@ -271,12 +269,10 @@ export function EquipmentSearch({
           .map(([name, count]) => ({ name, count }))
           .sort((a, b) => b.count - a.count);
         if (catList.length > 0) setCategories(catList);
-      }
 
-      // Brands fallback
-      if (brands.length === 0) {
+        // Build brand counts
         const uniqueBrands = new Map<string, number>();
-        equipment.forEach((item) => {
+        allProducts.forEach((item) => {
           if (item.brand && item.brand !== "Unknown") {
             uniqueBrands.set(item.brand, (uniqueBrands.get(item.brand) || 0) + 1);
           }
@@ -285,25 +281,28 @@ export function EquipmentSearch({
           .map(([name, count]) => ({ name, count }))
           .sort((a, b) => a.name.localeCompare(b.name));
         if (brandList.length > 0) setBrands(brandList);
-      }
 
-      // Power sources
-      const uniquePower = new Map<string, number>();
-      equipment.forEach((item) => {
-        if (item.energySource) {
-          uniquePower.set(item.energySource, (uniquePower.get(item.energySource) || 0) + 1);
-        }
-      });
-      const powerList = Array.from(uniquePower.entries())
-        .map(([name, count]) => ({
-          id: name.toLowerCase().replace(/\s+/g, "-"),
-          label: name,
-          count,
-        }))
-        .sort((a, b) => b.count - a.count);
-      if (powerList.length > 0) setPowerSources(powerList);
+        // Build power source counts
+        const uniquePower = new Map<string, number>();
+        allProducts.forEach((item) => {
+          if (item.energySource) {
+            uniquePower.set(item.energySource, (uniquePower.get(item.energySource) || 0) + 1);
+          }
+        });
+        const powerList = Array.from(uniquePower.entries())
+          .map(([name, count]) => ({
+            id: name.toLowerCase().replace(/\s+/g, "-"),
+            label: name,
+            count,
+          }))
+          .sort((a, b) => b.count - a.count);
+        if (powerList.length > 0) setPowerSources(powerList);
+      } catch (err) {
+        console.error("Failed to fetch filter options:", err);
+      }
     }
-  }, [equipment, categories.length, brands.length]);
+    fetchFilterOptions();
+  }, []);
 
   // Perform search when filters change
   useEffect(() => {
