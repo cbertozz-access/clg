@@ -248,9 +248,15 @@ Builder.registerComponent(LPTestimonials, {
 Builder.registerComponent(ContactForm, {
   name: "ContactForm",
   friendlyName: "Contact Form",
+  description: "Quote request form with grouped fields and modern card styling",
   inputs: [
-    { name: "title", type: "string", defaultValue: "CONTACT US" },
-    { name: "backgroundColor", type: "enum", enum: ["white", "gray", "none"], defaultValue: "gray" },
+    { name: "title", type: "string", defaultValue: "Request a Quote", friendlyName: "Form Title" },
+    { name: "subtitle", type: "string", defaultValue: "Tell us about your project — we respond within 2 hours", friendlyName: "Subtitle" },
+    { name: "submitButtonText", type: "string", defaultValue: "Get Your Quote", friendlyName: "Submit Button Text" },
+    { name: "variant", type: "enum", enum: ["full", "compact"], defaultValue: "full", friendlyName: "Form Variant", helperText: "full: all fields, compact: essential fields only" },
+    { name: "backgroundColor", type: "enum", enum: ["white", "gray", "none"], defaultValue: "gray", friendlyName: "Background Color" },
+    { name: "showPhoneCta", type: "boolean", defaultValue: true, friendlyName: "Show Phone CTA" },
+    { name: "phoneNumber", type: "string", defaultValue: "13 4000", friendlyName: "Phone Number" },
   ],
 });
 
