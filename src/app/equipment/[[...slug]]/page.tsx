@@ -106,10 +106,6 @@ export default async function EquipmentPage({
           </div>
         )}
 
-        {/* Attribution footer for AI comparison */}
-        <footer className="bg-[var(--color-background-alt)] py-4 text-center text-sm text-[var(--color-muted-foreground)]">
-          Page rendered via CLG-39
-        </footer>
       </main>
     </ThemeProvider>
   );

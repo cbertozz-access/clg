@@ -1,7 +1,6 @@
 import type { RegisteredComponent } from "@builder.io/sdk-react-nextjs";
 import { CategoryHeroCC } from "../components/builder/CategoryHeroCC";
 import {
-  LPHeader,
   LPHero,
   LPTrustBadges,
   LPBenefits,
@@ -9,7 +8,6 @@ import {
   LPTestimonials,
   LPFaq,
   LPCtaBanner,
-  LPFooter,
   LPBreadcrumb,
   LPStickyForm,
   LPStickyBottomCTA,
@@ -596,63 +594,6 @@ export const customComponents: RegisteredComponent[] = [
   // LANDING PAGE COMPONENTS
   // ============================================
 
-  // LP Header
-  {
-    component: LPHeader,
-    name: "LPHeader",
-    friendlyName: "LP - Header",
-    description: "Landing page header with logo, navigation, and CTA",
-    inputs: [
-      {
-        name: "logoUrl",
-        type: "file",
-        allowedFileTypes: ["jpeg", "jpg", "png", "svg", "webp"],
-        friendlyName: "Logo Image",
-      },
-      {
-        name: "companyName",
-        type: "string",
-        defaultValue: "ACCESS HIRE",
-        friendlyName: "Company Name",
-      },
-      {
-        name: "navLinks",
-        type: "list",
-        friendlyName: "Navigation Links",
-        subFields: [
-          { name: "label", type: "string", friendlyName: "Label" },
-          { name: "href", type: "url", friendlyName: "Link" },
-        ],
-      },
-      {
-        name: "phoneNumber",
-        type: "string",
-        defaultValue: "13 4000",
-        friendlyName: "Phone Number",
-      },
-      {
-        name: "ctaText",
-        type: "string",
-        defaultValue: "Get a Quote",
-        friendlyName: "CTA Button Text",
-      },
-      {
-        name: "ctaLink",
-        type: "url",
-        defaultValue: "#quote-form",
-        friendlyName: "CTA Button Link",
-      },
-      {
-        name: "variant",
-        type: "enum",
-        enum: ["full", "minimal"],
-        defaultValue: "full",
-        friendlyName: "Variant",
-        helperText: "Full shows nav & CTA button, minimal shows only logo & phone",
-      },
-    ],
-  },
-
   // LP Hero
   {
     component: LPHero,
@@ -1008,76 +949,6 @@ export const customComponents: RegisteredComponent[] = [
         type: "url",
         defaultValue: "tel:134000",
         friendlyName: "Secondary CTA Link",
-      },
-    ],
-  },
-
-  // LP Footer
-  {
-    component: LPFooter,
-    name: "LPFooter",
-    friendlyName: "LP - Footer",
-    description: "Page footer with links and contact info",
-    inputs: [
-      {
-        name: "logoUrl",
-        type: "file",
-        allowedFileTypes: ["jpeg", "jpg", "png", "svg", "webp"],
-        friendlyName: "Logo Image",
-      },
-      {
-        name: "companyName",
-        type: "string",
-        defaultValue: "ACCESS HIRE",
-        friendlyName: "Company Name",
-      },
-      {
-        name: "companyDescription",
-        type: "string",
-        defaultValue: "Australia's largest privately-owned equipment hire company since 1985.",
-        friendlyName: "Company Description",
-      },
-      {
-        name: "columns",
-        type: "list",
-        friendlyName: "Link Columns",
-        subFields: [
-          { name: "title", type: "string", friendlyName: "Column Title" },
-          {
-            name: "links",
-            type: "list",
-            friendlyName: "Links",
-            subFields: [
-              { name: "label", type: "string", friendlyName: "Label" },
-              { name: "href", type: "url", friendlyName: "URL" },
-            ],
-          },
-        ],
-      },
-      {
-        name: "phoneNumber",
-        type: "string",
-        defaultValue: "13 4000",
-        friendlyName: "Phone Number",
-      },
-      {
-        name: "email",
-        type: "string",
-        defaultValue: "info@accesshire.net",
-        friendlyName: "Email",
-      },
-      {
-        name: "copyrightText",
-        type: "string",
-        defaultValue: "© 2024 Access Hire Australia. All rights reserved.",
-        friendlyName: "Copyright Text",
-      },
-      {
-        name: "variant",
-        type: "enum",
-        enum: ["full", "minimal"],
-        defaultValue: "full",
-        friendlyName: "Variant",
       },
     ],
   },
