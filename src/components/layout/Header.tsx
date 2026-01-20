@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 
 /**
@@ -14,8 +13,8 @@ export function Header() {
     <header className="sticky top-0 z-50 bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo */}
-          <Link href="/" className="flex-shrink-0">
+          {/* Logo - stays on current page */}
+          <a href="#" className="flex-shrink-0" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }}>
             <Image
               src="/images/brand/access-hire-logo.webp"
               alt="Access Hire Australia"
@@ -24,7 +23,7 @@ export function Header() {
               className="h-10 md:h-12 w-auto"
               priority
             />
-          </Link>
+          </a>
 
           {/* Right side - Phone + CTA */}
           <div className="flex items-center gap-4">
