@@ -42,6 +42,20 @@ const countries = [
   "Other",
 ];
 
+const equipmentTypes = [
+  "Scissor Lift",
+  "Boom Lift",
+  "Telehandler",
+  "Forklift",
+  "Generator",
+  "Lighting Tower",
+  "Air Compressor",
+  "Fuel Tank",
+  "Material Lift",
+  "Man Lift",
+  "Other / Not Sure",
+];
+
 export interface ContactFormProps {
   title?: string;
   backgroundColor?: "white" | "gray" | "none";
@@ -56,6 +70,7 @@ export function ContactForm({
     surname: "",
     phone: "",
     email: "",
+    equipmentType: "",
     industry: "",
     company: "",
     country: "Australia",
@@ -90,6 +105,7 @@ export function ContactForm({
       contactCountry: formData.country,
       contactIndustry: formData.industry,
       projectLocationSuburb: formData.projectLocation,
+      productEnquiry: formData.equipmentType || undefined,
       transactionType: "hire",
     };
 
@@ -103,6 +119,7 @@ export function ContactForm({
           surname: "",
           phone: "",
           email: "",
+          equipmentType: "",
           industry: "",
           company: "",
           country: "Australia",
@@ -134,7 +151,7 @@ export function ContactForm({
   const labelClass = "block text-sm font-semibold text-[#1A1A1A] mb-1";
 
   return (
-    <section className={`py-12 ${bgClass[backgroundColor]}`}>
+    <section id="quote-form" className={`py-12 ${bgClass[backgroundColor]}`}>
       <div className="max-w-3xl mx-auto px-4">
         <div className="bg-white rounded-lg shadow-sm p-6 md:p-8">
           <h2 className="text-2xl font-bold text-[#1A1A1A] mb-8">{title}</h2>
@@ -221,8 +238,26 @@ export function ContactForm({
                 </div>
               </div>
 
-              {/* Row 3: Industry, Company Name */}
+              {/* Row 3: Equipment Type, Industry */}
               <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <label className={labelClass}>
+                    Equipment Type<span className="text-[#E31937]">*</span>
+                  </label>
+                  <select
+                    value={formData.equipmentType}
+                    onChange={(e) => handleChange("equipmentType", e.target.value)}
+                    required
+                    className={inputClass}
+                  >
+                    <option value="">What equipment do you need?</option>
+                    {equipmentTypes.map((opt) => (
+                      <option key={opt} value={opt}>
+                        {opt}
+                      </option>
+                    ))}
+                  </select>
+                </div>
                 <div>
                   <label className={labelClass}>
                     Industry<span className="text-[#E31937]">*</span>
@@ -241,6 +276,10 @@ export function ContactForm({
                     ))}
                   </select>
                 </div>
+              </div>
+
+              {/* Row 4: Company Name, Country */}
+              <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <label className={labelClass}>Company Name</label>
                   <input
@@ -251,10 +290,6 @@ export function ContactForm({
                     className={inputClass}
                   />
                 </div>
-              </div>
-
-              {/* Row 4: Country, Select Branch */}
-              <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <label className={labelClass}>Country</label>
                   <select
@@ -269,6 +304,10 @@ export function ContactForm({
                     ))}
                   </select>
                 </div>
+              </div>
+
+              {/* Row 5: Branch, Project Location */}
+              <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <label className={labelClass}>
                     Select Branch<span className="text-[#E31937]">*</span>
@@ -287,21 +326,19 @@ export function ContactForm({
                     ))}
                   </select>
                 </div>
-              </div>
-
-              {/* Row 5: Project Location Suburb */}
-              <div>
-                <label className={labelClass}>
-                  Project Location Suburb<span className="text-[#E31937]">*</span>
-                </label>
-                <input
-                  type="text"
-                  value={formData.projectLocation}
-                  onChange={(e) => handleChange("projectLocation", e.target.value)}
-                  placeholder="Enter Project Location Suburb"
-                  required
-                  className={inputClass}
-                />
+                <div>
+                  <label className={labelClass}>
+                    Project Location Suburb<span className="text-[#E31937]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.projectLocation}
+                    onChange={(e) => handleChange("projectLocation", e.target.value)}
+                    placeholder="Enter Project Location Suburb"
+                    required
+                    className={inputClass}
+                  />
+                </div>
               </div>
 
               {/* Row 6: Enquiry Message */}
