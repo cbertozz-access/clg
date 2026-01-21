@@ -2,7 +2,8 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import { EquipmentCard, EquipmentCardProps } from "./EquipmentCard";
+import { EquipmentCard } from "./EquipmentCard";
+import type { QuickViewEquipment } from "./QuickViewModal";
 import { EnquiryCartPanel } from "./EnquiryCartPanel";
 import { QuickViewModal } from "./QuickViewModal";
 import { useEnquiryCart } from "@/lib/enquiry-cart";
@@ -246,10 +247,26 @@ export function EquipmentSearch({
 
   // Quick view modal state
   const [quickViewOpen, setQuickViewOpen] = useState(false);
-  const [quickViewEquipment, setQuickViewEquipment] = useState<EquipmentCardProps | null>(null);
+  const [quickViewEquipment, setQuickViewEquipment] = useState<QuickViewEquipment | null>(null);
 
-  const handleQuickView = (equipment: EquipmentCardProps) => {
-    setQuickViewEquipment(equipment);
+  const handleQuickView = (item: Equipment) => {
+    // Map full equipment data to quick view format
+    setQuickViewEquipment({
+      id: item.id,
+      name: item.name,
+      brand: item.brand,
+      model: item.model,
+      category: item.category,
+      subcategory: item.subcategory,
+      imageUrl: item.imageUrl,
+      images: item.images,
+      workingHeight: item.specs.workingHeight,
+      platformHeight: undefined, // Not in current data
+      capacity: item.specs.capacity,
+      reach: item.specs.horizontalReach,
+      powerSource: item.energySource,
+      environment: undefined, // Not in current data
+    });
     setQuickViewOpen(true);
   };
 
@@ -927,7 +944,7 @@ export function EquipmentSearch({
                       ctaLink={`${productBaseUrl}/${item.slug}`}
                       variant={viewMode === "list" ? "compact" : "default"}
                       showPricing={showPricing}
-                      onQuickView={useQuickView ? handleQuickView : undefined}
+                      onQuickView={useQuickView ? () => handleQuickView(item) : undefined}
                     />
                   ))}
                 </div>
