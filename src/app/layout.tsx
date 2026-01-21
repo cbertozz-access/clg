@@ -50,6 +50,9 @@ export const metadata: Metadata = {
 
 const BUILDER_API_KEY = process.env.NEXT_PUBLIC_BUILDER_API_KEY;
 
+// GTM Container ID
+const GTM_ID = "GTM-NSDFMHP";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -57,14 +60,36 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {/* Google Tag Manager - Head */}
+        <Script id="gtm-init" strategy="afterInteractive">
+          {`
+            (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+            new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+            j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+            'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+            })(window,document,'script','dataLayer','${GTM_ID}');
+          `}
+        </Script>
+      </head>
       <body
         className={`${lato.variable} ${roboto.variable} ${montserrat.variable} ${openSans.variable} antialiased`}
       >
+        {/* Google Tag Manager - Noscript fallback */}
+        <noscript>
+          <iframe
+            src={`https://www.googletagmanager.com/ns.html?id=${GTM_ID}`}
+            height="0"
+            width="0"
+            style={{ display: "none", visibility: "hidden" }}
+          />
+        </noscript>
+
         <EnquiryCartProvider>
           {children}
           <VisitorDebugPanel />
         </EnquiryCartProvider>
-        {/* CLG Visitor Tracking SDK */}
+        {/* CLG Visitor Tracking SDK - loads after GTM */}
         <Script
           src="/clg-visitor.js"
           strategy="afterInteractive"
