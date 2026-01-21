@@ -178,6 +178,12 @@ export function TextBlock({
             ${appliedWeight}
             ${maxWidthClasses[maxWidth]}
             leading-relaxed
+            [&_h1]:text-4xl [&_h1]:md:text-5xl [&_h1]:lg:text-6xl [&_h1]:font-bold [&_h1]:mb-6 [&_h1]:font-[var(--font-heading)]
+            [&_h2]:text-3xl [&_h2]:md:text-4xl [&_h2]:font-bold [&_h2]:mb-5 [&_h2]:font-[var(--font-heading)]
+            [&_h3]:text-2xl [&_h3]:md:text-3xl [&_h3]:font-bold [&_h3]:mb-4 [&_h3]:font-[var(--font-heading)]
+            [&_h4]:text-xl [&_h4]:md:text-2xl [&_h4]:font-semibold [&_h4]:mb-3 [&_h4]:font-[var(--font-heading)]
+            [&_h5]:text-lg [&_h5]:md:text-xl [&_h5]:font-semibold [&_h5]:mb-3 [&_h5]:font-[var(--font-heading)]
+            [&_h6]:text-base [&_h6]:md:text-lg [&_h6]:font-semibold [&_h6]:mb-2 [&_h6]:font-[var(--font-heading)]
             [&_p]:mb-4 [&_p:last-child]:mb-0
             [&_strong]:font-bold
             [&_em]:italic
@@ -206,6 +212,12 @@ export function TextBlock({
         ${marginBottomClasses[marginBottom]}
         ${align === "center" ? "mx-auto" : align === "right" ? "ml-auto" : ""}
         leading-relaxed
+        [&_h1]:text-4xl [&_h1]:md:text-5xl [&_h1]:lg:text-6xl [&_h1]:font-bold [&_h1]:mb-6 [&_h1]:font-[var(--font-heading)]
+        [&_h2]:text-3xl [&_h2]:md:text-4xl [&_h2]:font-bold [&_h2]:mb-5 [&_h2]:font-[var(--font-heading)]
+        [&_h3]:text-2xl [&_h3]:md:text-3xl [&_h3]:font-bold [&_h3]:mb-4 [&_h3]:font-[var(--font-heading)]
+        [&_h4]:text-xl [&_h4]:md:text-2xl [&_h4]:font-semibold [&_h4]:mb-3 [&_h4]:font-[var(--font-heading)]
+        [&_h5]:text-lg [&_h5]:md:text-xl [&_h5]:font-semibold [&_h5]:mb-3 [&_h5]:font-[var(--font-heading)]
+        [&_h6]:text-base [&_h6]:md:text-lg [&_h6]:font-semibold [&_h6]:mb-2 [&_h6]:font-[var(--font-heading)]
         [&_p]:mb-4 [&_p:last-child]:mb-0
         [&_strong]:font-bold
         [&_em]:italic
