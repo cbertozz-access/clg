@@ -38,6 +38,15 @@
   // Initialize dataLayer if not exists
   window.dataLayer = window.dataLayer || [];
 
+  // Site identifier for GTM filtering - prevents CLG events from firing other tags
+  const SITE_ID = 'clg_dev';
+
+  // Push site identifier immediately so GTM can filter from the start
+  window.dataLayer.push({
+    'clg_site': true,
+    'site_id': SITE_ID
+  });
+
   const CLGVisitor = {
     visitorId: null,
     sessionId: null,
