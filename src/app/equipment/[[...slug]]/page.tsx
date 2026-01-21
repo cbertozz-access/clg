@@ -139,8 +139,14 @@ export async function generateMetadata({ params, searchParams }: PageProps) {
     };
   }
 
+  // Check if page allows indexing (default: noindex)
+  const allowIndexing = content.data?.allowIndexing === true;
+
   return {
     title: content.data?.title || "Equipment | Access Group",
     description: content.data?.description || "Browse our equipment range",
+    robots: allowIndexing
+      ? { index: true, follow: true }
+      : { index: false, follow: false },
   };
 }

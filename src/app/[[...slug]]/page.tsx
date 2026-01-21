@@ -136,8 +136,14 @@ export async function generateMetadata({ params, searchParams }: PageProps) {
     };
   }
 
+  // Check if page allows indexing (default: noindex)
+  const allowIndexing = content.data?.allowIndexing === true;
+
   return {
     title: content.data?.title || "Access Hire Australia",
     description: content.data?.description || "Equipment hire across Australia",
+    robots: allowIndexing
+      ? { index: true, follow: true }
+      : { index: false, follow: false },
   };
 }

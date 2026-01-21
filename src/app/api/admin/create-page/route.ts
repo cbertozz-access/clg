@@ -187,7 +187,7 @@ export async function POST(request: NextRequest) {
     // Build page data for Builder.io Write API
     const pageData = {
       name,
-      published: "draft", // Start as draft - user can publish in Builder.io
+      published: "published", // Publish immediately so page is live
       data: {
         title: name,
         description: subheadline || `${name} - Access Hire Australia`,
@@ -255,10 +255,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "Page created successfully as draft. Publish it in Builder.io to make it live.",
+      message: "Page created and published! It's now live.",
       pageId: result.id,
       editUrl: `https://builder.io/content/${result.id}`,
-      status: "draft",
+      status: "published",
     });
   } catch (error) {
     console.error("Create page error:", error);

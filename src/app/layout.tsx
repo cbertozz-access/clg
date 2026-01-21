@@ -38,6 +38,14 @@ const openSans = Open_Sans({
 export const metadata: Metadata = {
   title: "Access Hire Australia | Equipment Hire & Sales",
   description: "Australia's leading elevated work platform and materials handling equipment hire company. Hire boom lifts, scissor lifts, forklifts, and more.",
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: {
+      index: false,
+      follow: false,
+    },
+  },
 };
 
 const BUILDER_API_KEY = process.env.NEXT_PUBLIC_BUILDER_API_KEY;
