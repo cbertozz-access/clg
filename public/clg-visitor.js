@@ -9,6 +9,11 @@
  * - Referrer and landing page
  * - Page views per session
  *
+ * Integrations:
+ * - Firebase Cloud Function (visitor profiles)
+ * - Server-side GTM container (analytics)
+ * - Client-side dataLayer (GTM)
+ *
  * Usage:
  * <script src="https://clg-ten.vercel.app/clg-visitor.js" async></script>
  *
@@ -17,7 +22,13 @@
 (function(window, document) {
   'use strict';
 
-  const ENDPOINT = 'https://australia-southeast1-composable-lg.cloudfunctions.net/visitorId';
+  // Firebase endpoint for visitor profiles
+  const FIREBASE_ENDPOINT = 'https://australia-southeast1-composable-lg.cloudfunctions.net/visitorId';
+
+  // Server-side GTM endpoint
+  const SGTM_ENDPOINT = 'https://sgtm.accesshire.net';
+  const SGTM_PATH = '/clg/collect'; // Custom client path
+
   const COOKIE_NAME = 'clg_vid';
   const SESSION_COOKIE_NAME = 'clg_sid';
   const STORAGE_KEY = 'clg_visitor';
@@ -33,12 +44,88 @@
     profile: null,
     session: null,
     initialized: false,
+    sgtmEnabled: true, // Enable/disable server-side GTM
 
     /**
      * Generate a unique ID
      */
     generateId(prefix = '') {
       return prefix + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+    },
+
+    /**
+     * Send event to Server-side GTM container
+     * Uses sendBeacon for reliability, falls back to fetch
+     */
+    sendToSGTM(eventName, eventData = {}) {
+      if (!this.sgtmEnabled) return;
+
+      const payload = {
+        event_name: eventName,
+        client_id: this.visitorId,
+        session_id: this.sessionId,
+        timestamp: Date.now(),
+        // Page context
+        page_location: window.location.href,
+        page_path: window.location.pathname,
+        page_title: document.title,
+        page_referrer: document.referrer,
+        // Screen info
+        screen_resolution: `${screen.width}x${screen.height}`,
+        viewport_size: `${window.innerWidth}x${window.innerHeight}`,
+        // User agent
+        user_agent: navigator.userAgent,
+        language: navigator.language,
+        // Session context
+        session_landing_page: this.session?.landing_page,
+        session_referrer: this.session?.referrer,
+        session_page_views: this.session?.page_views,
+        is_new_session: this.session?.page_views === 1,
+        // UTM parameters (last touch)
+        utm_source: this.session?.utm?.utm_source,
+        utm_medium: this.session?.utm?.utm_medium,
+        utm_campaign: this.session?.utm?.utm_campaign,
+        utm_term: this.session?.utm?.utm_term,
+        utm_content: this.session?.utm?.utm_content,
+        // First touch attribution
+        first_touch_source: this.getFirstTouchUtm()?.utm_source,
+        first_touch_medium: this.getFirstTouchUtm()?.utm_medium,
+        first_touch_campaign: this.getFirstTouchUtm()?.utm_campaign,
+        // Visitor profile
+        lead_score: this.profile?.lead_score,
+        segments: this.profile?.segments,
+        total_visits: this.profile?.visits,
+        // Custom event data
+        ...eventData
+      };
+
+      const url = SGTM_ENDPOINT + SGTM_PATH;
+
+      // Try sendBeacon first (works during page unload)
+      if (navigator.sendBeacon) {
+        try {
+          const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+          const sent = navigator.sendBeacon(url, blob);
+          if (sent) {
+            console.log('[CLG] sGTM event sent via beacon:', eventName);
+            return;
+          }
+        } catch (e) {
+          // Fall through to fetch
+        }
+      }
+
+      // Fall back to fetch
+      fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        keepalive: true // Allows request to outlive page
+      }).then(() => {
+        console.log('[CLG] sGTM event sent via fetch:', eventName);
+      }).catch(err => {
+        console.warn('[CLG] sGTM send failed:', err);
+      });
     },
 
     /**
@@ -272,7 +359,7 @@
         params.set('source', source);
 
         // Fetch visitor profile
-        const url = ENDPOINT + '?' + params.toString();
+        const url = FIREBASE_ENDPOINT + '?' + params.toString();
         const response = await fetch(url, {
           method: 'GET',
           credentials: 'include'
@@ -334,6 +421,12 @@
         }));
 
         console.log('[CLG] Visitor initialized:', this.visitorId, 'Session:', this.sessionId);
+
+        // Send to server-side GTM
+        this.sendToSGTM(session.page_views === 1 ? 'session_start' : 'page_view', {
+          is_new_visitor: !existingId
+        });
+
         return data;
 
       } catch (error) {
@@ -381,7 +474,10 @@
 
       window.dataLayer.push(pageViewData);
 
-      // Send to server
+      // Send to server-side GTM
+      this.sendToSGTM('page_view', customData);
+
+      // Send to Firebase
       return this.track('page_view', pageViewData);
     },
 
@@ -413,7 +509,7 @@
       }
 
       try {
-        const response = await fetch(ENDPOINT, {
+        const response = await fetch(FIREBASE_ENDPOINT, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -465,6 +561,26 @@
     async trackFormSubmit(formName, formData = {}) {
       const firstTouchUtm = this.getFirstTouchUtm();
       const lastTouchUtm = this.getLastTouchUtm();
+
+      const formEventData = {
+        form_name: formName,
+        form_data: formData,
+        // Attribution data
+        first_touch_source: firstTouchUtm?.utm_source,
+        first_touch_medium: firstTouchUtm?.utm_medium,
+        first_touch_campaign: firstTouchUtm?.utm_campaign,
+        last_touch_source: lastTouchUtm?.utm_source,
+        last_touch_medium: lastTouchUtm?.utm_medium,
+        last_touch_campaign: lastTouchUtm?.utm_campaign,
+        // Session context
+        session_landing_page: this.session?.landing_page,
+        session_referrer: this.session?.referrer,
+        session_page_views: this.session?.page_views,
+        pages_visited: this.session?.pages_visited
+      };
+
+      // Send to server-side GTM
+      this.sendToSGTM('form_submit', formEventData);
 
       return this.track('form_submit', {
         form_name: formName,
@@ -539,13 +655,18 @@
      * Identify visitor (e.g., after form submission)
      */
     async identify(userData = {}) {
-      return this.track('identify', {
+      const identifyData = {
         email: userData.email,
         name: userData.name,
         company: userData.company,
         phone: userData.phone,
         ...userData
-      });
+      };
+
+      // Send to server-side GTM
+      this.sendToSGTM('identify', identifyData);
+
+      return this.track('identify', identifyData);
     }
   };
 
