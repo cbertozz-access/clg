@@ -264,20 +264,14 @@ Builder.registerComponent(ContactForm, {
 Builder.registerComponent(TextBlock, {
   name: "TextBlock",
   friendlyName: "Text Block",
-  description: "Rich text component with WYSIWYG editing, vertical/horizontal centering",
+  description: "Rich text with WYSIWYG - headings use Lato, body uses Roboto",
   inputs: [
-    { name: "text", type: "richText", defaultValue: "<p>Enter your text here</p>", friendlyName: "Text Content" },
-    { name: "size", type: "enum", enum: ["sm", "base", "lg", "xl", "2xl", "3xl", "4xl", "5xl"], defaultValue: "lg", friendlyName: "Text Size" },
-    { name: "align", type: "enum", enum: ["left", "center", "right"], defaultValue: "center", friendlyName: "Horizontal Align" },
-    { name: "verticalAlign", type: "enum", enum: ["top", "center", "bottom"], defaultValue: "center", friendlyName: "Vertical Align" },
+    { name: "text", type: "richText", defaultValue: "<p>Enter your text here</p>", friendlyName: "Content" },
+    { name: "align", type: "enum", enum: ["left", "center", "right"], defaultValue: "center", friendlyName: "Alignment" },
+    { name: "size", type: "enum", enum: ["sm", "base", "lg", "xl", "2xl"], defaultValue: "lg", friendlyName: "Body Text Size" },
     { name: "color", type: "enum", enum: ["default", "muted", "primary", "white"], defaultValue: "default", friendlyName: "Text Color" },
-    { name: "weight", type: "enum", enum: ["normal", "medium", "semibold", "bold"], defaultValue: "normal", friendlyName: "Font Weight" },
-    { name: "maxWidth", type: "enum", enum: ["none", "sm", "md", "lg", "xl", "2xl", "4xl", "full"], defaultValue: "4xl", friendlyName: "Max Width" },
-    { name: "minHeight", type: "enum", enum: ["none", "sm", "md", "lg", "xl", "screen"], defaultValue: "none", friendlyName: "Min Height", helperText: "Set height for vertical centering" },
-    { name: "padding", type: "enum", enum: ["none", "sm", "md", "lg", "xl"], defaultValue: "md", friendlyName: "Padding" },
-    { name: "as", type: "enum", enum: ["div", "h1", "h2", "h3", "h4", "h5", "h6", "p"], defaultValue: "div", friendlyName: "HTML Element", advanced: true },
-    { name: "marginTop", type: "enum", enum: ["none", "sm", "md", "lg", "xl"], defaultValue: "none", friendlyName: "Top Margin", advanced: true },
-    { name: "marginBottom", type: "enum", enum: ["none", "sm", "md", "lg", "xl"], defaultValue: "none", friendlyName: "Bottom Margin", advanced: true },
+    { name: "maxWidth", type: "enum", enum: ["none", "prose", "2xl", "4xl", "full"], defaultValue: "4xl", friendlyName: "Max Width" },
+    { name: "padding", type: "enum", enum: ["none", "sm", "md", "lg"], defaultValue: "md", friendlyName: "Padding" },
   ],
 });
 
