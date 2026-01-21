@@ -81,7 +81,7 @@ type TabType = "create" | "pages" | "brands" | "settings";
 
 export function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<TabType>("create");
-  const [createMode, setCreateMode] = useState<CreateMode>("templates");
+  const [createMode, setCreateMode] = useState<CreateMode>("builder");
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const [selectedBrand, setSelectedBrand] = useState<string>("access-hire");
   const [isCreating, setIsCreating] = useState(false);
