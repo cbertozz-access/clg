@@ -3,6 +3,7 @@ import { Lato, Roboto } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { EnquiryCartProvider } from "@/lib/enquiry-cart";
+import { EnquiryCartBubble } from "@/components/EnquiryCartBubble";
 import { VisitorDebugPanel } from "@/components/debug/VisitorDebugPanel";
 
 const lato = Lato({
@@ -38,6 +39,7 @@ export default function RootLayout({
       >
         <EnquiryCartProvider>
           {children}
+          <EnquiryCartBubble />
           <VisitorDebugPanel />
         </EnquiryCartProvider>
         {/* CLG Visitor Tracking SDK */}
