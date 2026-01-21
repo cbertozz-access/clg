@@ -10,7 +10,32 @@ const CONTACT_API_URL = '/api/contact';
 
 // Cookie/localStorage keys for visitor ID (matches clg-visitor.js SDK)
 const VISITOR_COOKIE_KEY = 'clg_vid';
+const SESSION_COOKIE_KEY = 'clg_sid';
 const VISITOR_STORAGE_KEY = 'clg_visitor';
+const SESSION_STORAGE_KEY = 'clg_session';
+const UTM_STORAGE_KEY = 'clg_utm';
+
+// Declare CLGVisitor SDK interface
+declare global {
+  interface Window {
+    CLGVisitor?: {
+      getAttribution?: () => {
+        visitor_id: string | null;
+        session_id: string | null;
+        first_touch: Record<string, string> | null;
+        last_touch: Record<string, string> | null;
+        landing_page: string | null;
+        referrer: string | null;
+        pages_visited: string[];
+        session_page_views: number;
+      };
+      getVisitorId?: () => string | null;
+      getSessionId?: () => string | null;
+      trackFormSubmit?: (formName: string, formData: Record<string, unknown>) => Promise<unknown>;
+      identify?: (userData: Record<string, unknown>) => Promise<unknown>;
+    };
+  }
+}
 
 export interface ContactRequestData {
   // Required fields
@@ -26,6 +51,7 @@ export interface ContactRequestData {
   // Optional fields
   contactRequestId?: string;
   visitorId?: string; // Firebase visitor ID for tracking
+  sessionId?: string; // Session ID for tracking
   contactCountry?: string;
   contactIndustry?: string;
   projectLocationSuburb?: string;
@@ -33,9 +59,21 @@ export interface ContactRequestData {
   transactionType?: string;
   startDate?: string;
   endDate?: string;
+  // Last-touch UTM (current session)
   utmSource?: string;
   utmMedium?: string;
   utmCampaign?: string;
+  utmTerm?: string;
+  utmContent?: string;
+  // First-touch UTM (original acquisition)
+  firstTouchSource?: string;
+  firstTouchMedium?: string;
+  firstTouchCampaign?: string;
+  // Session context
+  landingPage?: string;
+  referrer?: string;
+  sessionPageViews?: number;
+  pagesVisited?: string[];
   projectName?: string;
   refererURL?: string;
 }
@@ -93,6 +131,22 @@ export function getVisitorId(): string | null {
 }
 
 /**
+ * Get session ID from cookie
+ */
+export function getSessionId(): string | null {
+  if (typeof window === 'undefined') return null;
+
+  // Try SDK first
+  if (window.CLGVisitor?.getSessionId) {
+    return window.CLGVisitor.getSessionId();
+  }
+
+  // Fall back to cookie
+  const match = document.cookie.match(new RegExp('(^| )' + SESSION_COOKIE_KEY + '=([^;]+)'));
+  return match ? match[2] : null;
+}
+
+/**
  * Get UTM parameters from URL
  */
 function getUtmParams(): Partial<ContactRequestData> {
@@ -103,18 +157,86 @@ function getUtmParams(): Partial<ContactRequestData> {
     utmSource: params.get('utm_source') || undefined,
     utmMedium: params.get('utm_medium') || undefined,
     utmCampaign: params.get('utm_campaign') || undefined,
+    utmTerm: params.get('utm_term') || undefined,
+    utmContent: params.get('utm_content') || undefined,
   };
 }
 
 /**
+ * Get first-touch UTM parameters from localStorage
+ */
+function getFirstTouchUtm(): Partial<ContactRequestData> {
+  if (typeof window === 'undefined') return {};
+
+  try {
+    const stored = localStorage.getItem(UTM_STORAGE_KEY);
+    if (stored) {
+      const data = JSON.parse(stored);
+      return {
+        firstTouchSource: data.utm_source || undefined,
+        firstTouchMedium: data.utm_medium || undefined,
+        firstTouchCampaign: data.utm_campaign || undefined,
+      };
+    }
+  } catch {
+    // localStorage not available or invalid JSON
+  }
+  return {};
+}
+
+/**
+ * Get session context data
+ */
+function getSessionContext(): Partial<ContactRequestData> {
+  if (typeof window === 'undefined') return {};
+
+  // Try SDK first for full attribution
+  if (window.CLGVisitor?.getAttribution) {
+    const attribution = window.CLGVisitor.getAttribution();
+    return {
+      sessionId: attribution.session_id || undefined,
+      landingPage: attribution.landing_page || undefined,
+      referrer: attribution.referrer || undefined,
+      sessionPageViews: attribution.session_page_views || undefined,
+      pagesVisited: attribution.pages_visited || undefined,
+      // First touch from attribution
+      firstTouchSource: attribution.first_touch?.utm_source || undefined,
+      firstTouchMedium: attribution.first_touch?.utm_medium || undefined,
+      firstTouchCampaign: attribution.first_touch?.utm_campaign || undefined,
+    };
+  }
+
+  // Fall back to sessionStorage
+  try {
+    const stored = sessionStorage.getItem(SESSION_STORAGE_KEY);
+    if (stored) {
+      const session = JSON.parse(stored);
+      return {
+        sessionId: session.session_id || undefined,
+        landingPage: session.landing_page || undefined,
+        referrer: session.referrer || undefined,
+        sessionPageViews: session.page_views || undefined,
+        pagesVisited: session.pages_visited || undefined,
+      };
+    }
+  } catch {
+    // sessionStorage not available or invalid JSON
+  }
+
+  return { sessionId: getSessionId() || undefined };
+}
+
+/**
  * Submit a contact request to the API
- * Automatically includes visitor ID if available
+ * Automatically includes visitor ID, session ID, UTM, and attribution data
  */
 export async function submitContactRequest(
   data: Omit<ContactRequestData, 'contactRequestId'>
 ): Promise<ContactRequestResponse> {
   try {
     const utmParams = getUtmParams();
+    const firstTouchUtm = getFirstTouchUtm();
+    const sessionContext = getSessionContext();
     const refererURL = typeof window !== 'undefined' ? window.location.href : undefined;
     const visitorId = getVisitorId();
 
@@ -123,8 +245,28 @@ export async function submitContactRequest(
       visitorId: visitorId || undefined,
       ...data,
       ...utmParams,
+      ...firstTouchUtm,
+      ...sessionContext,
       refererURL,
     };
+
+    // Track form submission via SDK if available
+    if (typeof window !== 'undefined' && window.CLGVisitor?.trackFormSubmit) {
+      window.CLGVisitor.trackFormSubmit('contact_request', {
+        contactType: data.contactType,
+        sourceDepot: data.sourceDepot,
+      });
+    }
+
+    // Identify visitor if email provided
+    if (typeof window !== 'undefined' && window.CLGVisitor?.identify && data.contactEmail) {
+      window.CLGVisitor.identify({
+        email: data.contactEmail,
+        name: `${data.contactFirstName} ${data.contactLastName}`.trim(),
+        company: data.contactCompanyName,
+        phone: data.contactPhone,
+      });
+    }
 
     const response = await fetch(CONTACT_API_URL, {
       method: 'POST',

@@ -13,24 +13,58 @@ interface VisitorProfile {
   [key: string]: unknown;
 }
 
+interface SessionData {
+  session_id: string;
+  started_at: string;
+  last_activity: string;
+  landing_page: string;
+  landing_path: string;
+  referrer: string | null;
+  referrer_domain: string | null;
+  utm: Record<string, string>;
+  page_views: number;
+  pages_visited: string[];
+  events: Array<{ event: string; timestamp: string }>;
+}
+
+interface Attribution {
+  visitor_id: string | null;
+  session_id: string | null;
+  first_touch: Record<string, string> | null;
+  last_touch: Record<string, string> | null;
+  landing_page: string | null;
+  referrer: string | null;
+  pages_visited: string[];
+  session_page_views: number;
+}
+
 interface CLGVisitorSDK {
   visitorId: string | null;
+  sessionId: string | null;
   profile: VisitorProfile | null;
+  session: SessionData | null;
   initialized: boolean;
   init: () => Promise<VisitorProfile | null>;
   getVisitorId: () => string | null;
+  getSessionId: () => string | null;
   getProfile: () => VisitorProfile | null;
+  getSession: () => SessionData | null;
+  getAttribution: () => Attribution;
+  getFirstTouchUtm: () => Record<string, string> | null;
+  getLastTouchUtm: () => Record<string, string> | null;
 }
 
-declare global {
-  interface Window {
-    CLGVisitor?: CLGVisitorSDK;
-    dataLayer?: Record<string, unknown>[];
-  }
-}
+// Use module augmentation to extend Window without conflict
+declare const window: Window & {
+  CLGVisitor?: CLGVisitorSDK;
+  dataLayer?: Record<string, unknown>[];
+};
 
 const VISITOR_COOKIE_KEY = "clg_vid";
+const SESSION_COOKIE_KEY = "clg_sid";
 const VISITOR_STORAGE_KEY = "clg_visitor";
+const SESSION_STORAGE_KEY = "clg_session";
+const UTM_STORAGE_KEY = "clg_utm";
 
 function getCookie(name: string): string | null {
   if (typeof document === "undefined") return null;
@@ -41,12 +75,16 @@ function getCookie(name: string): string | null {
 export function VisitorDebugPanel() {
   const [isOpen, setIsOpen] = useState(false);
   const [visitorId, setVisitorId] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [cookieId, setCookieId] = useState<string | null>(null);
   const [storageId, setStorageId] = useState<string | null>(null);
   const [profile, setProfile] = useState<VisitorProfile | null>(null);
+  const [session, setSession] = useState<SessionData | null>(null);
+  const [firstTouchUtm, setFirstTouchUtm] = useState<Record<string, string> | null>(null);
   const [sdkStatus, setSdkStatus] = useState<"loading" | "ready" | "not-loaded">("loading");
   const [dataLayer, setDataLayer] = useState<Record<string, unknown>[] | null>(null);
   const [shouldShow, setShouldShow] = useState(false);
+  const [activeTab, setActiveTab] = useState<"visitor" | "session" | "utm" | "datalayer">("visitor");
 
   // Track if we've ever achieved "ready" status to prevent regression
   const hasBeenReadyRef = useRef(false);
@@ -95,35 +133,64 @@ export function VisitorDebugPanel() {
     if (!shouldShow) return;
 
     const loadData = () => {
-      // Get cookie ID
+      // Get cookie IDs
       const cid = getCookie(VISITOR_COOKIE_KEY);
       setCookieId(cid);
+      const sidCookie = getCookie(SESSION_COOKIE_KEY);
 
       // Get localStorage ID (SDK stores just the ID string, not JSON)
-      const sid = localStorage.getItem(VISITOR_STORAGE_KEY);
-      setStorageId(sid);
+      const vid = localStorage.getItem(VISITOR_STORAGE_KEY);
+      setStorageId(vid);
+
+      // Get session data from sessionStorage
+      try {
+        const sessionData = sessionStorage.getItem(SESSION_STORAGE_KEY);
+        if (sessionData) {
+          setSession(JSON.parse(sessionData));
+        }
+      } catch (e) {
+        // sessionStorage not available
+      }
+
+      // Get first-touch UTM from localStorage
+      try {
+        const utmData = localStorage.getItem(UTM_STORAGE_KEY);
+        if (utmData) {
+          setFirstTouchUtm(JSON.parse(utmData));
+        }
+      } catch (e) {
+        // localStorage not available
+      }
 
       // Check for CLGVisitor SDK - but never regress from "ready" to "loading"
       if (window.CLGVisitor) {
         const sdkInitialized = window.CLGVisitor.initialized;
         const sdkProfile = window.CLGVisitor.getProfile();
+        const sdkSession = window.CLGVisitor.getSession?.();
 
         // Only update status if SDK has better data, or we don't have data yet
         if (sdkInitialized && sdkProfile) {
           setSdkStatus("ready");
           hasBeenReadyRef.current = true;
           setVisitorId(window.CLGVisitor.getVisitorId());
+          setSessionId(window.CLGVisitor.getSessionId?.() || sidCookie || null);
           setProfile(sdkProfile);
+          if (sdkSession) setSession(sdkSession);
+          if (window.CLGVisitor.getFirstTouchUtm) {
+            setFirstTouchUtm(window.CLGVisitor.getFirstTouchUtm());
+          }
         } else if (!hasBeenReadyRef.current) {
           // Only set loading if we haven't already achieved ready status
           setSdkStatus(sdkInitialized ? "ready" : "loading");
           if (sdkInitialized) hasBeenReadyRef.current = true;
-          setVisitorId(window.CLGVisitor.getVisitorId() || cid || sid || null);
+          setVisitorId(window.CLGVisitor.getVisitorId() || cid || vid || null);
+          setSessionId(sidCookie || null);
         }
       } else if (!hasBeenReadyRef.current) {
         setSdkStatus("not-loaded");
         // Use cookie/storage as fallback
-        setVisitorId(cid || sid || null);
+        setVisitorId(cid || vid || null);
+        setSessionId(sidCookie || null);
       }
 
       // Get dataLayer
@@ -180,7 +247,7 @@ export function VisitorDebugPanel() {
 
       {/* Panel */}
       {isOpen && (
-        <div className="fixed right-0 top-1/2 -translate-y-1/2 z-[9998] w-80 max-h-[80vh] overflow-y-auto bg-gray-900 text-white text-xs rounded-l-lg shadow-2xl mr-6">
+        <div className="fixed right-0 top-1/2 -translate-y-1/2 z-[9998] w-96 max-h-[80vh] overflow-y-auto bg-gray-900 text-white text-xs rounded-l-lg shadow-2xl mr-6">
           {/* Header */}
           <div className="sticky top-0 bg-gray-900 px-3 py-2 border-b border-gray-700 flex items-center justify-between">
             <span className="font-semibold text-sm">Visitor Debug</span>
@@ -192,109 +259,237 @@ export function VisitorDebugPanel() {
             </button>
           </div>
 
+          {/* SDK Status Bar */}
+          <div className="px-3 py-2 border-b border-gray-700">
+            <div className={`font-mono px-2 py-1 rounded text-center ${
+              sdkStatus === "ready" ? "bg-green-900 text-green-300" :
+              sdkStatus === "loading" ? "bg-yellow-900 text-yellow-300" :
+              "bg-red-900 text-red-300"
+            }`}>
+              {sdkStatus === "ready" && "✓ SDK Ready"}
+              {sdkStatus === "loading" && "⏳ Loading..."}
+              {sdkStatus === "not-loaded" && "✗ SDK not loaded"}
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="flex border-b border-gray-700">
+            {(["visitor", "session", "utm", "datalayer"] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`flex-1 px-2 py-2 text-xs font-medium capitalize ${
+                  activeTab === tab
+                    ? "bg-gray-800 text-white border-b-2 border-blue-500"
+                    : "text-gray-400 hover:text-white"
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
           <div className="p-3 space-y-3">
-            {/* SDK Status */}
-            <div>
-              <div className="text-gray-400 mb-1">SDK Status</div>
-              <div className={`font-mono px-2 py-1 rounded ${
-                sdkStatus === "ready" ? "bg-green-900 text-green-300" :
-                sdkStatus === "loading" ? "bg-yellow-900 text-yellow-300" :
-                "bg-red-900 text-red-300"
-              }`}>
-                {sdkStatus === "ready" && "✓ Ready"}
-                {sdkStatus === "loading" && "⏳ Loading..."}
-                {sdkStatus === "not-loaded" && "✗ SDK not loaded"}
-              </div>
-              {sdkStatus === "not-loaded" && (
-                <p className="text-gray-500 text-[10px] mt-1">
-                  Add clg-visitor.js to page or GTM
-                </p>
-              )}
-            </div>
-
-            {/* Visitor ID */}
-            <div>
-              <div className="text-gray-400 mb-1">Visitor ID</div>
-              <div className="font-mono bg-gray-800 px-2 py-1 rounded break-all">
-                {displayId}
-              </div>
-            </div>
-
-            {/* Cookie */}
-            <div>
-              <div className="text-gray-400 mb-1">Cookie ({VISITOR_COOKIE_KEY})</div>
-              <div className="font-mono bg-gray-800 px-2 py-1 rounded break-all">
-                {cookieId || "Not set"}
-              </div>
-            </div>
-
-            {/* LocalStorage */}
-            <div>
-              <div className="text-gray-400 mb-1">LocalStorage ({VISITOR_STORAGE_KEY})</div>
-              <div className="font-mono bg-gray-800 px-2 py-1 rounded break-all">
-                {storageId || "Not set"}
-              </div>
-            </div>
-
-            {/* Profile Data (from SDK) */}
-            {profile && (
+            {/* Visitor Tab */}
+            {activeTab === "visitor" && (
               <>
-                {profile.lead_score !== undefined && (
-                  <div>
-                    <div className="text-gray-400 mb-1">Lead Score</div>
-                    <div className="font-mono bg-gray-800 px-2 py-1 rounded">
-                      {profile.lead_score}
-                    </div>
+                <div>
+                  <div className="text-gray-400 mb-1">Visitor ID</div>
+                  <div className="font-mono bg-gray-800 px-2 py-1 rounded break-all">
+                    {displayId}
                   </div>
-                )}
-
-                {profile.segments && profile.segments.length > 0 && (
-                  <div>
-                    <div className="text-gray-400 mb-1">Segments</div>
-                    <div className="font-mono bg-gray-800 px-2 py-1 rounded">
-                      {profile.segments.join(", ")}
-                    </div>
-                  </div>
-                )}
-
-                {profile.visits !== undefined && (
-                  <div>
-                    <div className="text-gray-400 mb-1">Visits</div>
-                    <div className="font-mono bg-gray-800 px-2 py-1 rounded">
-                      {profile.visits}
-                    </div>
-                  </div>
-                )}
+                </div>
 
                 <div>
-                  <div className="text-gray-400 mb-1">Full Profile</div>
-                  <pre className="font-mono bg-gray-800 px-2 py-1 rounded overflow-x-auto text-[10px] max-h-32 overflow-y-auto">
-                    {JSON.stringify(profile, null, 2)}
+                  <div className="text-gray-400 mb-1">Cookie ({VISITOR_COOKIE_KEY})</div>
+                  <div className="font-mono bg-gray-800 px-2 py-1 rounded break-all">
+                    {cookieId || "Not set"}
+                  </div>
+                </div>
+
+                <div>
+                  <div className="text-gray-400 mb-1">LocalStorage</div>
+                  <div className="font-mono bg-gray-800 px-2 py-1 rounded break-all">
+                    {storageId || "Not set"}
+                  </div>
+                </div>
+
+                {profile && (
+                  <>
+                    {profile.lead_score !== undefined && (
+                      <div>
+                        <div className="text-gray-400 mb-1">Lead Score</div>
+                        <div className="font-mono bg-gray-800 px-2 py-1 rounded">
+                          {profile.lead_score}
+                        </div>
+                      </div>
+                    )}
+
+                    {profile.segments && profile.segments.length > 0 && (
+                      <div>
+                        <div className="text-gray-400 mb-1">Segments</div>
+                        <div className="font-mono bg-gray-800 px-2 py-1 rounded">
+                          {profile.segments.join(", ")}
+                        </div>
+                      </div>
+                    )}
+
+                    {profile.visits !== undefined && (
+                      <div>
+                        <div className="text-gray-400 mb-1">Total Visits</div>
+                        <div className="font-mono bg-gray-800 px-2 py-1 rounded">
+                          {profile.visits}
+                        </div>
+                      </div>
+                    )}
+
+                    <div>
+                      <div className="text-gray-400 mb-1">Full Profile</div>
+                      <pre className="font-mono bg-gray-800 px-2 py-1 rounded overflow-x-auto text-[10px] max-h-32 overflow-y-auto">
+                        {JSON.stringify(profile, null, 2)}
+                      </pre>
+                    </div>
+                  </>
+                )}
+              </>
+            )}
+
+            {/* Session Tab */}
+            {activeTab === "session" && (
+              <>
+                <div>
+                  <div className="text-gray-400 mb-1">Session ID</div>
+                  <div className="font-mono bg-gray-800 px-2 py-1 rounded break-all">
+                    {sessionId || session?.session_id || "Not set"}
+                  </div>
+                </div>
+
+                {session && (
+                  <>
+                    <div>
+                      <div className="text-gray-400 mb-1">Landing Page</div>
+                      <div className="font-mono bg-gray-800 px-2 py-1 rounded break-all text-[10px]">
+                        {session.landing_page || "Not set"}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="text-gray-400 mb-1">Referrer</div>
+                      <div className="font-mono bg-gray-800 px-2 py-1 rounded break-all text-[10px]">
+                        {session.referrer || "Direct"}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <div className="text-gray-400 mb-1">Page Views</div>
+                        <div className="font-mono bg-gray-800 px-2 py-1 rounded">
+                          {session.page_views}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-gray-400 mb-1">Pages Visited</div>
+                        <div className="font-mono bg-gray-800 px-2 py-1 rounded">
+                          {session.pages_visited?.length || 0}
+                        </div>
+                      </div>
+                    </div>
+
+                    {session.pages_visited && session.pages_visited.length > 0 && (
+                      <div>
+                        <div className="text-gray-400 mb-1">Pages</div>
+                        <div className="font-mono bg-gray-800 px-2 py-1 rounded text-[10px] max-h-20 overflow-y-auto">
+                          {session.pages_visited.map((p, i) => (
+                            <div key={i}>{p}</div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div>
+                      <div className="text-gray-400 mb-1">Session Started</div>
+                      <div className="font-mono bg-gray-800 px-2 py-1 rounded text-[10px]">
+                        {session.started_at ? new Date(session.started_at).toLocaleString() : "Unknown"}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="text-gray-400 mb-1">Full Session Data</div>
+                      <pre className="font-mono bg-gray-800 px-2 py-1 rounded overflow-x-auto text-[10px] max-h-32 overflow-y-auto">
+                        {JSON.stringify(session, null, 2)}
+                      </pre>
+                    </div>
+                  </>
+                )}
+
+                {!session && (
+                  <div className="text-gray-500 text-center py-4">No session data available</div>
+                )}
+              </>
+            )}
+
+            {/* UTM Tab */}
+            {activeTab === "utm" && (
+              <>
+                <div>
+                  <div className="text-gray-400 mb-1 font-semibold">First Touch (Stored)</div>
+                  {firstTouchUtm ? (
+                    <div className="space-y-1">
+                      {Object.entries(firstTouchUtm).map(([key, value]) => (
+                        <div key={key} className="flex justify-between">
+                          <span className="text-gray-500">{key}:</span>
+                          <span className="font-mono bg-gray-800 px-2 rounded">{value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-gray-500">No first-touch UTM stored</div>
+                  )}
+                </div>
+
+                <div>
+                  <div className="text-gray-400 mb-1 font-semibold">Last Touch (Session)</div>
+                  {session?.utm && Object.keys(session.utm).length > 0 ? (
+                    <div className="space-y-1">
+                      {Object.entries(session.utm).map(([key, value]) => (
+                        <div key={key} className="flex justify-between">
+                          <span className="text-gray-500">{key}:</span>
+                          <span className="font-mono bg-gray-800 px-2 rounded">{value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-gray-500">No session UTM parameters</div>
+                  )}
+                </div>
+
+                <div>
+                  <div className="text-gray-400 mb-1 font-semibold">Current URL Params</div>
+                  <pre className="font-mono bg-gray-800 px-2 py-1 rounded overflow-x-auto text-[10px] max-h-24 overflow-y-auto">
+                    {typeof window !== "undefined"
+                      ? JSON.stringify(Object.fromEntries(new URLSearchParams(window.location.search)), null, 2)
+                      : "{}"}
                   </pre>
                 </div>
               </>
             )}
 
-            {/* DataLayer */}
-            {dataLayer && dataLayer.length > 0 && (
-              <div>
-                <div className="text-gray-400 mb-1">DataLayer ({dataLayer.length} items)</div>
-                <pre className="font-mono bg-gray-800 px-2 py-1 rounded overflow-x-auto text-[10px] max-h-32 overflow-y-auto">
-                  {JSON.stringify(dataLayer.slice(-5), null, 2)}
-                </pre>
-                <p className="text-gray-500 text-[10px] mt-1">Showing last 5 entries</p>
-              </div>
+            {/* DataLayer Tab */}
+            {activeTab === "datalayer" && (
+              <>
+                {dataLayer && dataLayer.length > 0 ? (
+                  <>
+                    <div className="text-gray-400 mb-1">DataLayer ({dataLayer.length} items)</div>
+                    <pre className="font-mono bg-gray-800 px-2 py-1 rounded overflow-x-auto text-[10px] max-h-64 overflow-y-auto">
+                      {JSON.stringify(dataLayer.slice(-10), null, 2)}
+                    </pre>
+                    <p className="text-gray-500 text-[10px]">Showing last 10 entries</p>
+                  </>
+                ) : (
+                  <div className="text-gray-500 text-center py-4">No dataLayer entries</div>
+                )}
+              </>
             )}
-
-            {/* URL Params */}
-            <div>
-              <div className="text-gray-400 mb-1">URL Params</div>
-              <pre className="font-mono bg-gray-800 px-2 py-1 rounded overflow-x-auto text-[10px] max-h-24 overflow-y-auto">
-                {typeof window !== "undefined"
-                  ? JSON.stringify(Object.fromEntries(new URLSearchParams(window.location.search)), null, 2)
-                  : "{}"}
-              </pre>
-            </div>
 
             {/* Actions */}
             <div className="pt-2 border-t border-gray-700 space-y-2">
@@ -307,15 +502,21 @@ export function VisitorDebugPanel() {
               <button
                 onClick={() => {
                   localStorage.removeItem(VISITOR_STORAGE_KEY);
+                  localStorage.removeItem(UTM_STORAGE_KEY);
+                  sessionStorage.removeItem(SESSION_STORAGE_KEY);
                   document.cookie = `${VISITOR_COOKIE_KEY}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                  document.cookie = `${SESSION_COOKIE_KEY}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
                   setVisitorId(null);
+                  setSessionId(null);
                   setCookieId(null);
                   setStorageId(null);
                   setProfile(null);
+                  setSession(null);
+                  setFirstTouchUtm(null);
                 }}
                 className="w-full px-2 py-1.5 bg-red-600 hover:bg-red-700 rounded text-white text-xs font-medium transition-colors"
               >
-                Clear Visitor Data
+                Clear All Data
               </button>
               <button
                 onClick={() => {
