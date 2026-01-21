@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     builderBlocks.unshift({
       "@type": "@builder.io/sdk:Element",
       component: {
-        name: "Header",
+        name: "SiteHeader",
         options: {},
       },
     });
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     builderBlocks.push({
       "@type": "@builder.io/sdk:Element",
       component: {
-        name: "Footer",
+        name: "SiteFooter",
         options: {},
       },
     });

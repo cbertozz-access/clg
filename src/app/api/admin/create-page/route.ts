@@ -184,6 +184,22 @@ export async function POST(request: NextRequest) {
 
     const blocks = JSON.parse(blocksJson).blocks;
 
+    // Add SiteHeader at the beginning and SiteFooter at the end
+    blocks.unshift({
+      "@type": "@builder.io/sdk:Element",
+      component: {
+        name: "SiteHeader",
+        options: {},
+      },
+    });
+    blocks.push({
+      "@type": "@builder.io/sdk:Element",
+      component: {
+        name: "SiteFooter",
+        options: {},
+      },
+    });
+
     // Build page data for Builder.io Write API
     const pageData = {
       name,
