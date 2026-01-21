@@ -1,10 +1,13 @@
 "use client";
 
+import Image from "next/image";
+
 /**
  * LPHero Component
  *
  * Hero section with headline, subheadline, and CTAs.
  * Uses CSS variables for theming - colors adapt to active brand.
+ * Images are optimized via Next.js Image component.
  */
 
 interface BenefitItem {
@@ -51,13 +54,41 @@ export function LPHero(props: Partial<LPHeroProps>) {
     '<span class="text-[var(--color-primary)]">$1</span>'
   );
 
-  const backgroundStyle = backgroundImage
-    ? {
-        background: `linear-gradient(to bottom, rgba(26, 26, 26, ${overlayOpacity / 100}) 0%, rgba(26, 26, 26, ${(overlayOpacity + 5) / 100}) 100%), url(${backgroundImage})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center top",
-      }
-    : { backgroundColor: "#1A1A1A" };
+  // Helper component for optimized background
+  const OptimizedBackground = () => (
+    <>
+      {backgroundImage && !backgroundImage.includes("placehold") ? (
+        <>
+          <Image
+            src={backgroundImage}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-top"
+            quality={80}
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(to bottom, rgba(26, 26, 26, ${overlayOpacity / 100}) 0%, rgba(26, 26, 26, ${(overlayOpacity + 5) / 100}) 100%)`,
+            }}
+          />
+        </>
+      ) : (
+        <div
+          className="absolute inset-0"
+          style={{
+            background: backgroundImage
+              ? `linear-gradient(to bottom, rgba(26, 26, 26, ${overlayOpacity / 100}) 0%, rgba(26, 26, 26, ${(overlayOpacity + 5) / 100}) 100%), url(${backgroundImage})`
+              : "#1A1A1A",
+            backgroundSize: "cover",
+            backgroundPosition: "center top",
+          }}
+        />
+      )}
+    </>
+  );
 
   if (variant === "product-focused") {
     return (
@@ -75,11 +106,9 @@ export function LPHero(props: Partial<LPHeroProps>) {
 
   if (variant === "squeeze") {
     return (
-      <section
-        className="min-h-[calc(100vh-120px)] flex items-center py-12"
-        style={backgroundStyle}
-      >
-        <div className="max-w-6xl mx-auto px-4 w-full">
+      <section className="relative min-h-[calc(100vh-120px)] flex items-center py-12">
+        <OptimizedBackground />
+        <div className="relative z-10 max-w-6xl mx-auto px-4 w-full">
           <div className="text-white">
             {showBadge && (
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full text-sm mb-6">
@@ -148,8 +177,9 @@ export function LPHero(props: Partial<LPHeroProps>) {
 
   // Standard variant
   return (
-    <section className="text-white py-16 md:py-24" style={backgroundStyle}>
-      <div className="max-w-7xl mx-auto px-4">
+    <section className="relative text-white py-16 md:py-24">
+      <OptimizedBackground />
+      <div className="relative z-10 max-w-7xl mx-auto px-4">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div>
             <h1

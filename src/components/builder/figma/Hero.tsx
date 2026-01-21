@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import {
   buildPersonalizationContext,
   getUrlParams,
@@ -167,19 +168,13 @@ export function FigmaHero({
   // Determine background image (priority: prop > campaign image)
   const heroImageUrl = backgroundImage || (useCampaignImage && context?.heroImage) || defaultCampaignContent.heroImage;
 
-  // Background styles
-  const bgStyle = heroImageUrl
-    ? {
-        backgroundImage:
-          overlayIntensity === "none"
-            ? `url(${heroImageUrl})`
-            : `${heroTokens.overlay[overlayIntensity]}, url(${heroImageUrl})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }
-    : {
-        backgroundColor: "var(--color-primary, #1A1A1A)",
-      };
+  // Overlay opacity values
+  const overlayOpacities = {
+    none: { start: 0, end: 0 },
+    light: { start: 0.3, end: 0.5 },
+    medium: { start: 0.4, end: 0.6 },
+    dark: { start: 0.5, end: 0.7 },
+  };
 
   const maxWidthClasses = {
     sm: "max-w-2xl",
@@ -196,12 +191,36 @@ export function FigmaHero({
   return (
     <section
       className={`relative flex items-center ${heroTokens.height[minHeight]} px-6 sm:px-10 md:px-16 lg:px-20 py-16`}
-      style={bgStyle}
+      style={!heroImageUrl ? { backgroundColor: "var(--color-primary, #1A1A1A)" } : undefined}
     >
+      {/* Optimized Background Image */}
+      {heroImageUrl && (
+        <>
+          <Image
+            src={heroImageUrl}
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center"
+            quality={80}
+          />
+          {/* Overlay */}
+          {overlayIntensity !== "none" && (
+            <div
+              className="absolute inset-0"
+              style={{
+                background: `linear-gradient(to bottom, rgba(0,0,0,${overlayOpacities[overlayIntensity].start}) 0%, rgba(0,0,0,${overlayOpacities[overlayIntensity].end}) 100%)`,
+              }}
+            />
+          )}
+        </>
+      )}
+
       {/* Contact info bar - top right */}
       {showContactInfo && (
         <div
-          className="absolute top-4 right-6 sm:right-10 md:right-16 lg:right-20 flex items-center gap-4 text-white text-sm"
+          className="absolute z-10 top-4 right-6 sm:right-10 md:right-16 lg:right-20 flex items-center gap-4 text-white text-sm"
           style={{ textShadow: heroTokens.textShadow.subheadline }}
         >
           <a href="tel:134000" className="flex items-center gap-1.5 hover:text-white/80 transition-colors">
@@ -217,7 +236,7 @@ export function FigmaHero({
         </div>
       )}
 
-      <div className={`w-full ${maxWidthClasses[contentMaxWidth]} ${textAlign === "center" ? "mx-auto" : ""}`}>
+      <div className={`relative z-10 w-full ${maxWidthClasses[contentMaxWidth]} ${textAlign === "center" ? "mx-auto" : ""}`}>
         <div className={`flex flex-col ${alignClasses[textAlign]}`}>
           {/* Badge */}
           {showBadge && badgeText && (

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useEnquiryCart } from "@/lib/enquiry-cart";
 
 /**
@@ -7,9 +8,47 @@ import { useEnquiryCart } from "@/lib/enquiry-cart";
  *
  * Displays a single equipment item with image, specs, pricing, and CTA.
  * Uses CSS variables for multi-brand theming.
+ *
+ * Can be used in two modes:
+ * 1. Pass all props directly (existing behavior)
+ * 2. Pass just `productId` to auto-fetch from the API
  */
 
+interface Product {
+  productId: string;
+  model: string;
+  description?: string;
+  brand?: string;
+  category: string;
+  subCategory?: string;
+  heroLabel?: string;
+  productImages?: Array<{
+    imageUrl: string;
+    imageThumbUrl?: string;
+    imageAltText?: string;
+  }>;
+  operationalSpecification?: {
+    horizontalReachFt?: string;
+    horizontalReachM?: number;
+    platformHeightFt?: string;
+    platformHeightM?: number;
+    workingHeightFt?: string;
+    workingHeightM?: number;
+    capacityKg?: number;
+    capacityT?: number;
+  };
+  pricing?: {
+    daily?: number;
+    weekly?: number;
+    monthly?: number;
+  };
+}
+
 export interface EquipmentCardProps {
+  /** Product ID to fetch from API (alternative to passing all props) */
+  productId?: string;
+  /** API endpoint URL (used with productId) */
+  apiEndpoint?: string;
   /** Equipment ID */
   id?: string;
   /** Product image URL */
@@ -49,18 +88,20 @@ export interface EquipmentCardProps {
 }
 
 export function EquipmentCard({
-  id,
-  imageUrl,
-  brand,
-  model,
-  name,
-  category,
-  spec1,
-  spec2,
-  dailyPrice,
-  weeklyPrice,
+  productId,
+  apiEndpoint = "https://acccessproducts.netlify.app/api/products",
+  id: idProp,
+  imageUrl: imageUrlProp,
+  brand: brandProp,
+  model: modelProp,
+  name: nameProp,
+  category: categoryProp,
+  spec1: spec1Prop,
+  spec2: spec2Prop,
+  dailyPrice: dailyPriceProp,
+  weeklyPrice: weeklyPriceProp,
   ctaText = "View Details",
-  ctaLink = "#",
+  ctaLink: ctaLinkProp,
   variant = "default",
   showPricing = true,
   showSpecs = true,
@@ -68,8 +109,118 @@ export function EquipmentCard({
   onAddToEnquiry,
   onQuickView,
 }: EquipmentCardProps) {
+  // State for fetched product data
+  const [fetchedProduct, setFetchedProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(!!productId);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch product data when productId is provided
+  useEffect(() => {
+    if (!productId) return;
+
+    const targetId = productId; // Capture for closure
+
+    async function fetchProduct() {
+      try {
+        setLoading(true);
+        const response = await fetch(apiEndpoint);
+
+        if (!response.ok) {
+          throw new Error(`API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const allProducts: Product[] = Array.isArray(data) ? data : data.products || [];
+
+        // Find matching product by ID (case-insensitive)
+        const searchId = targetId.toLowerCase();
+        const product = allProducts.find(
+          (p) =>
+            p.productId === targetId ||
+            p.productId?.toLowerCase() === searchId ||
+            p.model?.toLowerCase() === searchId
+        );
+
+        if (product) {
+          setFetchedProduct(product);
+          setError(null);
+        } else {
+          setError(`Product not found: ${targetId}`);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load product");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchProduct();
+  }, [productId, apiEndpoint]);
+
+  // Helper to extract title from heroLabel
+  const getProductTitle = (product: Product): string => {
+    if (product.heroLabel) {
+      const match = product.heroLabel.match(/title="([^"]+)"/);
+      return match ? match[1] : product.model;
+    }
+    return product.model;
+  };
+
+  // Helper to get spec strings from product
+  const getSpec1 = (product: Product): string => {
+    const ops = product.operationalSpecification;
+    if (ops?.capacityT) return `Capacity: ${ops.capacityT}T`;
+    if (ops?.platformHeightFt) return `Platform Height: ${ops.platformHeightFt}`;
+    if (ops?.horizontalReachFt && ops.horizontalReachFt !== "NA") return `Reach: ${ops.horizontalReachFt}`;
+    return "";
+  };
+
+  const getSpec2 = (product: Product): string => {
+    const ops = product.operationalSpecification;
+    if (ops?.workingHeightFt && ops.workingHeightFt !== "NA") return `Working Height: ${ops.workingHeightFt}`;
+    if (ops?.platformHeightM) return `Height: ${ops.platformHeightM}m`;
+    return "";
+  };
+
+  // Resolve props - use fetched data if available, otherwise use passed props
+  const id = fetchedProduct?.productId ?? idProp;
+  const imageUrl = fetchedProduct?.productImages?.[0]?.imageUrl ?? imageUrlProp;
+  const brand = fetchedProduct?.brand ?? brandProp;
+  const model = fetchedProduct?.model ?? modelProp;
+  const name = fetchedProduct ? getProductTitle(fetchedProduct) : nameProp;
+  const category = fetchedProduct?.category ?? categoryProp;
+  const spec1 = fetchedProduct ? getSpec1(fetchedProduct) : spec1Prop;
+  const spec2 = fetchedProduct ? getSpec2(fetchedProduct) : spec2Prop;
+  const dailyPrice = fetchedProduct?.pricing?.daily ?? dailyPriceProp;
+  const weeklyPrice = fetchedProduct?.pricing?.weekly ?? weeklyPriceProp;
+  const ctaLink = ctaLinkProp ?? (id ? `/equipment/${id}` : "#");
+
   const { addItem, removeItem, isInCart } = useEnquiryCart();
   const inCart = id ? isInCart(id) : false;
+
+  // Show loading state
+  if (loading) {
+    return (
+      <div className="animate-pulse bg-[var(--color-card,white)] border border-[var(--color-border,#e2e8f0)] rounded-[var(--radius,8px)] overflow-hidden">
+        <div className="h-48 md:h-56 bg-gray-200" />
+        <div className="p-4 space-y-3">
+          <div className="h-3 bg-gray-200 rounded w-1/4" />
+          <div className="h-5 bg-gray-200 rounded w-3/4" />
+          <div className="h-3 bg-gray-200 rounded w-1/2" />
+          <div className="h-10 bg-gray-200 rounded mt-4" />
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="bg-[var(--color-card,white)] border border-[var(--color-error,#ef4444)]/30 rounded-[var(--radius,8px)] p-4 text-center">
+        <p className="text-sm text-[var(--color-error,#ef4444)]">{error}</p>
+      </div>
+    );
+  }
 
   const handleEnquiryClick = () => {
     if (!id) return;
