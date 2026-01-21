@@ -248,9 +248,13 @@ export function EquipmentSearch({
   // Quick view modal state
   const [quickViewOpen, setQuickViewOpen] = useState(false);
   const [quickViewEquipment, setQuickViewEquipment] = useState<QuickViewEquipment | null>(null);
+  const [quickViewLoading, setQuickViewLoading] = useState(false);
 
-  const handleQuickView = (item: Equipment) => {
-    // Map full equipment data to quick view format
+  // Cache for Netlify API products (fetched once)
+  const [netlifyProducts, setNetlifyProducts] = useState<Record<string, unknown>[] | null>(null);
+
+  const handleQuickView = async (item: Equipment) => {
+    // Show modal immediately with basic Algolia data
     setQuickViewEquipment({
       id: item.id,
       name: item.name,
@@ -261,13 +265,73 @@ export function EquipmentSearch({
       imageUrl: item.imageUrl,
       images: item.images,
       workingHeight: item.specs.workingHeight,
-      platformHeight: undefined, // Not in current data
+      platformHeight: undefined,
       capacity: item.specs.capacity,
       reach: item.specs.horizontalReach,
       powerSource: item.energySource,
-      environment: undefined, // Not in current data
+      environment: undefined,
     });
     setQuickViewOpen(true);
+    setQuickViewLoading(true);
+
+    try {
+      // Fetch from Netlify API for full details (cache the results)
+      let products = netlifyProducts;
+      if (!products) {
+        const response = await fetch("https://acccessproducts.netlify.app/api/products");
+        if (response.ok) {
+          const data = await response.json();
+          products = Array.isArray(data) ? data : data.products || [];
+          setNetlifyProducts(products);
+        }
+      }
+
+      if (products) {
+        // Find matching product by ID or model
+        const fullProduct = products.find((p: Record<string, unknown>) =>
+          p.productId === item.id ||
+          p.model === item.model ||
+          (p.productId as string)?.toLowerCase() === item.id?.toLowerCase()
+        ) as Record<string, unknown> | undefined;
+
+        if (fullProduct) {
+          const ops = fullProduct.operationalSpecification as Record<string, unknown> | undefined;
+          const pricing = fullProduct.pricing as Record<string, number> | undefined;
+          const images = fullProduct.productImages as Array<{ imageUrl: string }> | undefined;
+
+          // Update with full details from Netlify API
+          setQuickViewEquipment({
+            id: item.id,
+            name: item.name,
+            brand: item.brand,
+            model: item.model,
+            category: item.category,
+            subcategory: item.subcategory,
+            description: fullProduct.description as string | undefined,
+            imageUrl: images?.[0]?.imageUrl || item.imageUrl,
+            images: images?.map(img => img.imageUrl) || item.images,
+            workingHeight: ops?.workingHeightFt as string | undefined || item.specs.workingHeight,
+            platformHeight: ops?.platformHeightFt as string | undefined,
+            capacity: ops?.capacityKg
+              ? `${ops.capacityKg}kg`
+              : ops?.capacityT
+                ? `${ops.capacityT}T`
+                : item.specs.capacity,
+            reach: ops?.horizontalReachFt as string | undefined || item.specs.horizontalReach,
+            powerSource: item.energySource,
+            environment: undefined,
+            dailyPrice: pricing?.daily,
+            weeklyPrice: pricing?.weekly,
+            monthlyPrice: pricing?.monthly,
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch product details:", error);
+      // Keep showing Algolia data on error
+    } finally {
+      setQuickViewLoading(false);
+    }
   };
 
   // Track if URL params have been applied
