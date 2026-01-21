@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 /**
  * Admin Dashboard - Page Generator
@@ -19,6 +19,15 @@ interface Brand {
   id: string;
   name: string;
   color: string;
+}
+
+interface CreatedPage {
+  id: string;
+  name: string;
+  urlPath: string;
+  editUrl?: string;
+  createdAt: string;
+  brand: string;
 }
 
 const TEMPLATES: PageTemplate[] = [
@@ -62,6 +71,27 @@ export function AdminDashboard() {
   const [isCreating, setIsCreating] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [lastCreatedPage, setLastCreatedPage] = useState<CreatedPage | null>(null);
+  const [recentPages, setRecentPages] = useState<CreatedPage[]>([]);
+
+  // Load recent pages from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem("clg-admin-recent-pages");
+    if (saved) {
+      try {
+        setRecentPages(JSON.parse(saved));
+      } catch (e) {
+        console.error("Failed to load recent pages:", e);
+      }
+    }
+  }, []);
+
+  // Save recent pages to localStorage when updated
+  const saveRecentPage = (page: CreatedPage) => {
+    const updated = [page, ...recentPages.filter(p => p.id !== page.id)].slice(0, 10);
+    setRecentPages(updated);
+    localStorage.setItem("clg-admin-recent-pages", JSON.stringify(updated));
+  };
 
   // Form state
   const [formData, setFormData] = useState({
@@ -89,6 +119,7 @@ export function AdminDashboard() {
     setIsCreating(true);
     setSuccessMessage(null);
     setErrorMessage(null);
+    setLastCreatedPage(null);
 
     try {
       const response = await fetch("/api/admin/create-page", {
@@ -103,8 +134,20 @@ export function AdminDashboard() {
 
       const result = await response.json();
 
-      if (response.ok) {
-        setSuccessMessage(`Page created successfully! View it at: ${formData.urlPath}`);
+      if (response.ok && result.success) {
+        const createdPage: CreatedPage = {
+          id: result.pageId || `temp-${Date.now()}`,
+          name: formData.name,
+          urlPath: formData.urlPath,
+          editUrl: result.editUrl,
+          createdAt: new Date().toISOString(),
+          brand: selectedBrand,
+        };
+
+        setLastCreatedPage(createdPage);
+        saveRecentPage(createdPage);
+        setSuccessMessage("Page created successfully!");
+
         // Reset form
         setFormData({
           name: "",
@@ -116,7 +159,7 @@ export function AdminDashboard() {
         });
         setSelectedTemplate("");
       } else {
-        setErrorMessage(result.error || "Failed to create page");
+        setErrorMessage(result.error || "Failed to create page. Check Builder.io for details.");
       }
     } catch (error) {
       setErrorMessage("Network error. Please try again.");
@@ -247,30 +290,6 @@ export function AdminDashboard() {
                     Select a template and configure your new landing page
                   </p>
                 </div>
-
-                {/* Success/Error Messages */}
-                {successMessage && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
-                    <svg className="w-5 h-5 text-green-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <div>
-                      <p className="text-green-800 font-medium">{successMessage}</p>
-                      <a href={formData.urlPath} className="text-green-600 text-sm hover:underline">
-                        Preview page →
-                      </a>
-                    </div>
-                  </div>
-                )}
-
-                {errorMessage && (
-                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
-                    <svg className="w-5 h-5 text-red-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                    </svg>
-                    <p className="text-red-800">{errorMessage}</p>
-                  </div>
-                )}
 
                 {/* Step 1: Select Template */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -431,6 +450,77 @@ export function AdminDashboard() {
                     </div>
                   </div>
 
+                  {/* Success/Error Messages - Right above Create button */}
+                  {successMessage && lastCreatedPage && (
+                    <div className="mt-6 bg-green-50 border border-green-200 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                        </svg>
+                        <div className="flex-1">
+                          <p className="text-green-800 font-medium">{successMessage}</p>
+                          <p className="text-green-700 text-sm mt-1">
+                            <strong>{lastCreatedPage.name}</strong> created at <code className="bg-green-100 px-1 rounded">{lastCreatedPage.urlPath}</code>
+                          </p>
+                          <div className="flex gap-4 mt-3">
+                            <a
+                              href={lastCreatedPage.urlPath}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-sm font-medium text-green-700 hover:text-green-800"
+                            >
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                              </svg>
+                              Preview Page
+                            </a>
+                            {lastCreatedPage.editUrl && (
+                              <a
+                                href={lastCreatedPage.editUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-sm font-medium text-green-700 hover:text-green-800"
+                              >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                                Edit in Builder.io
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => { setSuccessMessage(null); setLastCreatedPage(null); }}
+                          className="text-green-500 hover:text-green-700"
+                        >
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {errorMessage && (
+                    <div className="mt-6 bg-red-50 border border-red-200 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <svg className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                        </svg>
+                        <p className="text-red-800 flex-1">{errorMessage}</p>
+                        <button
+                          onClick={() => setErrorMessage(null)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Create Button */}
                   <div className="mt-6 flex justify-end gap-4">
                     <button
@@ -467,9 +557,104 @@ export function AdminDashboard() {
             )}
 
             {activeTab === "pages" && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Pages</h2>
-                <p className="text-gray-500">Page listing coming soon...</p>
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Pages</h2>
+                  <p className="text-gray-600 mt-1">Recently created pages from this admin</p>
+                </div>
+
+                {recentPages.length === 0 ? (
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <p className="text-gray-500 mb-4">No pages created yet</p>
+                    <button
+                      onClick={() => setActiveTab("create")}
+                      className="text-[#E31937] font-medium hover:underline"
+                    >
+                      Create your first page →
+                    </button>
+                  </div>
+                ) : (
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                    <table className="w-full">
+                      <thead className="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                          <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Page Name</th>
+                          <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">URL Path</th>
+                          <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Brand</th>
+                          <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Created</th>
+                          <th className="text-right px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {recentPages.map((page) => (
+                          <tr key={page.id} className="hover:bg-gray-50">
+                            <td className="px-6 py-4">
+                              <span className="font-medium text-gray-900">{page.name}</span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <code className="text-sm bg-gray-100 px-2 py-1 rounded">{page.urlPath}</code>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className="inline-flex items-center gap-2">
+                                <span
+                                  className="w-3 h-3 rounded-full"
+                                  style={{ backgroundColor: BRANDS.find(b => b.id === page.brand)?.color || "#gray" }}
+                                />
+                                <span className="text-sm text-gray-600">
+                                  {BRANDS.find(b => b.id === page.brand)?.name || page.brand}
+                                </span>
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-500">
+                              {new Date(page.createdAt).toLocaleDateString()}
+                            </td>
+                            <td className="px-6 py-4 text-right">
+                              <div className="flex justify-end gap-2">
+                                <a
+                                  href={page.urlPath}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-gray-500 hover:text-[#E31937] p-1"
+                                  title="Preview"
+                                >
+                                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                  </svg>
+                                </a>
+                                {page.editUrl && (
+                                  <a
+                                    href={page.editUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-gray-500 hover:text-[#E31937] p-1"
+                                    title="Edit in Builder.io"
+                                  >
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                  </a>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                <p className="text-sm text-gray-500">
+                  Note: This list shows pages created from this admin panel. View all pages in{" "}
+                  <a href="https://builder.io/content" target="_blank" rel="noopener noreferrer" className="text-[#E31937] hover:underline">
+                    Builder.io
+                  </a>
+                </p>
               </div>
             )}
 

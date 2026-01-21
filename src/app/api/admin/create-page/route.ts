@@ -184,17 +184,15 @@ export async function POST(request: NextRequest) {
 
     const blocks = JSON.parse(blocksJson).blocks;
 
-    // Build page data for Builder.io
+    // Build page data for Builder.io Write API
     const pageData = {
       name,
+      published: "draft", // Start as draft - user can publish in Builder.io
       data: {
         title: name,
         description: subheadline || `${name} - Access Hire Australia`,
-        url: urlPath,
-        brand: brand ? { "@type": "@builder.io/core:Reference", id: BRAND_REFS[brand] || brand } : undefined,
         blocks,
       },
-      published: "draft", // Start as draft
       query: [
         {
           property: "urlPath",
@@ -206,7 +204,6 @@ export async function POST(request: NextRequest) {
 
     // Check if we have the private key for Write API
     if (!BUILDER_PRIVATE_KEY) {
-      // For demo purposes, return success without actually creating
       console.log("Builder.io Write API key not configured. Page data:", pageData);
       return NextResponse.json({
         success: true,
@@ -215,6 +212,8 @@ export async function POST(request: NextRequest) {
         note: "Set BUILDER_PRIVATE_KEY env var to enable actual page creation",
       });
     }
+
+    console.log("Creating page in Builder.io:", JSON.stringify(pageData, null, 2));
 
     // Call Builder.io Write API
     const response = await fetch(
@@ -229,22 +228,37 @@ export async function POST(request: NextRequest) {
       }
     );
 
+    const responseText = await response.text();
+    console.log("Builder.io response status:", response.status);
+    console.log("Builder.io response:", responseText);
+
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error("Builder.io API error:", errorText);
       return NextResponse.json(
-        { error: `Builder.io API error: ${response.status}` },
+        {
+          error: `Builder.io API error: ${response.status}`,
+          details: responseText,
+        },
         { status: response.status }
       );
     }
 
-    const result = await response.json();
+    let result;
+    try {
+      result = JSON.parse(responseText);
+    } catch {
+      return NextResponse.json({
+        success: true,
+        message: "Page created (response not JSON)",
+        rawResponse: responseText,
+      });
+    }
 
     return NextResponse.json({
       success: true,
-      message: "Page created successfully",
+      message: "Page created successfully as draft. Publish it in Builder.io to make it live.",
       pageId: result.id,
       editUrl: `https://builder.io/content/${result.id}`,
+      status: "draft",
     });
   } catch (error) {
     console.error("Create page error:", error);
