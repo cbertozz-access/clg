@@ -54,11 +54,73 @@
     },
 
     /**
+     * Hash a string using SHA-256 (for PII protection)
+     * Returns hex string, or null if input is empty
+     */
+    async hashPII(value) {
+      if (!value || typeof value !== 'string') return null;
+
+      // Normalize: lowercase and trim
+      const normalized = value.toLowerCase().trim();
+      if (!normalized) return null;
+
+      try {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(normalized);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+      } catch (e) {
+        // Fallback for older browsers - simple hash
+        let hash = 0;
+        for (let i = 0; i < normalized.length; i++) {
+          const char = normalized.charCodeAt(i);
+          hash = ((hash << 5) - hash) + char;
+          hash = hash & hash;
+        }
+        return 'fallback_' + Math.abs(hash).toString(16);
+      }
+    },
+
+    /**
+     * Hash multiple PII fields, returns object with hashed values
+     */
+    async hashPIIFields(fields) {
+      const result = {};
+      for (const [key, value] of Object.entries(fields)) {
+        if (value) {
+          result[key + '_hash'] = await this.hashPII(value);
+        }
+      }
+      return result;
+    },
+
+    /**
      * Send event to Server-side GTM container
      * Uses sendBeacon for reliability, falls back to fetch
+     * PII fields are automatically hashed before sending
      */
-    sendToSGTM(eventName, eventData = {}) {
+    async sendToSGTM(eventName, eventData = {}) {
       if (!this.sgtmEnabled) return;
+
+      // Extract and hash any PII fields
+      const piiFields = {
+        email: eventData.email,
+        phone: eventData.phone,
+        name: eventData.name,
+        company: eventData.company
+      };
+
+      // Remove raw PII from eventData
+      const sanitizedEventData = { ...eventData };
+      delete sanitizedEventData.email;
+      delete sanitizedEventData.phone;
+      delete sanitizedEventData.name;
+      delete sanitizedEventData.company;
+      delete sanitizedEventData.form_data; // Don't send raw form data
+
+      // Hash PII fields
+      const hashedPII = await this.hashPIIFields(piiFields);
 
       const payload = {
         event_name: eventName,
@@ -95,8 +157,10 @@
         lead_score: this.profile?.lead_score,
         segments: this.profile?.segments,
         total_visits: this.profile?.visits,
-        // Custom event data
-        ...eventData
+        // Hashed PII (safe to store)
+        ...hashedPII,
+        // Custom event data (sanitized)
+        ...sanitizedEventData
       };
 
       const url = SGTM_ENDPOINT + SGTM_PATH;
@@ -653,6 +717,7 @@
 
     /**
      * Identify visitor (e.g., after form submission)
+     * Hashes PII before sending to sGTM, but keeps raw in local dataLayer
      */
     async identify(userData = {}) {
       const identifyData = {
@@ -663,9 +728,30 @@
         ...userData
       };
 
-      // Send to server-side GTM
-      this.sendToSGTM('identify', identifyData);
+      // Hash PII for dataLayer (allows matching without storing raw PII)
+      const hashedPII = await this.hashPIIFields({
+        email: userData.email,
+        phone: userData.phone,
+        name: userData.name,
+        company: userData.company
+      });
 
+      // Push hashed identity to dataLayer
+      window.dataLayer.push({
+        event: 'clg_user_identified',
+        visitor_id: this.visitorId,
+        session_id: this.sessionId,
+        // Hashed PII (safe for analytics)
+        ...hashedPII,
+        // Include any non-PII fields from userData
+        user_type: userData.user_type,
+        industry: userData.industry
+      });
+
+      // Send to server-side GTM (PII will be hashed by sendToSGTM)
+      await this.sendToSGTM('identify', identifyData);
+
+      // Send to Firebase (raw data for CRM/profile)
       return this.track('identify', identifyData);
     }
   };
