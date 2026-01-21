@@ -3,6 +3,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { getBrandThemeFromContent } from "@/lib/builder/brand-model";
 import { brands } from "@/lib/themes/brands";
 import { fetchOneEntry, getBuilderSearchParams } from "@builder.io/sdk-react-nextjs";
+import { EnquiryCartBubble } from "@/components/EnquiryCartBubble";
 
 const BUILDER_API_KEY = process.env.NEXT_PUBLIC_BUILDER_API_KEY!.trim();
 const MODEL_NAME = "cc-equipment-category";
@@ -116,8 +117,9 @@ export default async function EquipmentPage({
             </p>
           </div>
         )}
-
       </main>
+      {/* Enquiry Cart Bubble - inside ThemeProvider for brand-aware styling */}
+      <EnquiryCartBubble />
     </ThemeProvider>
   );
 }
