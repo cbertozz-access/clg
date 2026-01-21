@@ -110,7 +110,11 @@ export function AdminDashboard() {
     }
   };
 
-  // Load Builder pages when Pages tab is active
+  // Load Builder pages on mount and when Pages tab is active
+  useEffect(() => {
+    fetchBuilderPages();
+  }, []);
+
   useEffect(() => {
     if (activeTab === "pages") {
       fetchBuilderPages();
@@ -353,20 +357,34 @@ export function AdminDashboard() {
               <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
                 Quick Stats
               </h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Total Pages</span>
-                  <span className="font-semibold text-gray-900">24</span>
+              {loadingBuilderPages ? (
+                <div className="text-gray-400 text-sm">Loading...</div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Total Pages</span>
+                    <span className="font-semibold text-gray-900">{builderPages.length}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Published</span>
+                    <span className="font-semibold text-green-600">
+                      {builderPages.filter(p => p.published === "published").length}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Drafts</span>
+                    <span className="font-semibold text-yellow-600">
+                      {builderPages.filter(p => p.published !== "published").length}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Published</span>
-                  <span className="font-semibold text-green-600">18</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Drafts</span>
-                  <span className="font-semibold text-yellow-600">6</span>
-                </div>
-              </div>
+              )}
+              <button
+                onClick={fetchBuilderPages}
+                className="mt-3 text-xs text-[#E31937] hover:underline"
+              >
+                Refresh stats
+              </button>
             </div>
           </aside>
 
@@ -856,16 +874,219 @@ export function AdminDashboard() {
             )}
 
             {activeTab === "brands" && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Brand Management</h2>
-                <p className="text-gray-500">Brand configuration coming soon...</p>
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Brand Management</h2>
+                  <p className="text-gray-600 mt-1">Configure and preview brand themes</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {BRANDS.map((brand) => (
+                    <div key={brand.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                      {/* Brand Header with color */}
+                      <div
+                        className="h-24 flex items-center justify-center"
+                        style={{ backgroundColor: brand.color }}
+                      >
+                        <span className="text-white text-2xl font-bold">{brand.name.charAt(0)}</span>
+                      </div>
+                      <div className="p-5">
+                        <h3 className="text-lg font-semibold text-gray-900">{brand.name}</h3>
+                        <p className="text-sm text-gray-500 mt-1">Brand ID: <code className="bg-gray-100 px-1.5 py-0.5 rounded">{brand.id}</code></p>
+
+                        {/* Color info */}
+                        <div className="mt-4 flex items-center gap-3">
+                          <div
+                            className="w-8 h-8 rounded-full border-2 border-white shadow-sm"
+                            style={{ backgroundColor: brand.color }}
+                          />
+                          <div>
+                            <p className="text-xs text-gray-500">Primary Color</p>
+                            <p className="text-sm font-mono">{brand.color}</p>
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="mt-4 pt-4 border-t border-gray-100 flex gap-3">
+                          <a
+                            href={`/?brandId=${brand.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 text-center px-3 py-2 text-sm font-medium text-[#E31937] border border-[#E31937] rounded-lg hover:bg-red-50 transition-colors"
+                          >
+                            Preview Theme
+                          </a>
+                          <a
+                            href={`/equipment?brandId=${brand.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 text-center px-3 py-2 text-sm font-medium text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                          >
+                            Equipment Page
+                          </a>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex gap-3">
+                    <svg className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                    <div>
+                      <p className="text-blue-800 font-medium">Adding New Brands</p>
+                      <p className="text-blue-700 text-sm mt-1">
+                        New brands can be added in <code className="bg-blue-100 px-1 rounded">src/lib/themes/brands.ts</code>.
+                        Each brand needs colors, fonts, and spacing defined.
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
             {activeTab === "settings" && (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Settings</h2>
-                <p className="text-gray-500">Settings panel coming soon...</p>
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Settings</h2>
+                  <p className="text-gray-600 mt-1">System configuration and status</p>
+                </div>
+
+                {/* Environment Status */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Environment Status</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                      <div>
+                        <p className="font-medium text-gray-900">Builder.io Public API Key</p>
+                        <p className="text-sm text-gray-500">For fetching content</p>
+                      </div>
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                        Configured
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                      <div>
+                        <p className="font-medium text-gray-900">Builder.io Private API Key</p>
+                        <p className="text-sm text-gray-500">For creating/editing content</p>
+                      </div>
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                        Configured
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between py-3 border-b border-gray-100">
+                      <div>
+                        <p className="font-medium text-gray-900">Algolia Search</p>
+                        <p className="text-sm text-gray-500">Equipment search functionality</p>
+                      </div>
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                        Configured
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between py-3">
+                      <div>
+                        <p className="font-medium text-gray-900">Resend Email</p>
+                        <p className="text-sm text-gray-500">Contact form submissions</p>
+                      </div>
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                        Configured
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Links */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Links</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <a
+                      href="https://builder.io/content"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">Builder.io Content</p>
+                        <p className="text-sm text-gray-500">Manage all pages</p>
+                      </div>
+                    </a>
+                    <a
+                      href="https://vercel.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <svg className="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 2L2 19.5h20L12 2z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">Vercel Dashboard</p>
+                        <p className="text-sm text-gray-500">Deployments & logs</p>
+                      </div>
+                    </a>
+                    <a
+                      href="https://dashboard.algolia.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">Algolia Dashboard</p>
+                        <p className="text-sm text-gray-500">Search analytics</p>
+                      </div>
+                    </a>
+                    <a
+                      href="https://github.com/cbertozz-access/clg"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
+                        <svg className="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+                          <path fillRule="evenodd" clipRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.604-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.167 22 16.418 22 12c0-5.523-4.477-10-10-10z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">GitHub Repository</p>
+                        <p className="text-sm text-gray-500">Source code</p>
+                      </div>
+                    </a>
+                  </div>
+                </div>
+
+                {/* SEO Notice */}
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div className="flex gap-3">
+                    <svg className="w-5 h-5 text-yellow-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    <div>
+                      <p className="text-yellow-800 font-medium">SEO: NoIndex Active</p>
+                      <p className="text-yellow-700 text-sm mt-1">
+                        All pages are currently set to <code className="bg-yellow-100 px-1 rounded">noindex</code>.
+                        To enable indexing for a specific page, set <code className="bg-yellow-100 px-1 rounded">allowIndexing: true</code> in Builder.io.
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
           </main>
