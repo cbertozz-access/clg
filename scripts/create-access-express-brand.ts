@@ -34,17 +34,17 @@ const accessExpressBrand = {
     colorBrand900: "rgb(10 22 40)",    // #0a1628
     colorBrand950: "rgb(5 12 20)",
 
-    // Semantic colors - Orange CTA as primary action
-    colorPrimary: "rgb(245 166 35)",      // CTA orange #f5a623
-    colorPrimaryHover: "rgb(212 144 30)", // CTA pressed #d4901e
+    // Semantic colors - Navy/Black as primary
+    colorPrimary: "rgb(10 22 40)",        // Navy/black #0a1628
+    colorPrimaryHover: "rgb(18 42 74)",   // Lighter navy on hover
     colorPrimaryForeground: "rgb(255 255 255)",
 
-    // Blue accent as secondary
-    colorSecondary: "rgb(0 168 232)",     // Accent blue #00a8e8
-    colorSecondaryHover: "rgb(0 134 186)", // Accent active #0086ba
+    // Orange as secondary (for special CTAs)
+    colorSecondary: "rgb(245 166 35)",    // Orange #f5a623
+    colorSecondaryHover: "rgb(212 144 30)", // Orange pressed
     colorSecondaryForeground: "rgb(255 255 255)",
 
-    // Accent blue for links and highlights
+    // Blue accent for links and highlights
     colorAccent: "rgb(0 168 232)",        // #00a8e8
     colorAccentForeground: "rgb(255 255 255)",
 
@@ -86,8 +86,9 @@ const accessExpressBrand = {
     radiusSm: "4px",
     radiusLg: "12px",
 
-    // Logo URL
+    // Logo URLs
     logoUrl: "/images/logos/ae-logo-white.png",
+    logoUrlDark: "/images/logos/ae-logo-white.png",
 
     // Equipment brand colors (shared)
     equipmentBrands: {

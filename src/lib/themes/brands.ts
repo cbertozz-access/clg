@@ -137,17 +137,17 @@ export const brands: Record<string, BrandTheme> = {
         950: "rgb(5 12 20)",      // Darkest
       },
 
-      // Semantic colors - Orange CTA as primary action
-      primary: "rgb(245 166 35)",      // CTA orange #f5a623
-      primaryHover: "rgb(212 144 30)", // CTA pressed #d4901e
+      // Semantic colors - Navy/Black as primary
+      primary: "rgb(10 22 40)",        // Navy/black #0a1628
+      primaryHover: "rgb(18 42 74)",   // Lighter navy on hover
       primaryForeground: "rgb(255 255 255)",
 
-      // Blue accent as secondary
-      secondary: "rgb(0 168 232)",     // Accent blue #00a8e8
-      secondaryHover: "rgb(0 134 186)", // Accent active #0086ba
+      // Orange as secondary (for special CTAs)
+      secondary: "rgb(245 166 35)",    // Orange #f5a623
+      secondaryHover: "rgb(212 144 30)", // Orange pressed
       secondaryForeground: "rgb(255 255 255)",
 
-      // Accent blue for links and highlights
+      // Blue accent for links and highlights
       accent: "rgb(0 168 232)",        // #00a8e8
       accentForeground: "rgb(255 255 255)",
 
