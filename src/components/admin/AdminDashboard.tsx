@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { PageBuilder } from "./PageBuilder";
 
 /**
  * Admin Dashboard - Page Generator
@@ -29,6 +30,20 @@ interface CreatedPage {
   createdAt: string;
   brand: string;
 }
+
+interface BuilderPage {
+  id: string;
+  name: string;
+  published: string;
+  createdDate: number;
+  data: {
+    title?: string;
+    url?: string;
+  };
+  query?: Array<{ property: string; value: string }>;
+}
+
+type CreateMode = "templates" | "builder";
 
 const TEMPLATES: PageTemplate[] = [
   {
@@ -66,6 +81,7 @@ type TabType = "create" | "pages" | "brands" | "settings";
 
 export function AdminDashboard() {
   const [activeTab, setActiveTab] = useState<TabType>("create");
+  const [createMode, setCreateMode] = useState<CreateMode>("templates");
   const [selectedTemplate, setSelectedTemplate] = useState<string>("");
   const [selectedBrand, setSelectedBrand] = useState<string>("access-hire");
   const [isCreating, setIsCreating] = useState(false);
@@ -73,6 +89,33 @@ export function AdminDashboard() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [lastCreatedPage, setLastCreatedPage] = useState<CreatedPage | null>(null);
   const [recentPages, setRecentPages] = useState<CreatedPage[]>([]);
+  const [builderPages, setBuilderPages] = useState<BuilderPage[]>([]);
+  const [loadingBuilderPages, setLoadingBuilderPages] = useState(false);
+
+  // Fetch pages from Builder.io
+  const fetchBuilderPages = async () => {
+    setLoadingBuilderPages(true);
+    try {
+      const response = await fetch(
+        `https://cdn.builder.io/api/v3/content/cc-equipment-category?apiKey=286fbab6792c4f4f86cd9ec36393ea60&limit=50&includeUnpublished=true`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setBuilderPages(data.results || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch Builder pages:", error);
+    } finally {
+      setLoadingBuilderPages(false);
+    }
+  };
+
+  // Load Builder pages when Pages tab is active
+  useEffect(() => {
+    if (activeTab === "pages") {
+      fetchBuilderPages();
+    }
+  }, [activeTab]);
 
   // Load recent pages from localStorage on mount
   useEffect(() => {
@@ -91,6 +134,53 @@ export function AdminDashboard() {
     const updated = [page, ...recentPages.filter(p => p.id !== page.id)].slice(0, 10);
     setRecentPages(updated);
     localStorage.setItem("clg-admin-recent-pages", JSON.stringify(updated));
+  };
+
+  // Handle Page Builder save
+  const handleBuilderSave = async (
+    blocks: Array<{ type: string; props: Record<string, unknown> }>,
+    pageData: { name: string; urlPath: string }
+  ) => {
+    setIsCreating(true);
+    setSuccessMessage(null);
+    setErrorMessage(null);
+
+    try {
+      const response = await fetch("/api/admin/create-page-builder", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          blocks,
+          brand: selectedBrand,
+          name: pageData.name,
+          urlPath: pageData.urlPath,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        const createdPage: CreatedPage = {
+          id: result.pageId || `temp-${Date.now()}`,
+          name: pageData.name,
+          urlPath: pageData.urlPath,
+          editUrl: result.editUrl,
+          createdAt: new Date().toISOString(),
+          brand: selectedBrand,
+        };
+
+        setLastCreatedPage(createdPage);
+        saveRecentPage(createdPage);
+        setSuccessMessage("Page created successfully!");
+        setCreateMode("templates"); // Return to templates view
+      } else {
+        setErrorMessage(result.error || "Failed to create page");
+      }
+    } catch (error) {
+      setErrorMessage("Network error. Please try again.");
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   // Form state
@@ -284,13 +374,118 @@ export function AdminDashboard() {
           <main className="flex-1">
             {activeTab === "create" && (
               <div className="space-y-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Create New Page</h2>
-                  <p className="text-gray-600 mt-1">
-                    Select a template and configure your new landing page
-                  </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">Create New Page</h2>
+                    <p className="text-gray-600 mt-1">
+                      {createMode === "templates"
+                        ? "Select a template and configure your new landing page"
+                        : "Drag and drop components to build your page"}
+                    </p>
+                  </div>
+
+                  {/* Mode Toggle */}
+                  <div className="flex bg-gray-100 rounded-lg p-1">
+                    <button
+                      onClick={() => setCreateMode("templates")}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                        createMode === "templates"
+                          ? "bg-white text-gray-900 shadow-sm"
+                          : "text-gray-600 hover:text-gray-900"
+                      }`}
+                    >
+                      Quick Templates
+                    </button>
+                    <button
+                      onClick={() => setCreateMode("builder")}
+                      className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                        createMode === "builder"
+                          ? "bg-white text-gray-900 shadow-sm"
+                          : "text-gray-600 hover:text-gray-900"
+                      }`}
+                    >
+                      Page Builder
+                    </button>
+                  </div>
                 </div>
 
+                {/* Success/Error Messages */}
+                {successMessage && lastCreatedPage && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <svg className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <div className="flex-1">
+                        <p className="text-green-800 font-medium">{successMessage}</p>
+                        <p className="text-green-700 text-sm mt-1">
+                          <strong>{lastCreatedPage.name}</strong> at <code className="bg-green-100 px-1 rounded">{lastCreatedPage.urlPath}</code>
+                        </p>
+                        <div className="flex gap-4 mt-3">
+                          <a href={lastCreatedPage.urlPath} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm font-medium text-green-700 hover:text-green-800">
+                            Preview Page →
+                          </a>
+                          {lastCreatedPage.editUrl && (
+                            <a href={lastCreatedPage.editUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-sm font-medium text-green-700 hover:text-green-800">
+                              Edit in Builder.io →
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                      <button onClick={() => { setSuccessMessage(null); setLastCreatedPage(null); }} className="text-green-500 hover:text-green-700">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {errorMessage && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+                    <svg className="w-5 h-5 text-red-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                    <p className="text-red-800 flex-1">{errorMessage}</p>
+                    <button onClick={() => setErrorMessage(null)} className="text-red-500 hover:text-red-700">
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                  </div>
+                )}
+
+                {/* Page Builder Mode */}
+                {createMode === "builder" && (
+                  <div className="mb-4">
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-lg font-semibold text-gray-900">Select Brand First:</span>
+                      </div>
+                      <div className="flex gap-4">
+                        {BRANDS.map((brand) => (
+                          <button
+                            key={brand.id}
+                            onClick={() => setSelectedBrand(brand.id)}
+                            className={`flex items-center gap-3 px-4 py-2 rounded-lg border-2 transition-all ${
+                              selectedBrand === brand.id
+                                ? "border-[#E31937] bg-red-50"
+                                : "border-gray-200 hover:border-gray-300"
+                            }`}
+                          >
+                            <div className="w-5 h-5 rounded-full" style={{ backgroundColor: brand.color }} />
+                            <span className="font-medium text-gray-900">{brand.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <PageBuilder
+                      brand={selectedBrand}
+                      onSave={handleBuilderSave}
+                      onCancel={() => setCreateMode("templates")}
+                    />
+                  </div>
+                )}
+
+                {/* Templates Mode */}
+                {createMode === "templates" && (
+                  <>
                 {/* Step 1: Select Template */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                   <div className="flex items-center gap-2 mb-4">
@@ -553,6 +748,8 @@ export function AdminDashboard() {
                     </button>
                   </div>
                 </form>
+                  </>
+                )}
               </div>
             )}
 
