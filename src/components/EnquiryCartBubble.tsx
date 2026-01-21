@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useEnquiryCart } from "@/lib/enquiry-cart";
 import { EnquiryCartPanel } from "./builder/equipment/EnquiryCartPanel";
 
@@ -9,10 +9,23 @@ import { EnquiryCartPanel } from "./builder/equipment/EnquiryCartPanel";
  *
  * Shows in top-right corner with item count badge.
  * Opens the enquiry cart panel when clicked.
+ * Animates when items are added.
  */
 export function EnquiryCartBubble() {
   const { itemCount } = useEnquiryCart();
   const [isOpen, setIsOpen] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const prevCountRef = useRef(itemCount);
+
+  // Animate when item count increases
+  useEffect(() => {
+    if (itemCount > prevCountRef.current) {
+      setIsAnimating(true);
+      const timer = setTimeout(() => setIsAnimating(false), 600);
+      return () => clearTimeout(timer);
+    }
+    prevCountRef.current = itemCount;
+  }, [itemCount]);
 
   // Don't show if cart is empty
   if (itemCount === 0) return null;
@@ -22,14 +35,26 @@ export function EnquiryCartBubble() {
       {/* Floating Bubble */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed top-20 right-4 z-40 flex items-center gap-2 bg-[#E31937] hover:bg-[#C42920] text-white pl-4 pr-3 py-2.5 rounded-full shadow-lg transition-all hover:scale-105 active:scale-95"
+        className={`
+          fixed top-20 right-4 z-[9999]
+          flex items-center gap-3
+          bg-[#E31937] hover:bg-[#C42920]
+          text-white
+          pl-5 pr-4 py-3.5
+          rounded-full
+          shadow-xl shadow-black/20
+          transition-all duration-200
+          hover:scale-105 hover:shadow-2xl
+          active:scale-95
+          ${isAnimating ? "animate-bounce-subtle" : ""}
+        `}
         aria-label={`Enquiry cart with ${itemCount} items`}
       >
-        <span className="font-semibold text-sm whitespace-nowrap">Enquire Now</span>
+        <span className="font-bold text-base whitespace-nowrap">Enquire Now</span>
 
         {/* Cart Icon */}
         <div className="relative">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -39,14 +64,51 @@ export function EnquiryCartBubble() {
           </svg>
 
           {/* Count Badge */}
-          <span className="absolute -top-2 -right-2 bg-white text-[#E31937] text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow">
-            {itemCount > 9 ? "9+" : itemCount}
+          <span
+            className={`
+              absolute -top-2.5 -right-2.5
+              bg-white text-[#E31937]
+              text-sm font-bold
+              min-w-[24px] h-6 px-1.5
+              rounded-full
+              flex items-center justify-center
+              shadow-md
+              ${isAnimating ? "animate-ping-once" : ""}
+            `}
+          >
+            {itemCount > 99 ? "99+" : itemCount}
           </span>
         </div>
       </button>
 
+      {/* Pulse ring animation when items added */}
+      {isAnimating && (
+        <span className="fixed top-20 right-4 z-[9998] w-[160px] h-[56px] rounded-full bg-[#E31937] animate-ping opacity-30 pointer-events-none" />
+      )}
+
       {/* Enquiry Panel */}
       <EnquiryCartPanel isOpen={isOpen} onClose={() => setIsOpen(false)} />
+
+      {/* Custom animation styles */}
+      <style jsx global>{`
+        @keyframes bounce-subtle {
+          0%, 100% { transform: translateY(0) scale(1); }
+          25% { transform: translateY(-8px) scale(1.05); }
+          50% { transform: translateY(-4px) scale(1.02); }
+          75% { transform: translateY(-2px) scale(1.01); }
+        }
+        @keyframes ping-once {
+          0% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.3); opacity: 0.8; }
+          100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-bounce-subtle {
+          animation: bounce-subtle 0.6s ease-out;
+        }
+        .animate-ping-once {
+          animation: ping-once 0.4s ease-out;
+        }
+      `}</style>
     </>
   );
 }
