@@ -424,6 +424,37 @@ Builder.registerComponent(EquipmentCard, {
   ],
 });
 
+// Equipment categories from API
+const equipmentCategories = [
+  "",
+  "Scissor Lift",
+  "Boom Lift",
+  "Telehandler",
+  "Forklift",
+  "Generator",
+  "Lighting Tower",
+  "Fuel Tank",
+  "Material Lift",
+  "Man Lift",
+  "Pallet Jack",
+  "Trailer",
+];
+
+// Equipment brands
+const equipmentBrands = [
+  "",
+  "Genie",
+  "JLG",
+  "Haulotte",
+  "Skyjack",
+  "Snorkel",
+  "Bobcat",
+  "Toyota",
+  "Hyster",
+  "Crown",
+  "Manitou",
+];
+
 Builder.registerComponent(EquipmentGrid, {
   name: "EquipmentGrid",
   friendlyName: "Equipment - Grid",
@@ -431,10 +462,10 @@ Builder.registerComponent(EquipmentGrid, {
   inputs: [
     { name: "title", type: "string", defaultValue: "Our Equipment", friendlyName: "Section Title" },
     { name: "subtitle", type: "string", friendlyName: "Section Subtitle" },
-    { name: "apiEndpoint", type: "string", defaultValue: "https://acccessproducts.netlify.app/api/products", friendlyName: "API Endpoint" },
-    { name: "category", type: "string", friendlyName: "Filter by Category", helperText: "Leave empty to show all" },
-    { name: "subcategory", type: "string", friendlyName: "Filter by Subcategory" },
-    { name: "brand", type: "string", friendlyName: "Filter by Brand" },
+    { name: "apiEndpoint", type: "string", defaultValue: "https://acccessproducts.netlify.app/api/products", friendlyName: "API Endpoint", advanced: true },
+    { name: "category", type: "enum", enum: equipmentCategories, defaultValue: "", friendlyName: "Filter by Category", helperText: "Leave empty to show all" },
+    { name: "subcategory", type: "string", friendlyName: "Filter by Subcategory", advanced: true },
+    { name: "brand", type: "enum", enum: equipmentBrands, defaultValue: "", friendlyName: "Filter by Brand" },
     { name: "columns", type: "enum", enum: ["2", "3", "4"], defaultValue: "3", friendlyName: "Grid Columns" },
     { name: "maxProducts", type: "number", defaultValue: 12, friendlyName: "Max Products to Show" },
     { name: "showSearch", type: "boolean", defaultValue: false, friendlyName: "Show Search" },
@@ -442,7 +473,7 @@ Builder.registerComponent(EquipmentGrid, {
     { name: "viewAllLink", type: "url", friendlyName: "View All Link" },
     { name: "viewAllText", type: "string", defaultValue: "View All", friendlyName: "View All Text" },
     { name: "cardCtaText", type: "string", defaultValue: "View Details", friendlyName: "Card CTA Text" },
-    { name: "productBaseUrl", type: "string", defaultValue: "/equipment", friendlyName: "Product Detail URL Base" },
+    { name: "productBaseUrl", type: "string", defaultValue: "/equipment", friendlyName: "Product Detail URL Base", advanced: true },
     { name: "cardVariant", type: "enum", enum: ["default", "compact", "featured"], defaultValue: "default", friendlyName: "Card Style" },
     { name: "showPricing", type: "boolean", defaultValue: true, friendlyName: "Show Pricing" },
     { name: "background", type: "enum", enum: ["white", "light", "none"], defaultValue: "none", friendlyName: "Background" },
@@ -456,7 +487,7 @@ Builder.registerComponent(EquipmentSearch, {
   inputs: [
     { name: "title", type: "string", defaultValue: "Browse Equipment", friendlyName: "Page Title" },
     { name: "subtitle", type: "string", defaultValue: "Find the right equipment for your project", friendlyName: "Page Subtitle" },
-    { name: "initialCategory", type: "string", friendlyName: "Initial Category Filter" },
+    { name: "initialCategory", type: "enum", enum: equipmentCategories, defaultValue: "", friendlyName: "Initial Category", helperText: "Pre-filter to specific category" },
     { name: "productsPerPage", type: "number", defaultValue: 12, friendlyName: "Products Per Page" },
     { name: "columns", type: "enum", enum: ["2", "3", "4"], defaultValue: "3", friendlyName: "Grid Columns" },
     { name: "showCategoryFilter", type: "boolean", defaultValue: true, friendlyName: "Show Category Filter" },
@@ -466,12 +497,12 @@ Builder.registerComponent(EquipmentSearch, {
     { name: "showResultsCount", type: "boolean", defaultValue: true, friendlyName: "Show Results Count" },
     { name: "showLoadMore", type: "boolean", defaultValue: true, friendlyName: "Show Load More Button" },
     { name: "cardCtaText", type: "string", defaultValue: "View Details", friendlyName: "Card CTA Text" },
-    { name: "productBaseUrl", type: "string", defaultValue: "/equipment", friendlyName: "Product Detail URL Base" },
+    { name: "productBaseUrl", type: "string", defaultValue: "/equipment", friendlyName: "Product Detail URL Base", advanced: true },
     { name: "filterPosition", type: "enum", enum: ["left", "top"], defaultValue: "left", friendlyName: "Filter Position" },
-    { name: "isHire", type: "boolean", friendlyName: "Filter: Only Hire Equipment" },
-    { name: "isSale", type: "boolean", friendlyName: "Filter: Only Sale Equipment" },
-    { name: "inStockOnly", type: "boolean", friendlyName: "Filter: In Stock Only" },
-    { name: "selectorUrl", type: "string", defaultValue: "/selector", friendlyName: "Equipment Selector URL" },
+    { name: "isHire", type: "boolean", friendlyName: "Filter: Only Hire Equipment", advanced: true },
+    { name: "isSale", type: "boolean", friendlyName: "Filter: Only Sale Equipment", advanced: true },
+    { name: "inStockOnly", type: "boolean", friendlyName: "Filter: In Stock Only", advanced: true },
+    { name: "selectorUrl", type: "string", defaultValue: "/selector", friendlyName: "Equipment Selector URL", advanced: true },
   ],
 });
 
