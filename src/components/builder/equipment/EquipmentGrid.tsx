@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { EquipmentCard } from "./EquipmentCard";
+import { QuickViewModal, type QuickViewEquipment } from "./QuickViewModal";
 
 /**
  * Equipment Grid Component
@@ -77,6 +78,8 @@ export interface EquipmentGridProps {
   showPricing?: boolean;
   /** Background color variant */
   background?: "white" | "light" | "none";
+  /** Use quick view modal instead of navigation */
+  useQuickView?: boolean;
 }
 
 export function EquipmentGrid({
@@ -97,6 +100,7 @@ export function EquipmentGrid({
   cardVariant = "default",
   showPricing = true,
   background = "none",
+  useQuickView = true,
 }: EquipmentGridProps) {
   // URL parameters for deep linking
   const searchParams = useSearchParams();
@@ -110,6 +114,45 @@ export function EquipmentGrid({
   const [selectedCategory, setSelectedCategory] = useState(category || "");
   const [selectedBrand, setSelectedBrand] = useState(brand || "");
   const [categories, setCategories] = useState<string[]>([]);
+
+  // Quick view modal state
+  const [quickViewOpen, setQuickViewOpen] = useState(false);
+  const [quickViewEquipment, setQuickViewEquipment] = useState<QuickViewEquipment | null>(null);
+
+  // Helper function to get product title (needs to be defined before handleQuickView)
+  const getProductTitle = (product: Product): string => {
+    if (product.heroLabel) {
+      const match = product.heroLabel.match(/title="([^"]+)"/);
+      return match ? match[1] : product.model;
+    }
+    return product.model;
+  };
+
+  const handleQuickView = (product: Product) => {
+    setQuickViewEquipment({
+      id: product.productId,
+      name: getProductTitle(product),
+      brand: product.brand,
+      model: product.model,
+      category: product.category,
+      subcategory: product.subCategory,
+      imageUrl: product.productImages?.[0]?.imageUrl,
+      images: product.productImages?.map(img => img.imageUrl) || [],
+      description: product.description,
+      workingHeight: product.operationalSpecification?.workingHeightFt,
+      platformHeight: product.operationalSpecification?.platformHeightFt,
+      capacity: product.operationalSpecification?.capacityKg
+        ? `${product.operationalSpecification.capacityKg}kg`
+        : product.operationalSpecification?.capacityT
+          ? `${product.operationalSpecification.capacityT}T`
+          : undefined,
+      reach: product.operationalSpecification?.horizontalReachFt,
+      dailyPrice: product.pricing?.daily,
+      weeklyPrice: product.pricing?.weekly,
+      monthlyPrice: product.pricing?.monthly,
+    });
+    setQuickViewOpen(true);
+  };
 
   // Read URL parameters on mount
   useEffect(() => {
@@ -216,14 +259,6 @@ export function EquipmentGrid({
     white: "bg-[var(--color-card,white)]",
     light: "bg-[var(--color-background-alt,#ffffff)]",
     none: "",
-  };
-
-  const getProductTitle = (product: Product): string => {
-    if (product.heroLabel) {
-      const match = product.heroLabel.match(/title="([^"]+)"/);
-      return match ? match[1] : product.model;
-    }
-    return product.model;
   };
 
   const getSpec1 = (product: Product): string => {
@@ -342,6 +377,7 @@ export function EquipmentGrid({
                 ctaLink={`${productBaseUrl}/${product.productId}`}
                 variant={cardVariant}
                 showPricing={showPricing}
+                onQuickView={useQuickView ? () => handleQuickView(product) : undefined}
               />
             ))}
           </div>
@@ -379,6 +415,13 @@ export function EquipmentGrid({
           </div>
         )}
       </div>
+
+      {/* Quick View Modal */}
+      <QuickViewModal
+        isOpen={quickViewOpen}
+        onClose={() => setQuickViewOpen(false)}
+        equipment={quickViewEquipment}
+      />
     </section>
   );
 }
