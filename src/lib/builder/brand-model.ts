@@ -56,6 +56,12 @@ export interface BuilderBrand {
   colorCard: string;
   colorCardForeground?: string;
 
+  // Header/Footer
+  colorHeader?: string;
+  colorHeaderForeground?: string;
+  colorFooter?: string;
+  colorFooterForeground?: string;
+
   // Text
   colorForeground: string;
   colorMutedForeground: string;
@@ -137,6 +143,12 @@ export function builderBrandToTheme(brand: BuilderBrand): BrandTheme {
       card: brand.colorCard,
       cardForeground: brand.colorCardForeground || brand.colorForeground,
 
+      // Header/Footer
+      header: brand.colorHeader,
+      headerForeground: brand.colorHeaderForeground,
+      footer: brand.colorFooter,
+      footerForeground: brand.colorFooterForeground,
+
       // Text
       foreground: brand.colorForeground,
       mutedForeground: brand.colorMutedForeground,
@@ -165,6 +177,11 @@ export function builderBrandToTheme(brand: BuilderBrand): BrandTheme {
       radius: brand.radius,
       radiusSm: brand.radiusSm,
       radiusLg: brand.radiusLg,
+    },
+    assets: {
+      logoUrl: brand.logoUrl,
+      logoUrlDark: brand.logoUrlDark,
+      faviconUrl: brand.faviconUrl,
     },
   };
 }

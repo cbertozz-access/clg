@@ -54,6 +54,12 @@ const accessExpressBrand = {
     colorCard: "rgb(255 255 255)",
     colorCardForeground: "rgb(38 38 38)",   // neutral-800
 
+    // Header/Footer - Navy background (Access Express signature dark)
+    colorHeader: "rgb(10 22 40)",           // #0a1628 - Deep Navy
+    colorHeaderForeground: "rgb(255 255 255)", // white text
+    colorFooter: "rgb(10 22 40)",           // #0a1628 - Deep Navy
+    colorFooterForeground: "rgb(255 255 255)", // white text
+
     // Text
     colorForeground: "rgb(38 38 38)",       // neutral-800
     colorMutedForeground: "rgb(115 115 115)", // neutral-500
@@ -115,9 +121,33 @@ async function createBrandEntry() {
     const checkData = await checkResponse.json();
 
     if (checkData.results?.length > 0) {
-      console.log("Access Express brand entry already exists.");
-      console.log("Entry ID:", checkData.results[0].id);
-      console.log("\nView it at: https://builder.io/content/" + checkData.results[0].id);
+      const existingId = checkData.results[0].id;
+      console.log("Access Express brand entry exists. Updating...");
+      console.log("Entry ID:", existingId);
+
+      // Update the existing entry
+      const updateResponse = await fetch(
+        `https://builder.io/api/v1/write/brand/${existingId}`,
+        {
+          method: "PUT",
+          headers: {
+            Authorization: `Bearer ${BUILDER_PRIVATE_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ...accessExpressBrand,
+            published: "published",
+          }),
+        }
+      );
+
+      if (!updateResponse.ok) {
+        const error = await updateResponse.text();
+        throw new Error(`Failed to update entry: ${error}`);
+      }
+
+      console.log("✓ Access Express brand entry updated!");
+      console.log("\nView it at: https://builder.io/content/" + existingId);
       return;
     }
 
