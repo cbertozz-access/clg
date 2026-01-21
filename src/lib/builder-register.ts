@@ -255,6 +255,7 @@ Builder.registerComponent(ContactForm, {
     { name: "subtitle", type: "string", defaultValue: "Tell us about your project — we respond within 2 hours", friendlyName: "Subtitle" },
     { name: "submitButtonText", type: "string", defaultValue: "Get Your Quote", friendlyName: "Submit Button Text" },
     { name: "variant", type: "enum", enum: ["full", "compact"], defaultValue: "full", friendlyName: "Form Variant", helperText: "full: all fields, compact: essential fields only" },
+    { name: "width", type: "enum", enum: ["default", "wide", "full"], defaultValue: "default", friendlyName: "Form Width", helperText: "default: narrow, wide: 4xl, full: full width" },
     { name: "backgroundColor", type: "enum", enum: ["white", "gray", "none"], defaultValue: "gray", friendlyName: "Background Color" },
     { name: "showPhoneCta", type: "boolean", defaultValue: true, friendlyName: "Show Phone CTA" },
     { name: "phoneNumber", type: "string", defaultValue: "13 4000", friendlyName: "Phone Number" },

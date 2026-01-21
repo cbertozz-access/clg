@@ -63,6 +63,8 @@ export interface ContactFormProps {
   variant?: "full" | "compact";
   /** Background style */
   backgroundColor?: "white" | "gray" | "none";
+  /** Form width */
+  width?: "default" | "wide" | "full";
 }
 
 export function ContactForm({
@@ -73,6 +75,7 @@ export function ContactForm({
   phoneNumber = "13 4000",
   variant = "full",
   backgroundColor = "gray",
+  width = "default",
 }: ContactFormProps) {
   const [formData, setFormData] = useState({
     firstName: "",
@@ -159,9 +162,15 @@ export function ContactForm({
 
   const isCompact = variant === "compact";
 
+  const widthClass = {
+    default: isCompact ? "max-w-xl" : "max-w-2xl",
+    wide: "max-w-4xl",
+    full: "max-w-full",
+  };
+
   return (
     <section id="quote-form" className={`py-12 md:py-16 ${bgClass[backgroundColor]}`}>
-      <div className={`mx-auto px-4 ${isCompact ? "max-w-xl" : "max-w-2xl"}`}>
+      <div className={`mx-auto px-4 ${widthClass[width]}`}>
         {/* Card Container */}
         <div className="bg-white rounded-2xl shadow-lg shadow-gray-200/50 border border-gray-100 overflow-hidden">
           {/* Header */}
