@@ -93,7 +93,13 @@ export default async function CatchAllPage({
             <h1 className="text-2xl font-semibold text-[var(--color-foreground)] mb-4">Page Not Found</h1>
             <p className="text-[var(--color-muted-foreground)]">No content found for this page</p>
             <p className="text-sm text-[var(--color-muted-foreground)] mt-2">
-              Create content in Builder.io for path: {urlPath}
+              Path requested: <code className="bg-slate-100 px-2 py-1 rounded">{urlPath}</code>
+            </p>
+            <p className="text-sm text-[var(--color-muted-foreground)] mt-1">
+              Model: <code className="bg-slate-100 px-2 py-1 rounded">{MODEL_NAME}</code>
+            </p>
+            <p className="text-xs text-slate-400 mt-4">
+              Ensure your Builder.io page URL matches this path and uses the correct model.
             </p>
           </div>
         )}
