@@ -267,7 +267,7 @@ export function PageBuilder({ brand, onSave, onCancel }: PageBuilderProps) {
   const brandColor = brand === "access-express" ? "#0A1628" : "#E31937";
 
   return (
-    <div className="flex h-[calc(100vh-200px)] min-h-[600px] bg-gray-100 rounded-xl overflow-hidden border border-gray-200">
+    <div className="flex h-[calc(100vh-180px)] min-h-[700px] bg-gray-100 rounded-xl overflow-hidden border border-gray-200">
       {/* Component Palette */}
       <div className="w-64 bg-white border-r border-gray-200 flex flex-col">
         <div className="p-4 border-b border-gray-200">
@@ -297,43 +297,49 @@ export function PageBuilder({ brand, onSave, onCancel }: PageBuilderProps) {
       {/* Canvas */}
       <div className="flex-1 flex flex-col">
         {/* Page Settings Bar */}
-        <div className="bg-white border-b border-gray-200 p-4 flex items-center gap-4">
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="Page Name"
-              value={pageName}
-              onChange={(e) => {
-                setPageName(e.target.value);
-                if (!urlPath) {
-                  setUrlPath("/" + e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""));
-                }
-              }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#E31937] focus:border-transparent"
-            />
+        <div className="bg-white border-b border-gray-200 p-5">
+          <div className="flex items-end gap-6">
+            <div className="flex-1 min-w-0">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Page Name</label>
+              <input
+                type="text"
+                placeholder="e.g., Sydney Scissor Lifts"
+                value={pageName}
+                onChange={(e) => {
+                  setPageName(e.target.value);
+                  if (!urlPath) {
+                    setUrlPath("/" + e.target.value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""));
+                  }
+                }}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base focus:ring-2 focus:ring-[#E31937] focus:border-transparent"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">URL Path</label>
+              <input
+                type="text"
+                placeholder="/sydney-scissor-lifts"
+                value={urlPath}
+                onChange={(e) => setUrlPath(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base font-mono focus:ring-2 focus:ring-[#E31937] focus:border-transparent"
+              />
+            </div>
+            <div className="flex gap-3 flex-shrink-0">
+              <button
+                onClick={onCancel}
+                className="px-5 py-3 text-gray-600 hover:text-gray-900 font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={!pageName || !urlPath || blocks.length === 0}
+                className="px-6 py-3 bg-[#E31937] text-white rounded-lg font-semibold hover:bg-[#c4152f] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Create Page
+              </button>
+            </div>
           </div>
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="/url-path"
-              value={urlPath}
-              onChange={(e) => setUrlPath(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm font-mono focus:ring-2 focus:ring-[#E31937] focus:border-transparent"
-            />
-          </div>
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 text-gray-600 hover:text-gray-900"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={!pageName || !urlPath || blocks.length === 0}
-            className="px-4 py-2 bg-[#E31937] text-white rounded-lg font-medium hover:bg-[#c4152f] disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Create Page
-          </button>
         </div>
 
         {/* Preview Area */}
