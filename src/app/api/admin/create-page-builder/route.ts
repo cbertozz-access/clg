@@ -58,6 +58,7 @@ export async function POST(request: NextRequest) {
       published: "published",
       data: {
         title: name,
+        brandId: brand || "access-hire", // Required for theming
         blocks: builderBlocks,
       },
       query: [

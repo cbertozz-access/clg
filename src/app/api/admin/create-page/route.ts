@@ -191,6 +191,7 @@ export async function POST(request: NextRequest) {
       data: {
         title: name,
         description: subheadline || `${name} - Access Hire Australia`,
+        brandId: brand || "access-hire", // Required for theming
         blocks,
       },
       query: [
