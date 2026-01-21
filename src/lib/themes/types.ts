@@ -41,6 +41,12 @@ export interface BrandColors {
   card: string;
   cardForeground: string;
 
+  // Header/Footer specific (for brand-aware layout)
+  header?: string;
+  headerForeground?: string;
+  footer?: string;
+  footerForeground?: string;
+
   // Text
   foreground: string;
   mutedForeground: string;
@@ -61,6 +67,12 @@ export interface BrandColors {
   equipmentBrands?: Record<string, string>;
 }
 
+export interface BrandAssets {
+  logoUrl?: string;
+  logoUrlDark?: string;  // For dark backgrounds
+  faviconUrl?: string;
+}
+
 export interface BrandFonts {
   heading: string;
   body: string;
@@ -79,6 +91,7 @@ export interface BrandTheme {
   colors: BrandColors;
   fonts: BrandFonts;
   spacing: BrandSpacing;
+  assets?: BrandAssets;
 }
 
 /**

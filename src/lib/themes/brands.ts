@@ -50,6 +50,12 @@ export const brands: Record<string, BrandTheme> = {
       card: "rgb(255 255 255)",
       cardForeground: "rgb(15 23 42)", // slate-900
 
+      // Header/Footer (Access Hire: white header, red footer)
+      header: "rgb(255 255 255)",        // white
+      headerForeground: "rgb(15 23 42)", // dark text
+      footer: "rgb(227 25 55)",          // brand red
+      footerForeground: "rgb(255 255 255)", // white text
+
       // Text
       foreground: "rgb(15 23 42)", // slate-900
       mutedForeground: "rgb(100 116 139)", // slate-500
@@ -105,9 +111,109 @@ export const brands: Record<string, BrandTheme> = {
       radiusSm: "4px",
       radiusLg: "12px",
     },
+    assets: {
+      logoUrl: "/images/brand/access-hire-logo.webp",
+      logoUrlDark: "/images/brand/access-hire-logo-white.webp",
+    },
   },
 
-  // Brand 2: Example Blue Brand
+  // Brand 2: Access Express (Secondary Brand)
+  "access-express": {
+    id: "access-express",
+    name: "Access Express",
+    colors: {
+      // Full brand color scale (Deep Navy Blue)
+      brand: {
+        50: "rgb(232 242 250)",   // Lightest
+        100: "rgb(192 216 236)",
+        200: "rgb(138 176 212)",
+        300: "rgb(90 132 176)",
+        400: "rgb(58 100 144)",
+        500: "rgb(35 74 114)",    // Mid
+        600: "rgb(26 58 92)",     // #1a3a5c
+        700: "rgb(18 42 74)",     // #122a4a
+        800: "rgb(13 30 54)",     // #0d1e36
+        900: "rgb(10 22 40)",     // #0a1628 - Primary dark
+        950: "rgb(5 12 20)",      // Darkest
+      },
+
+      // Semantic colors - Orange CTA as primary action
+      primary: "rgb(245 166 35)",      // CTA orange #f5a623
+      primaryHover: "rgb(212 144 30)", // CTA pressed #d4901e
+      primaryForeground: "rgb(255 255 255)",
+
+      // Blue accent as secondary
+      secondary: "rgb(0 168 232)",     // Accent blue #00a8e8
+      secondaryHover: "rgb(0 134 186)", // Accent active #0086ba
+      secondaryForeground: "rgb(255 255 255)",
+
+      // Accent blue for links and highlights
+      accent: "rgb(0 168 232)",        // #00a8e8
+      accentForeground: "rgb(255 255 255)",
+
+      // Backgrounds - Light theme
+      background: "rgb(255 255 255)",
+      backgroundAlt: "rgb(250 250 250)", // neutral-50
+      card: "rgb(255 255 255)",
+      cardForeground: "rgb(38 38 38)",   // neutral-800
+
+      // Header/Footer - Navy background (Access Express signature dark)
+      header: "rgb(10 22 40)",           // #0a1628 - Deep Navy
+      headerForeground: "rgb(255 255 255)", // white text
+      footer: "rgb(10 22 40)",           // #0a1628 - Deep Navy
+      footerForeground: "rgb(255 255 255)", // white text
+
+      // Text
+      foreground: "rgb(38 38 38)",       // neutral-800
+      mutedForeground: "rgb(115 115 115)", // neutral-500
+
+      // Borders
+      border: "rgb(229 229 229)",        // neutral-200
+      input: "rgb(212 212 212)",         // neutral-300
+      ring: "rgb(0 168 232)",            // accent blue for focus
+
+      // Semantic status
+      success: "rgb(34 197 94)",         // green-500
+      successHover: "rgb(22 163 74)",    // green-600
+      warning: "rgb(245 158 11)",        // amber-500
+      error: "rgb(239 68 68)",           // red-500
+      errorHover: "rgb(220 38 38)",      // red-600
+
+      // Equipment brand colors (shared with AHA)
+      equipmentBrands: {
+        genie: "#0064a7",
+        jlg: "#f37123",
+        haulotte: "#f1bd4b",
+        skyjack: "#e41e26",
+        snorkel: "#ff8200",
+        lgmg: "#00a651",
+        dingli: "#003da5",
+        manitou: "#b22234",
+        bobcat: "#ff6600",
+        jcb: "#ffc107",
+        merlo: "#004d40",
+        toyota: "#eb0a1e",
+        hyster: "#ff6600",
+        crown: "#00529f",
+      },
+    },
+    fonts: {
+      heading: "'Montserrat', system-ui, sans-serif",
+      body: "'Open Sans', system-ui, sans-serif",
+      mono: "'Fira Code', 'Consolas', monospace",
+    },
+    spacing: {
+      radius: "8px",     // Default for buttons, inputs
+      radiusSm: "4px",   // Subtle corners
+      radiusLg: "12px",  // Cards
+    },
+    assets: {
+      logoUrl: "/images/logos/ae-logo-white.png",  // White logo for dark header
+      logoUrlDark: "/images/logos/ae-logo-white.png",
+    },
+  },
+
+  // Brand 3: Example Blue Brand
   "brand-blue": {
     id: "brand-blue",
     name: "Blue Corp",

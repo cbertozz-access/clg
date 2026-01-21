@@ -5,11 +5,12 @@ import { useEnquiryCart } from "@/lib/enquiry-cart";
 import { EnquiryCartPanel } from "./builder/equipment/EnquiryCartPanel";
 
 /**
- * Floating Enquiry Cart Bubble
+ * Floating Enquiry Cart Bubble - Brand Aware
  *
  * Shows in top-right corner with item count badge.
  * Opens the enquiry cart panel when clicked.
  * Animates when items are added.
+ * Uses CSS variables from ThemeProvider for brand colors.
  */
 export function EnquiryCartBubble() {
   const { itemCount } = useEnquiryCart();
@@ -38,8 +39,6 @@ export function EnquiryCartBubble() {
         className={`
           fixed top-20 right-4 z-[9999]
           flex items-center gap-3
-          bg-[#E31937] hover:bg-[#C42920]
-          text-white
           pl-5 pr-4 py-3.5
           rounded-full
           shadow-xl shadow-black/20
@@ -48,6 +47,10 @@ export function EnquiryCartBubble() {
           active:scale-95
           ${isAnimating ? "animate-bounce-subtle" : ""}
         `}
+        style={{
+          backgroundColor: "var(--color-primary)",
+          color: "var(--color-primary-foreground)",
+        }}
         aria-label={`Enquiry cart with ${itemCount} items`}
       >
         <span className="font-bold text-base whitespace-nowrap">Enquire Now</span>
@@ -67,7 +70,7 @@ export function EnquiryCartBubble() {
           <span
             className={`
               absolute -top-2.5 -right-2.5
-              bg-white text-[#E31937]
+              bg-white
               text-sm font-bold
               min-w-[24px] h-6 px-1.5
               rounded-full
@@ -75,6 +78,7 @@ export function EnquiryCartBubble() {
               shadow-md
               ${isAnimating ? "animate-ping-once" : ""}
             `}
+            style={{ color: "var(--color-primary)" }}
           >
             {itemCount > 99 ? "99+" : itemCount}
           </span>
@@ -83,7 +87,10 @@ export function EnquiryCartBubble() {
 
       {/* Pulse ring animation when items added */}
       {isAnimating && (
-        <span className="fixed top-20 right-4 z-[9998] w-[160px] h-[56px] rounded-full bg-[#E31937] animate-ping opacity-30 pointer-events-none" />
+        <span
+          className="fixed top-20 right-4 z-[9998] w-[160px] h-[56px] rounded-full animate-ping opacity-30 pointer-events-none"
+          style={{ backgroundColor: "var(--color-primary)" }}
+        />
       )}
 
       {/* Enquiry Panel */}

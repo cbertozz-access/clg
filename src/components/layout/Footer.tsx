@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
+import { useTheme } from "@/components/ThemeProvider";
 
 /**
- * Footer Component
+ * Footer Component - Brand Aware
  *
- * Access Hire Australia branded footer with red background.
- * Features location tabs and contact info.
+ * Uses CSS variables from ThemeProvider for colors and logo.
+ * Automatically adapts to the selected brand (Access Hire, Access Express, etc.)
  */
 
 const locations = [
@@ -58,11 +60,16 @@ const socialLinks = [
 ];
 
 export function Footer() {
+  const { brand } = useTheme();
   const [activeLocation, setActiveLocation] = useState("wa");
   const currentLocation = locations.find((l) => l.id === activeLocation) || locations[0];
 
+  // Get logo URL from brand assets (use dark/white version for colored footer)
+  const logoUrl = brand.assets?.logoUrlDark || brand.assets?.logoUrl || "/images/brand/access-hire-logo-white.webp";
+  const brandName = brand.name || "Access Hire Australia";
+
   return (
-    <footer className="bg-[#E31937] text-white">
+    <footer style={{ backgroundColor: "var(--color-footer)", color: "var(--color-footer-foreground)" }}>
       {/* Location Tabs */}
       <div>
         <div className="max-w-7xl mx-auto px-4">
@@ -72,11 +79,11 @@ export function Footer() {
                 <button
                   key={location.id}
                   onClick={() => setActiveLocation(location.id)}
-                  className={`px-4 md:px-6 py-3 text-sm font-bold transition-colors ${
-                    activeLocation === location.id
-                      ? "bg-white text-[#E31937]"
-                      : "text-white hover:bg-white/10"
-                  }`}
+                  className="px-4 md:px-6 py-3 text-sm font-bold transition-colors"
+                  style={{
+                    backgroundColor: activeLocation === location.id ? "white" : "transparent",
+                    color: activeLocation === location.id ? "var(--color-footer)" : "inherit",
+                  }}
                 >
                   {location.label}
                 </button>
@@ -84,7 +91,7 @@ export function Footer() {
             </div>
             <a
               href="tel:134000"
-              className="hidden md:flex items-center gap-2 px-4 py-3 font-bold text-xl hover:bg-white/10 transition-colors"
+              className="hidden md:flex items-center gap-2 px-4 py-3 font-bold text-xl transition-colors hover:opacity-80"
             >
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
@@ -95,13 +102,13 @@ export function Footer() {
         </div>
       </div>
 
-      {/* Location Info Bar - same red color */}
+      {/* Location Info Bar */}
       <div>
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 text-sm">
             <div className="flex items-center gap-4">
               <span className="font-bold">{currentLocation.city}</span>
-              <span className="text-white/80">{currentLocation.address}</span>
+              <span style={{ opacity: 0.8 }}>{currentLocation.address}</span>
             </div>
             <a href={`tel:${currentLocation.phone.replace(/\s/g, "")}`} className="font-semibold hover:underline">
               {currentLocation.phone}
@@ -110,16 +117,19 @@ export function Footer() {
         </div>
       </div>
 
-      {/* Main Footer Content - Simplified */}
+      {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-4 py-10">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-8">
           {/* Brand */}
           <div className="flex-shrink-0">
-            {/* Placeholder for white/reversed logo */}
-            <div className="w-[180px] h-[50px] bg-white/20 rounded flex items-center justify-center text-white/60 text-xs mb-4">
-              Logo (white version)
-            </div>
-            <p className="text-white/80 text-sm max-w-xs">
+            <Image
+              src={logoUrl}
+              alt={brandName}
+              width={180}
+              height={50}
+              className="h-12 w-auto mb-4"
+            />
+            <p style={{ opacity: 0.8 }} className="text-sm max-w-xs">
               Australia&apos;s leading elevated work platform and materials handling equipment hire company.
             </p>
           </div>
@@ -132,7 +142,7 @@ export function Footer() {
               </svg>
               <div>
                 <p className="font-bold text-lg">13 4000</p>
-                <p className="text-white/70 text-xs">24/7 Support</p>
+                <p style={{ opacity: 0.7 }} className="text-xs">24/7 Support</p>
               </div>
             </div>
 
@@ -151,7 +161,8 @@ export function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="p-2 bg-white/10 rounded-full hover:bg-white/20 transition-colors"
+                  className="p-2 rounded-full transition-colors"
+                  style={{ backgroundColor: "rgba(255,255,255,0.1)" }}
                   aria-label={social.label}
                 >
                   {social.icon}
@@ -165,8 +176,8 @@ export function Footer() {
       {/* Bottom Bar */}
       <div>
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <p className="text-sm text-white/70 text-center md:text-left">
-            &copy; {new Date().getFullYear()} Access Hire Australia. All rights reserved.
+          <p className="text-sm text-center md:text-left" style={{ opacity: 0.7 }}>
+            &copy; {new Date().getFullYear()} {brandName}. All rights reserved.
           </p>
         </div>
       </div>

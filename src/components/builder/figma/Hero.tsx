@@ -97,7 +97,7 @@ export function FigmaHero({
   subheadline,
   highlightCategory = true,
   primaryCtaText = "Get a Quote",
-  primaryCtaLink = "#quote",
+  primaryCtaLink = "#quote-form",
   secondaryCtaText,
   secondaryCtaLink,
   buttonSize = "md",

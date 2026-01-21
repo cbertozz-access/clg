@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * EnquiryCartPanel - Brand Aware
+ *
+ * Equipment enquiry form panel that uses CSS variables from ThemeProvider
+ * for colors to automatically adapt to the selected brand.
+ */
+
 import { useState } from "react";
 import { useEnquiryCart, EnquiryCartItem } from "@/lib/enquiry-cart";
 import { submitContactRequest, type ContactRequestData } from "@/lib/api/contact";
@@ -134,14 +141,15 @@ export function EnquiryCartPanel({ isOpen = false, onClose }: EnquiryCartPanelPr
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 px-4 py-4 flex items-center justify-between">
           <div>
-            <h2 className="font-bold text-lg text-[#1A1A1A]">Equipment Enquiry</h2>
-            <p className="text-sm text-[#6B7280]">
+            <h2 className="font-bold text-lg" style={{ color: "var(--color-foreground)" }}>Equipment Enquiry</h2>
+            <p className="text-sm" style={{ color: "var(--color-muted-foreground)" }}>
               {itemCount} {itemCount === 1 ? "item" : "items"} selected
             </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 -mr-2 text-[#6B7280] hover:text-[#1A1A1A]"
+            className="p-2 -mr-2 transition-colors"
+            style={{ color: "var(--color-muted-foreground)" }}
             aria-label="Close"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -155,7 +163,8 @@ export function EnquiryCartPanel({ isOpen = false, onClose }: EnquiryCartPanelPr
           {submitStatus === "success" ? (
             <div className="py-12 text-center">
               <svg
-                className="w-16 h-16 text-green-500 mx-auto mb-4"
+                className="w-16 h-16 mx-auto mb-4"
+                style={{ color: "var(--color-success)" }}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -167,13 +176,17 @@ export function EnquiryCartPanel({ isOpen = false, onClose }: EnquiryCartPanelPr
                   d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <h3 className="text-xl font-bold text-[#1A1A1A] mb-2">Thank You!</h3>
-              <p className="text-[#6B7280] mb-6">
+              <h3 className="text-xl font-bold mb-2" style={{ color: "var(--color-foreground)" }}>Thank You!</h3>
+              <p className="mb-6" style={{ color: "var(--color-muted-foreground)" }}>
                 Your equipment enquiry has been submitted. We&apos;ll be in touch shortly.
               </p>
               <button
                 onClick={onClose}
-                className="px-6 py-3 bg-[#E31937] text-white rounded-lg font-semibold"
+                className="px-6 py-3 rounded-lg font-semibold"
+                style={{
+                  backgroundColor: "var(--color-primary)",
+                  color: "var(--color-primary-foreground)",
+                }}
               >
                 Close
               </button>
@@ -182,11 +195,11 @@ export function EnquiryCartPanel({ isOpen = false, onClose }: EnquiryCartPanelPr
             <>
               {/* Equipment List */}
               <div className="space-y-3 mb-6">
-                <h3 className="font-semibold text-sm text-[#1A1A1A] uppercase tracking-wide">
+                <h3 className="font-semibold text-sm uppercase tracking-wide" style={{ color: "var(--color-foreground)" }}>
                   Selected Equipment
                 </h3>
                 {items.length === 0 ? (
-                  <p className="text-[#6B7280] text-sm py-4 text-center">
+                  <p className="text-sm py-4 text-center" style={{ color: "var(--color-muted-foreground)" }}>
                     No equipment selected. Add items from the equipment list.
                   </p>
                 ) : (
@@ -199,7 +212,11 @@ export function EnquiryCartPanel({ isOpen = false, onClose }: EnquiryCartPanelPr
               {items.length > 0 && !showForm && (
                 <button
                   onClick={() => setShowForm(true)}
-                  className="w-full bg-[#E31937] hover:bg-[#C42920] text-white py-4 rounded-lg font-semibold text-lg transition-colors"
+                  className="w-full py-4 rounded-lg font-semibold text-lg transition-colors"
+                  style={{
+                    backgroundColor: "var(--color-primary)",
+                    color: "var(--color-primary-foreground)",
+                  }}
                 >
                   Continue to Enquiry Form
                 </button>
@@ -208,15 +225,15 @@ export function EnquiryCartPanel({ isOpen = false, onClose }: EnquiryCartPanelPr
               {/* Enquiry Form */}
               {showForm && items.length > 0 && (
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  <h3 className="font-semibold text-sm text-[#1A1A1A] uppercase tracking-wide border-t pt-4">
+                  <h3 className="font-semibold text-sm uppercase tracking-wide border-t pt-4" style={{ color: "var(--color-foreground)" }}>
                     Your Details
                   </h3>
 
                   {/* Two-column grid */}
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-[#1A1A1A] mb-1">
-                        First Name <span className="text-[#E31937]">*</span>
+                      <label className="block text-sm font-medium mb-1" style={{ color: "var(--color-foreground)" }}>
+                        First Name <span style={{ color: "var(--color-primary)" }}>*</span>
                       </label>
                       <input
                         type="text"
@@ -224,12 +241,13 @@ export function EnquiryCartPanel({ isOpen = false, onClose }: EnquiryCartPanelPr
                         onChange={(e) => handleChange("firstName", e.target.value)}
                         placeholder="Enter First Name"
                         required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E31937] focus:border-[#E31937] outline-none"
+                        className="w-full px-4 py-3 border rounded-lg outline-none"
+                        style={{ borderColor: "var(--color-input)" }}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-[#1A1A1A] mb-1">
-                        Surname <span className="text-[#E31937]">*</span>
+                      <label className="block text-sm font-medium mb-1" style={{ color: "var(--color-foreground)" }}>
+                        Surname <span style={{ color: "var(--color-primary)" }}>*</span>
                       </label>
                       <input
                         type="text"
@@ -237,15 +255,16 @@ export function EnquiryCartPanel({ isOpen = false, onClose }: EnquiryCartPanelPr
                         onChange={(e) => handleChange("surname", e.target.value)}
                         placeholder="Enter Surname"
                         required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E31937] focus:border-[#E31937] outline-none"
+                        className="w-full px-4 py-3 border rounded-lg outline-none"
+                        style={{ borderColor: "var(--color-input)" }}
                       />
                     </div>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-[#1A1A1A] mb-1">
-                        Mobile Phone <span className="text-[#E31937]">*</span>
+                      <label className="block text-sm font-medium mb-1" style={{ color: "var(--color-foreground)" }}>
+                        Mobile Phone <span style={{ color: "var(--color-primary)" }}>*</span>
                       </label>
                       <input
                         type="tel"
@@ -253,12 +272,13 @@ export function EnquiryCartPanel({ isOpen = false, onClose }: EnquiryCartPanelPr
                         onChange={(e) => handleChange("phone", e.target.value)}
                         placeholder="Enter Mobile Phone"
                         required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E31937] focus:border-[#E31937] outline-none"
+                        className="w-full px-4 py-3 border rounded-lg outline-none"
+                        style={{ borderColor: "var(--color-input)" }}
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-[#1A1A1A] mb-1">
-                        Email <span className="text-[#E31937]">*</span>
+                      <label className="block text-sm font-medium mb-1" style={{ color: "var(--color-foreground)" }}>
+                        Email <span style={{ color: "var(--color-primary)" }}>*</span>
                       </label>
                       <input
                         type="email"
@@ -266,21 +286,23 @@ export function EnquiryCartPanel({ isOpen = false, onClose }: EnquiryCartPanelPr
                         onChange={(e) => handleChange("email", e.target.value)}
                         placeholder="Enter Email"
                         required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E31937] focus:border-[#E31937] outline-none"
+                        className="w-full px-4 py-3 border rounded-lg outline-none"
+                        style={{ borderColor: "var(--color-input)" }}
                       />
                     </div>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-[#1A1A1A] mb-1">
-                        Industry <span className="text-[#E31937]">*</span>
+                      <label className="block text-sm font-medium mb-1" style={{ color: "var(--color-foreground)" }}>
+                        Industry <span style={{ color: "var(--color-primary)" }}>*</span>
                       </label>
                       <select
                         value={formData.industry}
                         onChange={(e) => handleChange("industry", e.target.value)}
                         required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E31937] focus:border-[#E31937] outline-none bg-white"
+                        className="w-full px-4 py-3 border rounded-lg outline-none bg-white"
+                        style={{ borderColor: "var(--color-input)" }}
                       >
                         {industries.map((opt) => (
                           <option key={opt} value={opt === "Select your Industry Type" ? "" : opt}>
@@ -290,7 +312,7 @@ export function EnquiryCartPanel({ isOpen = false, onClose }: EnquiryCartPanelPr
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-[#1A1A1A] mb-1">
+                      <label className="block text-sm font-medium mb-1" style={{ color: "var(--color-foreground)" }}>
                         Company Name
                       </label>
                       <input
@@ -298,20 +320,22 @@ export function EnquiryCartPanel({ isOpen = false, onClose }: EnquiryCartPanelPr
                         value={formData.company}
                         onChange={(e) => handleChange("company", e.target.value)}
                         placeholder="Enter Company Name"
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E31937] focus:border-[#E31937] outline-none"
+                        className="w-full px-4 py-3 border rounded-lg outline-none"
+                        style={{ borderColor: "var(--color-input)" }}
                       />
                     </div>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-medium text-[#1A1A1A] mb-1">
+                      <label className="block text-sm font-medium mb-1" style={{ color: "var(--color-foreground)" }}>
                         Country
                       </label>
                       <select
                         value={formData.country}
                         onChange={(e) => handleChange("country", e.target.value)}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E31937] focus:border-[#E31937] outline-none bg-white"
+                        className="w-full px-4 py-3 border rounded-lg outline-none bg-white"
+                        style={{ borderColor: "var(--color-input)" }}
                       >
                         {countries.map((opt) => (
                           <option key={opt} value={opt}>
@@ -321,14 +345,15 @@ export function EnquiryCartPanel({ isOpen = false, onClose }: EnquiryCartPanelPr
                       </select>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-[#1A1A1A] mb-1">
-                        Select Branch <span className="text-[#E31937]">*</span>
+                      <label className="block text-sm font-medium mb-1" style={{ color: "var(--color-foreground)" }}>
+                        Select Branch <span style={{ color: "var(--color-primary)" }}>*</span>
                       </label>
                       <select
                         value={formData.branch}
                         onChange={(e) => handleChange("branch", e.target.value)}
                         required
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E31937] focus:border-[#E31937] outline-none bg-white"
+                        className="w-full px-4 py-3 border rounded-lg outline-none bg-white"
+                        style={{ borderColor: "var(--color-input)" }}
                       >
                         {branches.map((opt) => (
                           <option key={opt} value={opt === "Choose Your Branch" ? "" : opt}>
@@ -340,8 +365,8 @@ export function EnquiryCartPanel({ isOpen = false, onClose }: EnquiryCartPanelPr
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-[#1A1A1A] mb-1">
-                      Project Location Suburb <span className="text-[#E31937]">*</span>
+                    <label className="block text-sm font-medium mb-1" style={{ color: "var(--color-foreground)" }}>
+                      Project Location Suburb <span style={{ color: "var(--color-primary)" }}>*</span>
                     </label>
                     <input
                       type="text"
@@ -349,13 +374,14 @@ export function EnquiryCartPanel({ isOpen = false, onClose }: EnquiryCartPanelPr
                       onChange={(e) => handleChange("projectLocation", e.target.value)}
                       placeholder="Enter Project Location Suburb"
                       required
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E31937] focus:border-[#E31937] outline-none"
+                      className="w-full px-4 py-3 border rounded-lg outline-none"
+                      style={{ borderColor: "var(--color-input)" }}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-[#1A1A1A] mb-1">
-                      Enquiry Message <span className="text-[#E31937]">*</span>
+                    <label className="block text-sm font-medium mb-1" style={{ color: "var(--color-foreground)" }}>
+                      Enquiry Message <span style={{ color: "var(--color-primary)" }}>*</span>
                     </label>
                     <textarea
                       value={formData.message}
@@ -363,7 +389,8 @@ export function EnquiryCartPanel({ isOpen = false, onClose }: EnquiryCartPanelPr
                       placeholder="Enter Enquiry Message"
                       required
                       rows={4}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E31937] focus:border-[#E31937] outline-none resize-none"
+                      className="w-full px-4 py-3 border rounded-lg outline-none resize-none"
+                      style={{ borderColor: "var(--color-input)" }}
                     />
                   </div>
 
@@ -376,7 +403,11 @@ export function EnquiryCartPanel({ isOpen = false, onClose }: EnquiryCartPanelPr
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full bg-[#E31937] hover:bg-[#C42920] disabled:bg-gray-400 disabled:cursor-not-allowed text-white py-4 rounded-lg font-semibold text-lg transition-colors flex items-center justify-center gap-2"
+                    className="w-full disabled:bg-gray-400 disabled:cursor-not-allowed py-4 rounded-lg font-semibold text-lg transition-colors flex items-center justify-center gap-2"
+                    style={{
+                      backgroundColor: isSubmitting ? undefined : "var(--color-primary)",
+                      color: "var(--color-primary-foreground)",
+                    }}
                   >
                     {isSubmitting ? (
                       <>
@@ -423,17 +454,18 @@ function CartItemRow({ item, onRemove }: { item: EnquiryCartItem; onRemove: () =
         />
       )}
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-[#1A1A1A] truncate">{item.name}</p>
+        <p className="font-medium truncate" style={{ color: "var(--color-foreground)" }}>{item.name}</p>
         {item.brand && (
-          <p className="text-sm text-[#6B7280]">{item.brand}</p>
+          <p className="text-sm" style={{ color: "var(--color-muted-foreground)" }}>{item.brand}</p>
         )}
         {item.category && (
-          <p className="text-xs text-[#6B7280]">{item.category}</p>
+          <p className="text-xs" style={{ color: "var(--color-muted-foreground)" }}>{item.category}</p>
         )}
       </div>
       <button
         onClick={onRemove}
-        className="p-2 text-[#6B7280] hover:text-[#E31937] transition-colors"
+        className="p-2 transition-colors hover:opacity-80"
+        style={{ color: "var(--color-muted-foreground)" }}
         aria-label="Remove item"
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

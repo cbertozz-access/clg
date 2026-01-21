@@ -6,7 +6,7 @@
  */
 
 import type { BrandTheme, ColorScale } from "../themes/types";
-import { defaultBrand } from "../themes/brands";
+import { defaultBrand, brands } from "../themes/brands";
 
 const BUILDER_API_KEY = process.env.NEXT_PUBLIC_BUILDER_API_KEY!;
 
@@ -232,6 +232,7 @@ export async function fetchBrandById(entryId: string): Promise<BuilderBrand | nu
 /**
  * Get brand theme from Builder.io content
  * Handles both direct brandId and reference field structures
+ * Falls back to local brands.ts definitions
  */
 export async function getBrandThemeFromContent(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -252,9 +253,31 @@ export async function getBrandThemeFromContent(
 
   // Check for simple brandId string
   if (content.data.brandId) {
+    // First check local brands (from brands.ts)
+    if (brands[content.data.brandId]) {
+      return brands[content.data.brandId];
+    }
+    // Then try Builder.io brand model
     const brand = await fetchBrand(content.data.brandId);
     if (brand) return builderBrandToTheme(brand);
   }
 
   return null;
+}
+
+/**
+ * Get list of available local brand IDs for Builder.io enum inputs
+ */
+export function getLocalBrandIds(): string[] {
+  return Object.keys(brands);
+}
+
+/**
+ * Get local brands as options for Builder.io select inputs
+ */
+export function getLocalBrandOptions(): Array<{ label: string; value: string }> {
+  return Object.values(brands).map((brand) => ({
+    label: brand.name,
+    value: brand.id,
+  }));
 }

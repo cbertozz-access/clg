@@ -456,7 +456,7 @@ export const customComponents: RegisteredComponent[] = [
       {
         name: "primaryCtaLink",
         type: "url",
-        defaultValue: "#quote",
+        defaultValue: "#quote-form",
         friendlyName: "Primary CTA Link",
       },
       {

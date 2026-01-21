@@ -44,6 +44,16 @@ export function generateCssVariables(theme: BrandTheme): string {
   lines.push(`--color-card: ${theme.colors.card};`);
   lines.push(`--color-card-foreground: ${theme.colors.cardForeground};`);
 
+  // Header/Footer
+  if (theme.colors.header) {
+    lines.push(`--color-header: ${theme.colors.header};`);
+    lines.push(`--color-header-foreground: ${theme.colors.headerForeground || theme.colors.foreground};`);
+  }
+  if (theme.colors.footer) {
+    lines.push(`--color-footer: ${theme.colors.footer};`);
+    lines.push(`--color-footer-foreground: ${theme.colors.footerForeground || "rgb(255 255 255)"};`);
+  }
+
   // Text
   lines.push(`--color-foreground: ${theme.colors.foreground};`);
   lines.push(`--color-muted-foreground: ${theme.colors.mutedForeground};`);
@@ -120,6 +130,12 @@ export function generateCssVariablesObject(
     "--color-card": theme.colors.card,
     "--color-card-foreground": theme.colors.cardForeground,
 
+    // Header/Footer
+    "--color-header": theme.colors.header || theme.colors.background,
+    "--color-header-foreground": theme.colors.headerForeground || theme.colors.foreground,
+    "--color-footer": theme.colors.footer || theme.colors.primary,
+    "--color-footer-foreground": theme.colors.footerForeground || "rgb(255 255 255)",
+
     // Text
     "--color-foreground": theme.colors.foreground,
     "--color-muted-foreground": theme.colors.mutedForeground,
@@ -156,6 +172,14 @@ export function generateCssVariablesObject(
     for (const [brand, color] of Object.entries(theme.colors.equipmentBrands)) {
       vars[`--color-equipment-brand-${brand}`] = color;
     }
+  }
+
+  // Add asset URLs if present
+  if (theme.assets?.logoUrl) {
+    vars["--logo-url"] = `url(${theme.assets.logoUrl})`;
+  }
+  if (theme.assets?.logoUrlDark) {
+    vars["--logo-url-dark"] = `url(${theme.assets.logoUrlDark})`;
   }
 
   return vars;

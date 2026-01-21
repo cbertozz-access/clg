@@ -1,6 +1,7 @@
 import { BuilderContent } from "@/components/builder/BuilderContent";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { getBrandThemeFromContent } from "@/lib/builder/brand-model";
+import { brands } from "@/lib/themes/brands";
 import { fetchOneEntry, getBuilderSearchParams } from "@builder.io/sdk-react-nextjs";
 
 const BUILDER_API_KEY = process.env.NEXT_PUBLIC_BUILDER_API_KEY!.trim();
@@ -76,8 +77,18 @@ export default async function CatchAllPage({
 
   const content = await fetchBuilderContent(urlPath, resolvedSearchParams);
 
-  // Get brand theme from Builder.io content
-  const brandTheme = await getBrandThemeFromContent(content);
+  // Get brand theme from Builder.io content or URL parameter
+  let brandTheme = await getBrandThemeFromContent(content);
+
+  // Fallback: check URL parameter ?brandId=access-express
+  if (!brandTheme && resolvedSearchParams.brandId) {
+    const brandIdParam = Array.isArray(resolvedSearchParams.brandId)
+      ? resolvedSearchParams.brandId[0]
+      : resolvedSearchParams.brandId;
+    if (brandIdParam && brands[brandIdParam]) {
+      brandTheme = brands[brandIdParam];
+    }
+  }
 
   return (
     <ThemeProvider theme={brandTheme}>

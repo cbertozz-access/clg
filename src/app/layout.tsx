@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Lato, Roboto } from "next/font/google";
+import { Lato, Roboto, Montserrat, Open_Sans } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { EnquiryCartProvider } from "@/lib/enquiry-cart";
 import { EnquiryCartBubble } from "@/components/EnquiryCartBubble";
 import { VisitorDebugPanel } from "@/components/debug/VisitorDebugPanel";
 
+// Access Hire Australia fonts
 const lato = Lato({
   weight: ["300", "400", "700", "900"],
   subsets: ["latin"],
@@ -17,6 +18,21 @@ const roboto = Roboto({
   weight: ["300", "400", "500", "700"],
   subsets: ["latin"],
   variable: "--font-roboto",
+  display: "swap",
+});
+
+// Access Express fonts
+const montserrat = Montserrat({
+  weight: ["400", "500", "600", "700", "800"],
+  subsets: ["latin"],
+  variable: "--font-montserrat",
+  display: "swap",
+});
+
+const openSans = Open_Sans({
+  weight: ["300", "400", "500", "600", "700"],
+  subsets: ["latin"],
+  variable: "--font-open-sans",
   display: "swap",
 });
 
@@ -35,7 +51,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${lato.variable} ${roboto.variable} antialiased`}
+        className={`${lato.variable} ${roboto.variable} ${montserrat.variable} ${openSans.variable} antialiased`}
       >
         <EnquiryCartProvider>
           {children}

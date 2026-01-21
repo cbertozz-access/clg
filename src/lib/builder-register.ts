@@ -141,7 +141,7 @@ Builder.registerComponent(FigmaHero, {
     { name: "subheadline", type: "longText", friendlyName: "Subheadline", helperText: "Leave blank to use campaign content" },
     { name: "highlightCategory", type: "boolean", defaultValue: true, friendlyName: "Highlight Category", helperText: "Highlight category keyword in brand color" },
     { name: "primaryCtaText", type: "string", defaultValue: "Get a Quote", friendlyName: "Primary Button Text" },
-    { name: "primaryCtaLink", type: "url", defaultValue: "#quote", friendlyName: "Primary Button Link" },
+    { name: "primaryCtaLink", type: "url", defaultValue: "#quote-form", friendlyName: "Primary Button Link" },
     { name: "secondaryCtaText", type: "string", friendlyName: "Secondary Button Text" },
     { name: "secondaryCtaLink", type: "url", friendlyName: "Secondary Button Link" },
     { name: "buttonSize", type: "enum", enum: ["sm", "md", "lg"], defaultValue: "md", friendlyName: "Button Size" },
@@ -402,28 +402,6 @@ Builder.registerComponent(LPLoadMore, {
   ],
 });
 
-// Equipment Components
-Builder.registerComponent(EquipmentCard, {
-  name: "EquipmentCard",
-  friendlyName: "Equipment - Card",
-  description: "Single equipment card with image, specs, pricing, and CTA",
-  inputs: [
-    { name: "id", type: "string", friendlyName: "Equipment ID" },
-    { name: "imageUrl", type: "file", allowedFileTypes: ["jpeg", "jpg", "png", "webp"], friendlyName: "Product Image" },
-    { name: "brand", type: "string", friendlyName: "Brand", helperText: "Equipment manufacturer (e.g., Genie, JLG)" },
-    { name: "model", type: "string", defaultValue: "Equipment", friendlyName: "Model Number" },
-    { name: "name", type: "string", defaultValue: "Equipment Name", friendlyName: "Display Name" },
-    { name: "category", type: "string", friendlyName: "Category" },
-    { name: "spec1", type: "string", friendlyName: "Spec Line 1", helperText: "Primary specification (e.g., Capacity: 2.5T)" },
-    { name: "spec2", type: "string", friendlyName: "Spec Line 2" },
-    { name: "spec3", type: "string", friendlyName: "Spec Line 3" },
-    { name: "priceFrom", type: "string", friendlyName: "Price From", helperText: "e.g., $149/day" },
-    { name: "ctaText", type: "string", defaultValue: "Get Quote", friendlyName: "CTA Button Text" },
-    { name: "ctaLink", type: "string", defaultValue: "#quote", friendlyName: "CTA Link" },
-    { name: "variant", type: "enum", enum: ["default", "compact", "featured"], defaultValue: "default" },
-  ],
-});
-
 // Equipment categories from API
 const equipmentCategories = [
   "",
@@ -454,6 +432,31 @@ const equipmentBrands = [
   "Crown",
   "Manitou",
 ];
+
+// Equipment Components
+Builder.registerComponent(EquipmentCard, {
+  name: "EquipmentCard",
+  friendlyName: "Equipment - Card",
+  description: "Single equipment card with image, specs, pricing, and CTA",
+  inputs: [
+    { name: "id", type: "string", friendlyName: "Equipment ID" },
+    { name: "imageUrl", type: "file", allowedFileTypes: ["jpeg", "jpg", "png", "webp"], friendlyName: "Product Image" },
+    { name: "brand", type: "enum", enum: equipmentBrands, defaultValue: "", friendlyName: "Brand" },
+    { name: "model", type: "string", defaultValue: "Equipment", friendlyName: "Model Number" },
+    { name: "name", type: "string", defaultValue: "Equipment Name", friendlyName: "Display Name" },
+    { name: "category", type: "enum", enum: equipmentCategories, defaultValue: "", friendlyName: "Category" },
+    { name: "spec1", type: "string", friendlyName: "Spec Line 1", helperText: "Primary specification (e.g., Capacity: 2.5T)" },
+    { name: "spec2", type: "string", friendlyName: "Spec Line 2" },
+    { name: "dailyPrice", type: "string", friendlyName: "Daily Price", helperText: "e.g., $149 or POA" },
+    { name: "weeklyPrice", type: "string", friendlyName: "Weekly Price", helperText: "e.g., $450 or POA" },
+    { name: "ctaText", type: "string", defaultValue: "View Details", friendlyName: "CTA Button Text" },
+    { name: "ctaLink", type: "string", defaultValue: "#", friendlyName: "CTA Link" },
+    { name: "variant", type: "enum", enum: ["default", "compact", "featured"], defaultValue: "default" },
+    { name: "showPricing", type: "boolean", defaultValue: true, friendlyName: "Show Pricing" },
+    { name: "showSpecs", type: "boolean", defaultValue: true, friendlyName: "Show Specs" },
+    { name: "showEnquiryButton", type: "boolean", defaultValue: true, friendlyName: "Show Enquiry Button" },
+  ],
+});
 
 Builder.registerComponent(EquipmentGrid, {
   name: "EquipmentGrid",

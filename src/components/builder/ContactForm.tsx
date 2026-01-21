@@ -4,10 +4,11 @@ import { useState } from "react";
 import { submitContactRequest, type ContactRequestData } from "@/lib/api/contact";
 
 /**
- * Contact Form Component
+ * Contact Form Component - Brand Aware
  *
  * Self-contained quote request form that integrates with the Contact Request API.
- * Designed to work on any background and match page design language.
+ * Uses CSS variables from ThemeProvider for brand colors.
+ * Automatically adapts to the selected brand.
  */
 
 const industries = [
@@ -151,14 +152,14 @@ export function ContactForm({
 
   const bgClass = {
     white: "bg-white",
-    gray: "bg-[#FFFFFF]",
+    gray: "bg-[var(--color-background-alt,#ffffff)]",
     none: "",
   };
 
   const inputClass =
-    "w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-[#1A1A1A] placeholder:text-gray-400 focus:ring-2 focus:ring-[#E31937]/20 focus:border-[#E31937] outline-none transition-all";
+    "w-full px-4 py-3 bg-white border rounded-lg placeholder:text-gray-400 outline-none transition-all";
 
-  const labelClass = "block text-sm font-medium text-[#374151] mb-1.5";
+  const labelClass = "block text-sm font-medium mb-1.5";
 
   const isCompact = variant === "compact";
 
@@ -172,12 +173,12 @@ export function ContactForm({
     <section id="quote-form" className={`py-12 md:py-16 ${bgClass[backgroundColor]}`}>
       <div className={`mx-auto px-4 ${widthClass[width]}`}>
         {/* Card Container */}
-        <div className="bg-white rounded-2xl shadow-lg shadow-gray-200/50 border border-gray-100 overflow-hidden">
+        <div className="bg-[var(--color-card,white)] rounded-2xl shadow-lg shadow-gray-200/50 border border-[var(--color-border,#f3f4f6)] overflow-hidden">
           {/* Header */}
-          <div className="px-6 md:px-8 pt-6 md:pt-8 pb-6 border-b border-gray-100">
-            <h2 className="text-2xl md:text-3xl font-bold text-[#1A1A1A]">{title}</h2>
+          <div className="px-6 md:px-8 pt-6 md:pt-8 pb-6 border-b border-[var(--color-border,#f3f4f6)]">
+            <h2 className="text-2xl md:text-3xl font-bold" style={{ color: "var(--color-foreground)" }}>{title}</h2>
             {subtitle && (
-              <p className="mt-2 text-gray-500">{subtitle}</p>
+              <p className="mt-2" style={{ color: "var(--color-muted-foreground)" }}>{subtitle}</p>
             )}
           </div>
 
@@ -187,7 +188,8 @@ export function ContactForm({
               <div className="text-center py-8">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <svg
-                    className="w-8 h-8 text-green-500"
+                    className="w-8 h-8"
+                    style={{ color: "var(--color-success)" }}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -200,13 +202,14 @@ export function ContactForm({
                     />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold text-[#1A1A1A] mb-2">Thank You!</h3>
-                <p className="text-gray-500 mb-6">
+                <h3 className="text-xl font-bold mb-2" style={{ color: "var(--color-foreground)" }}>Thank You!</h3>
+                <p className="mb-6" style={{ color: "var(--color-muted-foreground)" }}>
                   Your enquiry has been submitted. We&apos;ll be in touch within 2 hours.
                 </p>
                 <button
                   onClick={() => setSubmitStatus("idle")}
-                  className="text-[#E31937] font-medium hover:underline"
+                  className="font-medium hover:underline"
+                  style={{ color: "var(--color-primary)" }}
                 >
                   Submit another enquiry
                 </button>
@@ -215,13 +218,13 @@ export function ContactForm({
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Section: Contact Details */}
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--color-muted-foreground)" }}>
                     Contact Details
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className={labelClass}>
-                        First Name <span className="text-[#E31937]">*</span>
+                        First Name <span style={{ color: "var(--color-primary)" }}>*</span>
                       </label>
                       <input
                         type="text"
@@ -234,7 +237,7 @@ export function ContactForm({
                     </div>
                     <div>
                       <label className={labelClass}>
-                        Surname <span className="text-[#E31937]">*</span>
+                        Surname <span style={{ color: "var(--color-primary)" }}>*</span>
                       </label>
                       <input
                         type="text"
@@ -247,7 +250,7 @@ export function ContactForm({
                     </div>
                     <div>
                       <label className={labelClass}>
-                        Mobile <span className="text-[#E31937]">*</span>
+                        Mobile <span style={{ color: "var(--color-primary)" }}>*</span>
                       </label>
                       <input
                         type="tel"
@@ -260,7 +263,7 @@ export function ContactForm({
                     </div>
                     <div>
                       <label className={labelClass}>
-                        Email <span className="text-[#E31937]">*</span>
+                        Email <span style={{ color: "var(--color-primary)" }}>*</span>
                       </label>
                       <input
                         type="email"
@@ -276,14 +279,14 @@ export function ContactForm({
 
                 {/* Section: Project Details */}
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
+                  <h3 className="text-sm font-semibold uppercase tracking-wider mb-4" style={{ color: "var(--color-muted-foreground)" }}>
                     Project Details
                   </h3>
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <label className={labelClass}>
-                          Equipment Type <span className="text-[#E31937]">*</span>
+                          Equipment Type <span style={{ color: "var(--color-primary)" }}>*</span>
                         </label>
                         <select
                           value={formData.equipmentType}
@@ -301,7 +304,7 @@ export function ContactForm({
                       </div>
                       <div>
                         <label className={labelClass}>
-                          Branch <span className="text-[#E31937]">*</span>
+                          Branch <span style={{ color: "var(--color-primary)" }}>*</span>
                         </label>
                         <select
                           value={formData.branch}
@@ -351,7 +354,7 @@ export function ContactForm({
 
                     <div>
                       <label className={labelClass}>
-                        Project Location <span className="text-[#E31937]">*</span>
+                        Project Location <span style={{ color: "var(--color-primary)" }}>*</span>
                       </label>
                       <input
                         type="text"
@@ -365,7 +368,7 @@ export function ContactForm({
 
                     <div>
                       <label className={labelClass}>
-                        Message <span className="text-[#E31937]">*</span>
+                        Message <span style={{ color: "var(--color-primary)" }}>*</span>
                       </label>
                       <textarea
                         value={formData.message}
@@ -393,7 +396,11 @@ export function ContactForm({
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-[#E31937] hover:bg-[#C42920] disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-4 rounded-lg font-semibold text-lg transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#E31937]/25 hover:shadow-xl hover:shadow-[#E31937]/30"
+                  className="w-full disabled:bg-gray-300 disabled:cursor-not-allowed py-4 rounded-lg font-semibold text-lg transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl"
+                  style={{
+                    backgroundColor: isSubmitting ? undefined : "var(--color-primary)",
+                    color: "var(--color-primary-foreground)",
+                  }}
                 >
                   {isSubmitting ? (
                     <>
@@ -428,11 +435,12 @@ export function ContactForm({
                 {/* Phone CTA */}
                 {showPhoneCta && (
                   <div className="text-center pt-2">
-                    <p className="text-gray-500 text-sm">
+                    <p className="text-sm" style={{ color: "var(--color-muted-foreground)" }}>
                       Need help now?{" "}
                       <a
                         href={`tel:${phoneNumber.replace(/\s/g, "")}`}
-                        className="text-[#E31937] font-semibold hover:underline"
+                        className="font-semibold hover:underline"
+                        style={{ color: "var(--color-primary)" }}
                       >
                         Call {phoneNumber}
                       </a>

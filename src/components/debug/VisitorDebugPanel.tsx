@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface VisitorProfile {
   visitor_id?: string;
@@ -48,6 +48,9 @@ export function VisitorDebugPanel() {
   const [dataLayer, setDataLayer] = useState<Record<string, unknown>[] | null>(null);
   const [shouldShow, setShouldShow] = useState(false);
 
+  // Track if we've ever achieved "ready" status to prevent regression
+  const hasBeenReadyRef = useRef(false);
+
   // Check if should show panel
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -72,6 +75,7 @@ export function VisitorDebugPanel() {
         setVisitorId(data.visitor_id);
         setProfile(data);
         setSdkStatus("ready");
+        hasBeenReadyRef.current = true;
 
         // Store locally
         if (data.visitor_id) {
@@ -99,7 +103,7 @@ export function VisitorDebugPanel() {
       const sid = localStorage.getItem(VISITOR_STORAGE_KEY);
       setStorageId(sid);
 
-      // Check for CLGVisitor SDK - but don't overwrite "ready" status if we already have data
+      // Check for CLGVisitor SDK - but never regress from "ready" to "loading"
       if (window.CLGVisitor) {
         const sdkInitialized = window.CLGVisitor.initialized;
         const sdkProfile = window.CLGVisitor.getProfile();
@@ -107,14 +111,16 @@ export function VisitorDebugPanel() {
         // Only update status if SDK has better data, or we don't have data yet
         if (sdkInitialized && sdkProfile) {
           setSdkStatus("ready");
+          hasBeenReadyRef.current = true;
           setVisitorId(window.CLGVisitor.getVisitorId());
           setProfile(sdkProfile);
-        } else if (!profile) {
-          // Only set loading if we don't already have profile from direct fetch
+        } else if (!hasBeenReadyRef.current) {
+          // Only set loading if we haven't already achieved ready status
           setSdkStatus(sdkInitialized ? "ready" : "loading");
+          if (sdkInitialized) hasBeenReadyRef.current = true;
           setVisitorId(window.CLGVisitor.getVisitorId() || cid || sid || null);
         }
-      } else if (!profile) {
+      } else if (!hasBeenReadyRef.current) {
         setSdkStatus("not-loaded");
         // Use cookie/storage as fallback
         setVisitorId(cid || sid || null);
@@ -139,6 +145,7 @@ export function VisitorDebugPanel() {
     // Listen for SDK ready event
     const handleVisitorReady = (e: CustomEvent) => {
       setSdkStatus("ready");
+      hasBeenReadyRef.current = true;
       setVisitorId(e.detail?.visitor_id);
       setProfile(e.detail);
       loadData();

@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * QuickViewModal - Brand Aware
+ *
+ * Equipment detail modal that uses CSS variables from ThemeProvider
+ * for colors to automatically adapt to the selected brand.
+ */
+
 import { useEffect, useState } from "react";
 import { useEnquiryCart } from "@/lib/enquiry-cart";
 
@@ -178,11 +185,12 @@ export function QuickViewModal({ isOpen, onClose, equipment }: QuickViewModalPro
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
-                    className={`flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors ${
-                      index === currentImageIndex
-                        ? "border-[#E31937]"
-                        : "border-gray-200 hover:border-gray-400"
-                    }`}
+                    className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-colors"
+                    style={{
+                      borderColor: index === currentImageIndex
+                        ? "var(--color-primary)"
+                        : "#e5e7eb",
+                    }}
                   >
                     <img
                       src={img}
@@ -236,7 +244,10 @@ export function QuickViewModal({ isOpen, onClose, equipment }: QuickViewModalPro
             {/* Brand & Model */}
             <div className="mb-2">
               {equipment.brand && (
-                <span className="text-sm font-semibold text-[#E31937] uppercase tracking-wide">
+                <span
+                  className="text-sm font-semibold uppercase tracking-wide"
+                  style={{ color: "var(--color-primary)" }}
+                >
                   {equipment.brand}
                 </span>
               )}
@@ -311,14 +322,12 @@ export function QuickViewModal({ isOpen, onClose, equipment }: QuickViewModalPro
               {equipment.id && (
                 <button
                   onClick={handleEnquiryClick}
-                  className={`
-                    flex-1 flex items-center justify-center gap-2 py-3 font-semibold rounded-lg
-                    transition-colors duration-200 border-2
-                    ${inCart
-                      ? "bg-[#E31937] border-[#E31937] text-white"
-                      : "bg-transparent border-[#E31937] text-[#E31937] hover:bg-[#E31937]/10"
-                    }
-                  `}
+                  className="flex-1 flex items-center justify-center gap-2 py-3 font-semibold rounded-lg transition-colors duration-200 border-2"
+                  style={{
+                    backgroundColor: inCart ? "var(--color-primary)" : "transparent",
+                    borderColor: "var(--color-primary)",
+                    color: inCart ? "var(--color-primary-foreground)" : "var(--color-primary)",
+                  }}
                 >
                   {inCart ? (
                     <>
@@ -340,7 +349,11 @@ export function QuickViewModal({ isOpen, onClose, equipment }: QuickViewModalPro
 
               <a
                 href={`tel:134000`}
-                className="flex-1 py-3 font-semibold rounded-lg bg-[#E31937] hover:bg-[#C42920] text-white transition-colors text-center flex items-center justify-center gap-2"
+                className="flex-1 py-3 font-semibold rounded-lg transition-colors text-center flex items-center justify-center gap-2"
+                style={{
+                  backgroundColor: "var(--color-primary)",
+                  color: "var(--color-primary-foreground)",
+                }}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
