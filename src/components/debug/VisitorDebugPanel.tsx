@@ -72,6 +72,29 @@ function getCookie(name: string): string | null {
   return match ? match[2] : null;
 }
 
+// Safe JSON stringify that handles circular references and functions
+function safeStringify(obj: unknown, indent = 2): string {
+  const seen = new WeakSet();
+  return JSON.stringify(
+    obj,
+    (_key, value) => {
+      // Handle functions
+      if (typeof value === "function") {
+        return "[Function]";
+      }
+      // Handle circular references
+      if (typeof value === "object" && value !== null) {
+        if (seen.has(value)) {
+          return "[Circular]";
+        }
+        seen.add(value);
+      }
+      return value;
+    },
+    indent
+  );
+}
+
 export function VisitorDebugPanel() {
   const [isOpen, setIsOpen] = useState(false);
   const [visitorId, setVisitorId] = useState<string | null>(null);
@@ -481,7 +504,7 @@ export function VisitorDebugPanel() {
                   <>
                     <div className="text-gray-400 mb-1">DataLayer ({dataLayer.length} items)</div>
                     <pre className="font-mono bg-gray-800 px-2 py-1 rounded overflow-x-auto text-[10px] max-h-64 overflow-y-auto">
-                      {JSON.stringify(dataLayer.slice(-10), null, 2)}
+                      {safeStringify(dataLayer.slice(-10))}
                     </pre>
                     <p className="text-gray-500 text-[10px]">Showing last 10 entries</p>
                   </>
