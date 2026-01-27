@@ -25,8 +25,8 @@
   // Firebase endpoint for visitor profiles
   const FIREBASE_ENDPOINT = 'https://australia-southeast1-composable-lg.cloudfunctions.net/visitorId';
 
-  // Server-side GTM endpoint
-  const SGTM_ENDPOINT = 'https://sgtm.accesshire.net';
+  // Server-side GTM endpoint (GCP App Engine)
+  const SGTM_ENDPOINT = 'https://composable-lg.ts.r.appspot.com';
   const SGTM_PATH = '/clg/collect'; // Custom client path
 
   const COOKIE_NAME = 'clg_vid';
