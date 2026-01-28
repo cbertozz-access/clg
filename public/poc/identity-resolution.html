@@ -632,7 +632,7 @@
       padding: 16px 24px;
       border-top: 1px solid #333;
       display: flex;
-      justify-content: space-between;
+      justify-content: flex-end;
       gap: 12px;
     }
     .modal-btn {
@@ -1564,15 +1564,6 @@
       document.getElementById('packetModal').classList.remove('show');
     }
 
-    function goBackFromModal() {
-      closePacketModal();
-      if (modalResolve) {
-        modalResolve('back');
-        modalResolve = null;
-      }
-      resetDemo();
-    }
-
     function continueFromModal() {
       closePacketModal();
       if (modalResolve) {
@@ -1610,7 +1601,6 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button class="modal-btn secondary" onclick="goBackFromModal()">Back</button>
         <button class="modal-btn primary" onclick="continueFromModal()">Next</button>
       </div>
     </div>
