@@ -5,12 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Identity Resolution POC</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background: #000;
       color: #fff;
@@ -20,12 +15,7 @@
       padding: 20px;
       min-height: 100vh;
     }
-    
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-    
+    .container { max-width: 1400px; margin: 0 auto; }
     header {
       border: 1px solid #fff;
       padding: 15px 20px;
@@ -34,12 +24,7 @@
       justify-content: space-between;
       align-items: center;
     }
-    
-    header h1 {
-      font-size: 18px;
-      font-weight: normal;
-    }
-    
+    header h1 { font-size: 18px; font-weight: normal; }
     .brand-select {
       background: #000;
       color: #fff;
@@ -49,44 +34,35 @@
       font-size: 14px;
       cursor: pointer;
     }
-    
     .grid {
       display: grid;
-      grid-template-columns: 300px 1fr;
+      grid-template-columns: 320px 1fr;
       gap: 20px;
     }
-    
     .panel {
       border: 1px solid #fff;
       padding: 15px;
     }
-    
     .panel-title {
       font-size: 12px;
       margin-bottom: 15px;
       padding-bottom: 10px;
       border-bottom: 1px solid #333;
     }
-    
     .signal-row {
       display: flex;
       justify-content: space-between;
       margin-bottom: 8px;
       font-size: 12px;
     }
-    
-    .signal-label {
-      color: #888;
-    }
-    
+    .signal-label { color: #888; }
     .signal-value {
       color: #fff;
       text-align: right;
-      max-width: 150px;
+      max-width: 160px;
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    
     .status-indicator {
       display: inline-block;
       width: 8px;
@@ -94,31 +70,20 @@
       border-radius: 50%;
       margin-right: 8px;
     }
-    
     .status-indicator.active {
       background: #fff;
       animation: pulse 1s infinite;
     }
-    
-    .status-indicator.success {
-      background: #fff;
-    }
-    
-    .status-indicator.pending {
-      background: #333;
-    }
-    
+    .status-indicator.success { background: #fff; }
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.3; }
     }
-    
     .right-column {
       display: flex;
       flex-direction: column;
       gap: 20px;
     }
-    
     .flow-diagram {
       display: flex;
       align-items: center;
@@ -127,7 +92,6 @@
       padding: 20px;
       flex-wrap: wrap;
     }
-    
     .flow-step {
       border: 1px solid #333;
       padding: 10px 15px;
@@ -136,59 +100,40 @@
       font-size: 11px;
       transition: all 0.3s;
     }
-    
     .flow-step.active {
       border-color: #fff;
       background: #fff;
       color: #000;
     }
-    
-    .flow-step.complete {
-      border-color: #fff;
-    }
-    
-    .flow-arrow {
-      color: #333;
-      font-size: 18px;
-    }
-    
-    .flow-arrow.active {
-      color: #fff;
-    }
-    
+    .flow-step.complete { border-color: #fff; }
+    .flow-arrow { color: #333; font-size: 18px; }
+    .flow-arrow.active { color: #fff; }
     .flow-branch {
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 10px;
     }
-    
-    .form-group {
-      margin-bottom: 15px;
-    }
-    
+    .form-group { margin-bottom: 12px; }
     .form-group label {
       display: block;
       margin-bottom: 5px;
       font-size: 12px;
       color: #888;
     }
-    
-    .form-group input {
+    .form-group input, .form-group select {
       width: 100%;
       background: #000;
       border: 1px solid #fff;
       color: #fff;
       padding: 8px 10px;
       font-family: inherit;
-      font-size: 14px;
+      font-size: 13px;
     }
-    
-    .form-group input:focus {
+    .form-group input:focus, .form-group select:focus {
       outline: none;
       background: #111;
     }
-    
     .btn {
       background: #fff;
       color: #000;
@@ -200,80 +145,79 @@
       width: 100%;
       transition: all 0.2s;
     }
-    
-    .btn:hover {
-      background: #ccc;
-    }
-    
+    .btn:hover { background: #ccc; }
     .btn:disabled {
       background: #333;
       color: #666;
       cursor: not-allowed;
     }
-    
+    .btn-outline {
+      background: transparent;
+      color: #fff;
+      border: 1px solid #fff;
+      margin-top: 10px;
+    }
+    .btn-outline:hover {
+      background: #fff;
+      color: #000;
+    }
+    .scenario-box {
+      background: #111;
+      border: 1px solid #333;
+      padding: 12px;
+      margin-bottom: 15px;
+      font-size: 11px;
+    }
+    .scenario-box.highlight { border-color: #fff; }
+    .scenario-label {
+      color: #888;
+      margin-bottom: 8px;
+      font-size: 10px;
+      text-transform: uppercase;
+    }
+    .scenario-desc {
+      color: #fff;
+      line-height: 1.5;
+    }
     .lookup-result {
       font-size: 12px;
       padding: 15px;
       background: #111;
       margin-top: 10px;
     }
-    
-    .lookup-result.match {
-      border-left: 3px solid #fff;
-    }
-    
-    .lookup-result.no-match {
-      border-left: 3px solid #333;
-    }
-    
+    .lookup-result.match { border-left: 3px solid #fff; }
+    .lookup-result.no-match { border-left: 3px solid #333; }
     .payload-box {
       background: #111;
       padding: 15px;
       font-size: 11px;
       overflow-x: auto;
       white-space: pre;
-      max-height: 200px;
+      max-height: 180px;
       overflow-y: auto;
     }
-    
     .payload-label {
       font-size: 11px;
       color: #888;
       margin-bottom: 5px;
       margin-top: 15px;
     }
-    
-    .payload-label:first-child {
-      margin-top: 0;
-    }
-    
+    .payload-label:first-child { margin-top: 0; }
     .event-log {
-      height: 200px;
+      height: 180px;
       overflow-y: auto;
       background: #111;
       padding: 10px;
       font-size: 11px;
     }
-    
     .log-entry {
       margin-bottom: 5px;
       display: flex;
       gap: 10px;
     }
-    
-    .log-time {
-      color: #666;
-      flex-shrink: 0;
-    }
-    
-    .log-indicator {
-      flex-shrink: 0;
-    }
-    
-    .log-message {
-      color: #fff;
-    }
-    
+    .log-time { color: #666; flex-shrink: 0; }
+    .log-indicator { flex-shrink: 0; }
+    .log-message { color: #fff; }
     .clear-btn {
       background: transparent;
       color: #666;
@@ -283,46 +227,34 @@
       cursor: pointer;
       float: right;
     }
-    
     .clear-btn:hover {
       border-color: #fff;
       color: #fff;
     }
-    
     .two-col {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
     }
-    
     .master-record {
       margin-top: 15px;
       padding: 15px;
       background: #111;
       font-size: 11px;
     }
-    
     .master-record h4 {
       margin-bottom: 10px;
       font-weight: normal;
       color: #888;
     }
-    
-    .device-list {
-      margin-top: 10px;
-    }
-    
+    .device-list { margin-top: 10px; }
     .device-item {
       padding: 8px;
       border: 1px solid #333;
       margin-bottom: 5px;
       font-size: 10px;
     }
-    
-    .device-item.current {
-      border-color: #fff;
-    }
-    
+    .device-item.current { border-color: #fff; }
     .tag {
       display: inline-block;
       border: 1px solid #fff;
@@ -331,18 +263,51 @@
       margin-right: 5px;
       margin-top: 5px;
     }
-    
-    .hidden {
-      display: none;
-    }
-    
-    .processing {
-      animation: blink 0.5s infinite;
-    }
-    
+    .tag.warning { border-color: #888; color: #888; }
+    .tag.new { background: #fff; color: #000; }
+    .hidden { display: none; }
+    .processing { animation: blink 0.5s infinite; }
     @keyframes blink {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.5; }
+    }
+    .submission-counter {
+      background: #111;
+      padding: 10px;
+      margin-top: 15px;
+      font-size: 11px;
+      text-align: center;
+    }
+    .counter-value {
+      font-size: 24px;
+      margin: 5px 0;
+    }
+    .dup-warning {
+      background: #fff;
+      color: #000;
+      padding: 15px;
+      margin-top: 15px;
+      text-align: center;
+    }
+    .dup-warning strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+    .history-table {
+      width: 100%;
+      margin-top: 15px;
+      border-collapse: collapse;
+      font-size: 10px;
+    }
+    .history-table th, .history-table td {
+      border: 1px solid #333;
+      padding: 6px;
+      text-align: left;
+    }
+    .history-table th {
+      background: #111;
+      color: #888;
     }
   </style>
 </head>
@@ -350,17 +315,70 @@
   <div class="container">
     <header>
       <h1>■ IDENTITY RESOLUTION POC</h1>
-      <select class="brand-select" id="brandSelect">
-        <option value="clg">CLG</option>
-        <option value="access-hire">Access Hire</option>
-        <option value="access-express">Access Express</option>
-      </select>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <span style="color: #888; font-size: 12px;">Current Brand:</span>
+        <select class="brand-select" id="brandSelect">
+          <option value="clg">CLG</option>
+          <option value="access-hire">Access Hire</option>
+          <option value="access-express">Access Express</option>
+        </select>
+      </div>
     </header>
     
     <div class="grid">
       <div class="left-column">
         <div class="panel">
-          <div class="panel-title">■ DEVICE SIGNALS</div>
+          <div class="panel-title">■ TEST SCENARIO</div>
+          
+          <div class="form-group">
+            <label>Quick Select</label>
+            <select id="scenarioSelect" onchange="loadScenario()">
+              <option value="returning-user">↻ Returning User (John)</option>
+              <option value="returning-user-jane">↻ Returning User (Jane)</option>
+              <option value="new-user">+ New User</option>
+              <option value="same-email-diff-phone">↻ Same Email, Diff Phone</option>
+              <option value="same-phone-diff-email">↻ Same Phone, Diff Email</option>
+              <option value="custom">✎ Custom Entry</option>
+            </select>
+          </div>
+          
+          <div class="scenario-box highlight" id="scenarioDesc">
+            <div class="scenario-label">What Will Happen</div>
+            <div class="scenario-desc" id="scenarioText">
+              Known user - will match and link to existing record.
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="testEmail" placeholder="user@example.com">
+          </div>
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" id="testPhone" placeholder="0400000000">
+          </div>
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" id="testName" placeholder="Full Name">
+          </div>
+          
+          <button class="btn" id="submitBtn" onclick="submitTestLead()">
+            SUBMIT LEAD
+          </button>
+          
+          <button class="btn btn-outline" onclick="resetDemo()">
+            RESET SESSION
+          </button>
+          
+          <div class="submission-counter">
+            <div style="color: #888;">SESSION SUBMISSIONS</div>
+            <div class="counter-value" id="sessionCounter">0</div>
+            <div style="color: #666; font-size: 10px;">Each gets unique UID for NetSuite</div>
+          </div>
+        </div>
+        
+        <div class="panel" style="margin-top: 20px;">
+          <div class="panel-title">■ CURRENT DEVICE</div>
           <div class="signal-row">
             <span class="signal-label">Device ID</span>
             <span class="signal-value" id="deviceId">-</span>
@@ -370,33 +388,9 @@
             <span class="signal-value" id="platform">-</span>
           </div>
           <div class="signal-row">
-            <span class="signal-label">Screen</span>
-            <span class="signal-value" id="screen">-</span>
-          </div>
-          <div class="signal-row">
             <span class="signal-label">Browser</span>
             <span class="signal-value" id="browser">-</span>
           </div>
-          <div class="signal-row">
-            <span class="signal-label">Touch</span>
-            <span class="signal-value" id="touch">-</span>
-          </div>
-          <div class="signal-row">
-            <span class="signal-label">Timezone</span>
-            <span class="signal-value" id="timezone">-</span>
-          </div>
-          <div class="signal-row">
-            <span class="signal-label">Language</span>
-            <span class="signal-value" id="language">-</span>
-          </div>
-          <div style="margin-top: 15px; font-size: 11px;">
-            <span class="status-indicator active"></span>
-            <span>Signals Captured</span>
-          </div>
-        </div>
-        
-        <div class="panel" style="margin-top: 20px;">
-          <div class="panel-title">■ VISITOR STATE</div>
           <div class="signal-row">
             <span class="signal-label">Visitor ID</span>
             <span class="signal-value" id="visitorId">-</span>
@@ -405,112 +399,64 @@
             <span class="signal-label">Session ID</span>
             <span class="signal-value" id="sessionId">-</span>
           </div>
-          <div class="signal-row">
-            <span class="signal-label">Page Views</span>
-            <span class="signal-value" id="pageViews">-</span>
-          </div>
-          <div class="signal-row">
-            <span class="signal-label">First Touch</span>
-            <span class="signal-value" id="firstTouch">-</span>
-          </div>
-          <div style="margin-top: 15px; font-size: 11px;">
-            <span class="status-indicator success"></span>
-            <span>Connected</span>
-          </div>
-        </div>
-        
-        <div class="panel" style="margin-top: 20px;">
-          <div class="panel-title">■ TEST FORM</div>
-          <div class="form-group">
-            <label>Email</label>
-            <input type="email" id="testEmail" placeholder="john@example.com">
-          </div>
-          <div class="form-group">
-            <label>Phone</label>
-            <input type="tel" id="testPhone" placeholder="0412345678">
-          </div>
-          <div class="form-group">
-            <label>Name</label>
-            <input type="text" id="testName" placeholder="John Smith">
-          </div>
-          <button class="btn" id="submitBtn" onclick="submitTestLead()">
-            SUBMIT TEST LEAD
-          </button>
         </div>
       </div>
       
       <div class="right-column">
         <div class="panel">
-          <div class="panel-title">■ PROCESS FLOW</div>
+          <div class="panel-title">■ DEDUPLICATION FLOW</div>
           <div class="flow-diagram">
-            <div class="flow-step" id="step-capture">
-              CAPTURE<br>SIGNALS
-            </div>
+            <div class="flow-step" id="step-capture">CAPTURE<br>SIGNALS</div>
             <span class="flow-arrow" id="arrow-1">→</span>
-            <div class="flow-step" id="step-check">
-              CHECK<br>FIREBASE
-            </div>
+            <div class="flow-step" id="step-check">QUERY<br>FIREBASE</div>
             <span class="flow-arrow" id="arrow-2">→</span>
-            <div class="flow-step" id="step-match">
-              MATCH<br>LOOKUP
-            </div>
+            <div class="flow-step" id="step-match">MATCH<br>EMAIL/PHONE</div>
             <span class="flow-arrow" id="arrow-3">→</span>
             <div class="flow-branch">
-              <div class="flow-step" id="step-new">
-                NEW LEAD<br>CREATED
-              </div>
-              <span style="color: #333;">OR</span>
-              <div class="flow-step" id="step-link">
-                LINK TO<br>MASTER
-              </div>
+              <div class="flow-step" id="step-new">CREATE<br>NEW</div>
+              <span style="color: #333;">─ OR ─</span>
+              <div class="flow-step" id="step-link">LINK TO<br>EXISTING</div>
             </div>
             <span class="flow-arrow" id="arrow-4">→</span>
-            <div class="flow-step" id="step-push">
-              PUSH<br>DATA
-            </div>
+            <div class="flow-step" id="step-push">SEND<br>UNIQUE UID</div>
           </div>
         </div>
         
         <div class="two-col">
           <div class="panel">
-            <div class="panel-title">■ FIREBASE LOOKUP</div>
+            <div class="panel-title">■ FIREBASE DEDUPLICATION</div>
             <div id="lookupStatus">
-              <span style="color: #666;">Awaiting form submission...</span>
+              <span style="color: #666;">Submit a lead to see deduplication...</span>
             </div>
-            <div id="lookupResult" class="hidden">
-            </div>
-            <div id="masterRecord" class="hidden">
-            </div>
+            <div id="lookupResult" class="hidden"></div>
+            <div id="masterRecord" class="hidden"></div>
+            <div id="dupWarning" class="hidden"></div>
           </div>
           
           <div class="panel">
             <div class="panel-title">■ OUTBOUND PAYLOADS</div>
             <div class="payload-label">▼ DataLayer Push</div>
-            <div class="payload-box" id="dataLayerPayload">
-// Awaiting submission...
-            </div>
-            <div class="payload-label">▼ NetSuite Payload</div>
-            <div class="payload-box" id="netsuitePayload">
-// Awaiting submission...
-            </div>
+            <div class="payload-box" id="dataLayerPayload">// Submit a lead...</div>
+            <div class="payload-label">▼ NetSuite Payload (unique UID)</div>
+            <div class="payload-box" id="netsuitePayload">// Submit a lead...</div>
           </div>
         </div>
         
         <div class="panel">
           <div class="panel-title">
-            ■ EVENT LOG
-            <button class="clear-btn" onclick="clearLog()">CLEAR</button>
+            ■ SESSION HISTORY
+            <button class="clear-btn" onclick="clearLog()">CLEAR LOG</button>
           </div>
-          <div class="event-log" id="eventLog">
-          </div>
+          <div id="sessionHistory"></div>
+          <div class="event-log" id="eventLog"></div>
         </div>
       </div>
     </div>
   </div>
   
   <script>
-    // Dummy data store (simulating Firebase)
-    const dummyDatabase = {
+    // Simulated Firebase database
+    const database = {
       leads: {
         'LEAD-ABC123': {
           masterLeadId: 'LEAD-ABC123',
@@ -520,24 +466,8 @@
           lastName: 'Smith',
           firstSeen: '2026-01-15T10:30:00Z',
           devices: {
-            'DEV-OLD001': {
-              deviceType: 'desktop',
-              platform: 'Win32',
-              browser: 'Chrome',
-              firstSeen: '2026-01-15',
-              lastSeen: '2026-01-20',
-              sessionCount: 3,
-              brands: ['access-hire']
-            },
-            'DEV-OLD002': {
-              deviceType: 'mobile',
-              platform: 'iPhone',
-              browser: 'Safari',
-              firstSeen: '2026-01-18',
-              lastSeen: '2026-01-25',
-              sessionCount: 5,
-              brands: ['access-hire', 'access-express']
-            }
+            'DEV-PREV01': { deviceType: 'desktop', platform: 'Win32', browser: 'Chrome', brands: ['access-hire'] },
+            'DEV-PREV02': { deviceType: 'mobile', platform: 'iPhone', browser: 'Safari', brands: ['access-hire', 'access-express'] }
           },
           siteIds: {
             'access-hire': ['UID-001', 'UID-003'],
@@ -553,138 +483,171 @@
           lastName: 'Doe',
           firstSeen: '2026-01-20T14:00:00Z',
           devices: {
-            'DEV-XYZ999': {
-              deviceType: 'desktop',
-              platform: 'MacIntel',
-              browser: 'Safari',
-              firstSeen: '2026-01-20',
-              lastSeen: '2026-01-27',
-              sessionCount: 2,
-              brands: ['clg']
-            }
+            'DEV-PREV03': { deviceType: 'desktop', platform: 'MacIntel', browser: 'Safari', brands: ['clg'] }
           },
-          siteIds: {
-            'clg': ['UID-004']
-          },
+          siteIds: { 'clg': ['UID-004'] },
           totalSubmissions: 1
         }
       }
     };
     
-    // Current state
-    let currentDeviceId = null;
-    let currentVisitorId = null;
-    let currentSessionId = null;
+    // Scenarios
+    const scenarios = {
+      'returning-user': {
+        email: 'john@example.com',
+        phone: '0412345678',
+        name: 'John Smith',
+        desc: '↻ MATCH: Email + Phone match existing lead LEAD-ABC123. Will link this submission to master record.'
+      },
+      'returning-user-jane': {
+        email: 'jane@company.com',
+        phone: '0498765432',
+        name: 'Jane Doe',
+        desc: '↻ MATCH: Will match existing lead LEAD-DEF456 from CLG site.'
+      },
+      'new-user': {
+        email: 'brand.new@user.com',
+        phone: '0400111222',
+        name: 'Brand New User',
+        desc: '+ NEW: No email or phone match. Will create NEW master lead record.'
+      },
+      'same-email-diff-phone': {
+        email: 'john@example.com',
+        phone: '0499999999',
+        name: 'John Smith',
+        desc: '↻ MATCH: Same email as John (different phone). EMAIL MATCH links to LEAD-ABC123.'
+      },
+      'same-phone-diff-email': {
+        email: 'different@email.com',
+        phone: '0412345678',
+        name: 'J Smith',
+        desc: '↻ MATCH: Different email but same phone. PHONE MATCH links to LEAD-ABC123.'
+      },
+      'custom': {
+        email: '',
+        phone: '',
+        name: '',
+        desc: '✎ Enter any values to test. Try submitting same data twice to see duplicate handling.'
+      }
+    };
     
-    // Generate IDs
+    // Session state
+    let deviceId, visitorId, sessionId;
+    let sessionSubmissions = 0;
+    let sessionLeads = []; // Track submissions this session
+    
     function generateUUID() {
-      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
         const r = Math.random() * 16 | 0;
-        const v = c === 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16).toUpperCase();
+        return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16).toUpperCase();
       });
     }
     
-    function generateShortId(prefix) {
+    function generateId(prefix) {
       return prefix + '-' + Math.random().toString(36).substr(2, 6).toUpperCase();
     }
     
-    // Logging
-    function log(message, type = 'info') {
-      const logEl = document.getElementById('eventLog');
+    function log(msg, type = 'info') {
+      const el = document.getElementById('eventLog');
       const time = new Date().toLocaleTimeString('en-AU', { hour12: false });
-      const indicator = type === 'success' ? '●' : type === 'processing' ? '◐' : '○';
-      
+      const icon = type === 'success' ? '●' : type === 'warning' ? '▲' : type === 'processing' ? '◐' : '○';
       const entry = document.createElement('div');
       entry.className = 'log-entry';
-      entry.innerHTML = `
-        <span class="log-time">${time}</span>
-        <span class="log-indicator">${indicator}</span>
-        <span class="log-message">${message}</span>
-      `;
-      logEl.insertBefore(entry, logEl.firstChild);
+      entry.innerHTML = `<span class="log-time">${time}</span><span class="log-indicator">${icon}</span><span class="log-message">${msg}</span>`;
+      el.insertBefore(entry, el.firstChild);
     }
     
     function clearLog() {
       document.getElementById('eventLog').innerHTML = '';
     }
     
-    // Initialize device signals
-    function initializeSignals() {
-      currentDeviceId = generateShortId('DEV');
-      currentVisitorId = generateShortId('VIS');
-      currentSessionId = generateShortId('SES');
+    function loadScenario() {
+      const id = document.getElementById('scenarioSelect').value;
+      const s = scenarios[id];
+      document.getElementById('testEmail').value = s.email;
+      document.getElementById('testPhone').value = s.phone;
+      document.getElementById('testName').value = s.name;
+      document.getElementById('scenarioText').textContent = s.desc;
+    }
+    
+    function init() {
+      deviceId = generateId('DEV');
+      visitorId = generateId('VIS');
+      sessionId = generateId('SES');
       
-      // Device signals
-      document.getElementById('deviceId').textContent = currentDeviceId;
-      document.getElementById('platform').textContent = navigator.platform || 'Unknown';
-      document.getElementById('screen').textContent = `${screen.width}x${screen.height}`;
-      document.getElementById('browser').textContent = getBrowserName();
-      document.getElementById('touch').textContent = 'ontouchstart' in window ? 'Yes' : 'No';
-      document.getElementById('timezone').textContent = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      document.getElementById('language').textContent = navigator.language;
+      document.getElementById('deviceId').textContent = deviceId;
+      document.getElementById('platform').textContent = navigator.platform;
+      document.getElementById('browser').textContent = navigator.userAgent.includes('Chrome') ? 'Chrome' : 'Safari';
+      document.getElementById('visitorId').textContent = visitorId;
+      document.getElementById('sessionId').textContent = sessionId;
       
-      // Visitor state
-      document.getElementById('visitorId').textContent = currentVisitorId;
-      document.getElementById('sessionId').textContent = currentSessionId;
-      document.getElementById('pageViews').textContent = Math.floor(Math.random() * 5) + 1;
-      document.getElementById('firstTouch').textContent = ['google', 'direct', 'facebook', 'linkedin'][Math.floor(Math.random() * 4)];
-      
-      log('Device signals captured');
-      log('Visitor ID generated: ' + currentVisitorId);
-      log('Session initialized: ' + currentSessionId);
-      
-      // Activate first step
       document.getElementById('step-capture').classList.add('complete');
+      loadScenario();
+      log('Session started: ' + sessionId);
     }
     
-    function getBrowserName() {
-      const ua = navigator.userAgent;
-      if (ua.includes('Chrome')) return 'Chrome';
-      if (ua.includes('Safari')) return 'Safari';
-      if (ua.includes('Firefox')) return 'Firefox';
-      if (ua.includes('Edge')) return 'Edge';
-      return 'Unknown';
-    }
-    
-    // Flow step animation
-    function activateStep(stepId, arrowId) {
-      if (arrowId) {
-        document.getElementById(arrowId).classList.add('active');
-      }
+    async function activateStep(stepId, arrowId) {
+      if (arrowId) document.getElementById(arrowId).classList.add('active');
       const step = document.getElementById(stepId);
       step.classList.add('active');
-      
-      return new Promise(resolve => {
-        setTimeout(() => {
-          step.classList.remove('active');
-          step.classList.add('complete');
-          resolve();
-        }, 800);
-      });
+      await new Promise(r => setTimeout(r, 500));
+      step.classList.remove('active');
+      step.classList.add('complete');
     }
     
-    // Firebase lookup simulation
-    function lookupInFirebase(email, phone) {
-      // Search by email first, then phone
-      for (const leadId in dummyDatabase.leads) {
-        const lead = dummyDatabase.leads[leadId];
-        if (lead.email === email || lead.phone === phone) {
-          return lead;
+    function findMatch(email, phone) {
+      for (const id in database.leads) {
+        const lead = database.leads[id];
+        if (email && lead.email.toLowerCase() === email.toLowerCase()) {
+          return { lead, matchType: 'EMAIL' };
+        }
+        if (phone && lead.phone === phone) {
+          return { lead, matchType: 'PHONE' };
         }
       }
       return null;
     }
     
-    // Submit test lead
+    function checkDuplicate(email, phone) {
+      // Check if we've already submitted this email/phone in this session
+      return sessionLeads.find(l => 
+        (email && l.email.toLowerCase() === email.toLowerCase()) || 
+        (phone && l.phone === phone)
+      );
+    }
+    
+    function updateSessionHistory() {
+      if (sessionLeads.length === 0) {
+        document.getElementById('sessionHistory').innerHTML = '';
+        return;
+      }
+      
+      let html = `<table class="history-table">
+        <tr><th>#</th><th>UID (NetSuite)</th><th>Master ID</th><th>Email</th><th>Brand</th><th>Type</th></tr>`;
+      
+      sessionLeads.forEach((l, i) => {
+        html += `<tr>
+          <td>${i + 1}</td>
+          <td>${l.uid.substring(0, 8)}...</td>
+          <td>${l.masterId}</td>
+          <td>${l.email || '-'}</td>
+          <td>${l.brand}</td>
+          <td>${l.type}</td>
+        </tr>`;
+      });
+      
+      html += '</table>';
+      document.getElementById('sessionHistory').innerHTML = html;
+    }
+    
     async function submitTestLead() {
-      const email = document.getElementById('testEmail').value;
-      const phone = document.getElementById('testPhone').value;
-      const name = document.getElementById('testName').value;
+      const email = document.getElementById('testEmail').value.trim();
+      const phone = document.getElementById('testPhone').value.trim();
+      const name = document.getElementById('testName').value.trim();
       const brand = document.getElementById('brandSelect').value;
       
       if (!email && !phone) {
-        alert('Please enter at least an email or phone number');
+        alert('Enter at least email or phone');
         return;
       }
       
@@ -693,186 +656,228 @@
       btn.textContent = 'PROCESSING...';
       
       // Reset flow
-      document.querySelectorAll('.flow-step').forEach(el => {
-        el.classList.remove('active', 'complete');
-      });
-      document.querySelectorAll('.flow-arrow').forEach(el => {
-        el.classList.remove('active');
-      });
+      document.querySelectorAll('.flow-step').forEach(el => el.classList.remove('active', 'complete'));
+      document.querySelectorAll('.flow-arrow').forEach(el => el.classList.remove('active'));
       document.getElementById('step-capture').classList.add('complete');
+      document.getElementById('dupWarning').classList.add('hidden');
       
-      log('Form submitted - starting identity resolution');
+      log('━━━━━━━━━━━━━━━━━━━━━━━━');
+      log(`SUBMISSION #${sessionSubmissions + 1} on ${brand.toUpperCase()}`);
       
-      // Step 1: Check Firebase
+      // Check for session duplicate FIRST
+      const prevSubmission = checkDuplicate(email, phone);
+      const isDuplicate = !!prevSubmission;
+      
+      if (isDuplicate) {
+        log('⚠ DUPLICATE in this session!', 'warning');
+      }
+      
       await activateStep('step-check', 'arrow-1');
-      log('Checking Firebase for existing lead...', 'processing');
+      log('Querying Firebase...', 'processing');
       
       document.getElementById('lookupStatus').innerHTML = `
         <div class="processing">
-          Checking email: ${email || '(not provided)'}<br>
-          Checking phone: ${phone || '(not provided)'}
+          Checking: ${email || '(no email)'}<br>
+          Checking: ${phone || '(no phone)'}
         </div>
       `;
       
-      await new Promise(r => setTimeout(r, 500));
-      
-      // Step 2: Match lookup
+      await new Promise(r => setTimeout(r, 300));
       await activateStep('step-match', 'arrow-2');
-      const existingLead = lookupInFirebase(email, phone);
       
-      let masterLeadId;
-      let isReturning = false;
-      let matchedLead = null;
+      const result = findMatch(email, phone);
+      let masterId, isReturning = false, matchedLead = null, matchType = null;
       
-      if (existingLead) {
-        // Found existing lead
+      if (result) {
         isReturning = true;
-        masterLeadId = existingLead.masterLeadId;
-        matchedLead = existingLead;
+        masterId = result.lead.masterLeadId;
+        matchedLead = result.lead;
+        matchType = result.matchType;
         
-        log('MATCH FOUND: ' + masterLeadId, 'success');
+        log(`✓ MATCH via ${matchType}: ${masterId}`, 'success');
+        
+        const isNewBrand = !matchedLead.siteIds[brand];
+        const isNewDevice = !matchedLead.devices[deviceId];
         
         document.getElementById('lookupStatus').innerHTML = '';
         document.getElementById('lookupResult').classList.remove('hidden');
         document.getElementById('lookupResult').className = 'lookup-result match';
         document.getElementById('lookupResult').innerHTML = `
-          <strong>✓ MATCH FOUND</strong><br><br>
-          Master ID: ${masterLeadId}<br>
-          Email: ${existingLead.email}<br>
-          Phone: ${existingLead.phone}<br>
-          Previous submissions: ${existingLead.totalSubmissions}<br>
-          Known devices: ${Object.keys(existingLead.devices).length}<br>
-          Brands: ${Object.keys(existingLead.siteIds).join(', ')}
+          <strong>✓ MATCH FOUND (${matchType})</strong><br><br>
+          Master ID: <strong>${masterId}</strong><br>
+          Stored Email: ${matchedLead.email}<br>
+          Stored Phone: ${matchedLead.phone}<br>
+          Previous submissions: ${matchedLead.totalSubmissions}<br>
+          Known brands: ${Object.keys(matchedLead.siteIds).join(', ')}<br>
+          Known devices: ${Object.keys(matchedLead.devices).length}
         `;
         
-        // Show master record
         document.getElementById('masterRecord').classList.remove('hidden');
         document.getElementById('masterRecord').innerHTML = `
           <div class="master-record">
-            <h4>MASTER RECORD</h4>
-            <div>First seen: ${new Date(existingLead.firstSeen).toLocaleDateString()}</div>
-            <div>Total submissions: ${existingLead.totalSubmissions}</div>
-            <div class="device-list">
-              <div style="color: #888; margin-bottom: 5px;">KNOWN DEVICES:</div>
-              ${Object.entries(existingLead.devices).map(([id, dev]) => `
-                <div class="device-item">
-                  ${id}<br>
-                  ${dev.deviceType} / ${dev.platform} / ${dev.browser}<br>
-                  Sessions: ${dev.sessionCount} | Brands: ${dev.brands.join(', ')}
-                </div>
-              `).join('')}
-              <div class="device-item current">
-                ${currentDeviceId} (CURRENT)<br>
-                ${getDeviceType()} / ${navigator.platform} / ${getBrowserName()}<br>
-                <span class="tag">NEW DEVICE</span>
-              </div>
+            <h4>UPDATING MASTER RECORD</h4>
+            ${isNewBrand ? `<span class="tag new">+ NEW BRAND: ${brand}</span>` : `<span class="tag">EXISTING BRAND: ${brand}</span>`}
+            ${isNewDevice ? `<span class="tag new">+ NEW DEVICE</span>` : ''}
+            ${isDuplicate ? `<span class="tag warning">DUPLICATE SESSION</span>` : ''}
+            <div style="margin-top: 10px;">
+              Submissions: ${matchedLead.totalSubmissions} → <strong>${matchedLead.totalSubmissions + 1}</strong>
+            </div>
+            <div>
+              UIDs for ${brand}: [${(matchedLead.siteIds[brand] || []).join(', ')}${matchedLead.siteIds[brand] ? ', ' : ''}<strong>+NEW</strong>]
             </div>
           </div>
         `;
         
-        // Activate link step
         await activateStep('step-link', 'arrow-3');
-        log('Device linked to master record');
         
       } else {
-        // New lead
-        masterLeadId = generateShortId('LEAD');
-        
-        log('No match found - creating new lead: ' + masterLeadId);
+        masterId = generateId('LEAD');
+        log(`+ NEW LEAD: ${masterId}`);
         
         document.getElementById('lookupStatus').innerHTML = '';
         document.getElementById('lookupResult').classList.remove('hidden');
         document.getElementById('lookupResult').className = 'lookup-result no-match';
         document.getElementById('lookupResult').innerHTML = `
-          <strong>○ NO MATCH FOUND</strong><br><br>
-          Creating new master lead...<br>
-          Master ID: ${masterLeadId}
+          <strong>○ NO MATCH</strong><br><br>
+          No existing lead found.<br>
+          Creating new master record...
         `;
         
         document.getElementById('masterRecord').classList.remove('hidden');
         document.getElementById('masterRecord').innerHTML = `
           <div class="master-record">
             <h4>NEW MASTER RECORD</h4>
-            <div>Email: ${email || '(not provided)'}</div>
-            <div>Phone: ${phone || '(not provided)'}</div>
-            <div>Created: ${new Date().toLocaleString()}</div>
-            <div class="device-list">
-              <div style="color: #888; margin-bottom: 5px;">DEVICES:</div>
-              <div class="device-item current">
-                ${currentDeviceId}<br>
-                ${getDeviceType()} / ${navigator.platform} / ${getBrowserName()}<br>
-                <span class="tag">FIRST DEVICE</span>
-              </div>
-            </div>
+            <div>ID: <strong>${masterId}</strong></div>
+            <div>Email: ${email || '(none)'}</div>
+            <div>Phone: ${phone || '(none)'}</div>
+            <div>Brand: ${brand}</div>
+            <span class="tag new">NEW LEAD</span>
           </div>
         `;
         
-        // Activate new step
+        // Add to database for future lookups
+        database.leads[masterId] = {
+          masterLeadId: masterId,
+          email: email,
+          phone: phone,
+          firstName: name,
+          firstSeen: new Date().toISOString(),
+          devices: { [deviceId]: { deviceType: 'desktop', platform: navigator.platform, browser: 'Chrome', brands: [brand] } },
+          siteIds: { [brand]: [] },
+          totalSubmissions: 0
+        };
+        
         await activateStep('step-new', 'arrow-3');
-        log('New lead created in Firebase');
       }
       
-      // Step 3: Push data
+      // Show duplicate warning
+      if (isDuplicate) {
+        document.getElementById('dupWarning').classList.remove('hidden');
+        document.getElementById('dupWarning').innerHTML = `
+          <div class="dup-warning">
+            <strong>⚠ DUPLICATE SUBMISSION DETECTED</strong>
+            Same user submitted earlier in this session.<br>
+            Previous UID: ${prevSubmission.uid.substring(0, 8)}...<br>
+            <strong>NEW unique UID generated for NetSuite.</strong>
+          </div>
+        `;
+      }
+      
       await activateStep('step-push', 'arrow-4');
       
-      const submissionUid = generateUUID();
+      // Generate unique UID for NetSuite
+      const uid = generateUUID();
+      sessionSubmissions++;
       
-      // Generate payloads
-      const dataLayerPayload = {
+      // Track in session
+      sessionLeads.push({
+        uid,
+        masterId,
+        email,
+        phone,
+        brand,
+        type: isReturning ? (isDuplicate ? 'DUPLICATE' : 'RETURNING') : 'NEW'
+      });
+      
+      // Update database
+      if (database.leads[masterId]) {
+        database.leads[masterId].totalSubmissions++;
+        if (!database.leads[masterId].siteIds[brand]) {
+          database.leads[masterId].siteIds[brand] = [];
+        }
+        database.leads[masterId].siteIds[brand].push(uid);
+      }
+      
+      document.getElementById('sessionCounter').textContent = sessionSubmissions;
+      updateSessionHistory();
+      
+      // Payloads
+      const dataLayer = {
         event: 'lead_identified',
-        master_lead_id: masterLeadId,
-        submission_uid: submissionUid,
-        is_returning_lead: isReturning,
-        current_device_id: currentDeviceId,
-        is_new_device: true,
-        known_devices: isReturning ? Object.keys(matchedLead.devices).length + 1 : 1,
-        cross_brand_history: isReturning ? Object.keys(matchedLead.siteIds) : [brand],
-        total_submissions: isReturning ? matchedLead.totalSubmissions + 1 : 1,
-        visitor_id: currentVisitorId,
-        session_id: currentSessionId,
+        master_lead_id: masterId,
+        submission_uid: uid,
+        is_returning: isReturning,
+        is_duplicate: isDuplicate,
+        match_type: matchType || 'NONE',
+        brand: brand,
+        device_id: deviceId,
+        cross_brand_history: Object.keys(database.leads[masterId]?.siteIds || {})
+      };
+      
+      const netsuite = {
+        contactRequestId: uid,
+        masterLeadId: masterId,
+        isReturning: isReturning,
+        isDuplicate: isDuplicate,
+        email: email,
+        phone: phone,
+        name: name,
         brand: brand
       };
       
-      const netsuitePayload = {
-        contactRequestId: submissionUid,
-        masterLeadId: masterLeadId,
-        isReturningLead: isReturning,
-        contactEmail: email,
-        contactPhone: phone,
-        contactName: name,
-        sourceBrand: brand,
-        deviceId: currentDeviceId,
-        visitorId: currentVisitorId,
-        previousSubmissions: isReturning ? matchedLead.totalSubmissions : 0,
-        knownBrands: isReturning ? Object.keys(matchedLead.siteIds) : [brand]
-      };
+      document.getElementById('dataLayerPayload').textContent = JSON.stringify(dataLayer, null, 2);
+      document.getElementById('netsuitePayload').textContent = JSON.stringify(netsuite, null, 2);
       
-      document.getElementById('dataLayerPayload').textContent = JSON.stringify(dataLayerPayload, null, 2);
-      document.getElementById('netsuitePayload').textContent = JSON.stringify(netsuitePayload, null, 2);
-      
-      log('DataLayer push: lead_identified', 'success');
-      log('NetSuite payload ready: ' + submissionUid, 'success');
-      log('Identity resolution complete', 'success');
+      log(`NetSuite UID: ${uid.substring(0, 8)}...`, 'success');
+      log('Submission complete ✓', 'success');
       
       btn.disabled = false;
-      btn.textContent = 'SUBMIT TEST LEAD';
+      btn.textContent = 'SUBMIT LEAD';
     }
     
-    function getDeviceType() {
-      if ('ontouchstart' in window && screen.width < 768) return 'mobile';
-      if ('ontouchstart' in window) return 'tablet';
-      return 'desktop';
-    }
-    
-    // Initialize on load
-    window.onload = function() {
-      initializeSignals();
+    function resetDemo() {
+      sessionSubmissions = 0;
+      sessionLeads = [];
       
-      // Pre-fill with matching email for demo
-      document.getElementById('testEmail').value = 'john@example.com';
-      document.getElementById('testPhone').value = '0412345678';
-      document.getElementById('testName').value = 'John Smith';
-    };
+      // Reset database to original
+      delete database.leads['LEAD-ABC123'].siteIds['clg'];
+      database.leads['LEAD-ABC123'].totalSubmissions = 3;
+      database.leads['LEAD-DEF456'].totalSubmissions = 1;
+      
+      // Remove any new leads
+      for (const id in database.leads) {
+        if (!['LEAD-ABC123', 'LEAD-DEF456'].includes(id)) {
+          delete database.leads[id];
+        }
+      }
+      
+      document.getElementById('sessionCounter').textContent = '0';
+      document.querySelectorAll('.flow-step').forEach(el => el.classList.remove('active', 'complete'));
+      document.querySelectorAll('.flow-arrow').forEach(el => el.classList.remove('active'));
+      
+      document.getElementById('lookupStatus').innerHTML = '<span style="color: #666;">Submit a lead to see deduplication...</span>';
+      document.getElementById('lookupResult').classList.add('hidden');
+      document.getElementById('masterRecord').classList.add('hidden');
+      document.getElementById('dupWarning').classList.add('hidden');
+      document.getElementById('sessionHistory').innerHTML = '';
+      document.getElementById('dataLayerPayload').textContent = '// Submit a lead...';
+      document.getElementById('netsuitePayload').textContent = '// Submit a lead...';
+      
+      clearLog();
+      init();
+    }
+    
+    window.onload = init;
   </script>
 </body>
 </html>
