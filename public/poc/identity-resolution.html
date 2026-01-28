@@ -16,8 +16,7 @@
 
     .app-layout {
       display: grid;
-      grid-template-columns: 240px 1fr;
-      grid-template-rows: 1fr auto;
+      grid-template-columns: 220px 1fr 200px;
       height: 100vh;
     }
 
@@ -25,81 +24,77 @@
     .sidebar {
       background: #111;
       border-right: 1px solid #222;
-      padding: 12px;
+      padding: 10px;
       overflow-y: auto;
-      grid-row: 1 / 3;
     }
-    .sidebar h1 { font-size: 12px; margin-bottom: 2px; }
-    .sidebar-sub { font-size: 9px; color: #666; margin-bottom: 12px; }
+    .sidebar h1 { font-size: 11px; margin-bottom: 2px; }
+    .sidebar-sub { font-size: 9px; color: #666; margin-bottom: 10px; }
 
-    /* Presets */
     .presets {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 4px;
-      margin-bottom: 10px;
+      gap: 3px;
+      margin-bottom: 8px;
     }
     .preset-btn {
       background: transparent;
       border: 1px solid #333;
       border-radius: 3px;
-      padding: 6px 4px;
+      padding: 5px 3px;
       text-align: center;
       cursor: pointer;
       font-size: 8px;
       font-weight: 600;
-      color: #999;
+      color: #888;
     }
     .preset-btn:hover { border-color: #555; background: #1a1a1a; }
     .preset-btn.active { border-color: #fff; background: #1a1a1a; color: #fff; }
 
-    /* Form */
     .form-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 6px;
-      margin-bottom: 10px;
+      gap: 4px;
+      margin-bottom: 8px;
     }
     .form-group label {
       display: block;
-      font-size: 8px;
+      font-size: 7px;
       color: #555;
-      margin-bottom: 2px;
+      margin-bottom: 1px;
       text-transform: uppercase;
     }
     .form-group input, .form-group select {
       width: 100%;
       background: #0a0a0a;
       border: 1px solid #333;
-      border-radius: 3px;
+      border-radius: 2px;
       color: #fff;
-      padding: 5px 6px;
-      font-size: 10px;
+      padding: 4px 5px;
+      font-size: 9px;
     }
     .form-group.full { grid-column: span 2; }
 
-    /* Playback */
     .playback {
       background: #1a1a1a;
       border-radius: 4px;
-      padding: 8px;
-      margin-bottom: 10px;
+      padding: 6px;
+      margin-bottom: 8px;
     }
     .playback-row {
       display: flex;
-      gap: 6px;
+      gap: 4px;
       align-items: center;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
     .mode-toggle {
       display: flex;
       background: #0a0a0a;
       border: 1px solid #333;
-      border-radius: 3px;
+      border-radius: 2px;
     }
     .mode-btn {
-      padding: 4px 8px;
-      font-size: 9px;
+      padding: 3px 6px;
+      font-size: 8px;
       font-weight: 600;
       background: transparent;
       border: none;
@@ -110,20 +105,20 @@
     .step-ind {
       flex: 1;
       text-align: center;
-      font-size: 9px;
+      font-size: 8px;
       color: #666;
-      padding: 4px;
+      padding: 3px;
       background: #0a0a0a;
       border: 1px solid #222;
-      border-radius: 3px;
+      border-radius: 2px;
     }
     .step-ind span { color: #fff; font-weight: 600; }
     .btn {
       width: 100%;
-      padding: 8px;
+      padding: 6px;
       border: none;
-      border-radius: 3px;
-      font-size: 10px;
+      border-radius: 2px;
+      font-size: 9px;
       font-weight: 600;
       cursor: pointer;
       background: #fff;
@@ -134,7 +129,7 @@
       background: #1a3a1a;
       border: 1px solid #2a5a2a;
       color: #8f8;
-      margin-top: 6px;
+      margin-top: 4px;
       display: none;
     }
     .btn-next.visible { display: block; }
@@ -142,85 +137,86 @@
       background: transparent;
       border: 1px solid #333;
       color: #666;
-      margin-top: 6px;
+      margin-top: 4px;
     }
     .kbd-hint {
-      font-size: 8px;
+      font-size: 7px;
       color: #444;
       text-align: center;
-      margin-top: 6px;
+      margin-top: 4px;
       display: none;
     }
     .kbd-hint.visible { display: block; }
 
-    /* Status/IDs inline */
-    .status-ids {
+    .status-row {
       display: flex;
-      gap: 4px;
-      flex-wrap: wrap;
-      margin-bottom: 10px;
+      gap: 3px;
+      margin-bottom: 6px;
     }
     .mini-box {
       background: #0a0a0a;
       border: 1px solid #222;
-      border-radius: 3px;
-      padding: 4px 6px;
+      border-radius: 2px;
+      padding: 3px 4px;
       flex: 1;
-      min-width: 45px;
+      text-align: center;
     }
-    .mini-label { font-size: 7px; color: #555; text-transform: uppercase; }
-    .mini-value { font-size: 9px; color: #444; font-weight: 600; font-family: monospace; }
+    .mini-label { font-size: 6px; color: #555; text-transform: uppercase; }
+    .mini-value { font-size: 8px; color: #444; font-weight: 600; }
     .mini-value.ready { color: #fff; }
     .mini-value.active { color: #0f0; }
     .mini-value.done { color: #0f0; }
     .mini-value.warning { color: #f90; }
 
-    /* Main Flow Panel */
+    /* Main Panel */
     .main-panel {
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      background: #0a0a0a;
     }
 
     .flow-header {
-      padding: 8px 16px;
+      padding: 6px 12px;
       border-bottom: 1px solid #222;
       background: #111;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    .flow-header h2 { font-size: 11px; }
-    .flow-header-sub { font-size: 9px; color: #666; }
+    .flow-header h2 { font-size: 10px; }
+    .flow-header-sub { font-size: 8px; color: #666; }
 
-    /* Horizontal Flow */
+    /* Flow Area */
     .flow-area {
       flex: 1;
-      padding: 16px;
-      overflow: hidden;
       display: flex;
       flex-direction: column;
       justify-content: center;
+      align-items: center;
+      padding: 12px;
+      overflow: hidden;
     }
 
     .h-flow {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
       gap: 0;
-      flex-wrap: nowrap;
+      width: 100%;
     }
 
     .h-step {
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-width: 70px;
+      flex: 1;
       max-width: 90px;
+      min-width: 70px;
     }
     .h-num {
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
       border: 2px solid #333;
       border-radius: 50%;
       display: flex;
@@ -236,120 +232,156 @@
 
     .h-box {
       border: 1px solid #222;
-      border-radius: 4px;
-      padding: 6px 8px;
+      border-radius: 5px;
+      padding: 8px 6px;
       text-align: center;
       width: 100%;
       transition: all 0.2s;
+      min-height: 70px;
     }
-    .h-box.active { border-color: #fff; background: #1a1a1a; }
+    .h-box.active { border-color: #fff; background: #1a1a1a; box-shadow: 0 0 15px rgba(255,255,255,0.1); }
     .h-box.done { border-color: #333; }
+    .h-box.warning { border-color: #f90; }
 
-    .h-icon { font-size: 14px; margin-bottom: 2px; }
-    .h-name { font-size: 9px; font-weight: 600; white-space: nowrap; }
+    .h-icon { font-size: 16px; margin-bottom: 3px; }
+    .h-name { font-size: 9px; font-weight: 600; margin-bottom: 2px; }
+    .h-sub { font-size: 7px; color: #666; }
     .h-badge {
-      font-size: 7px;
-      padding: 1px 3px;
+      font-size: 6px;
+      padding: 2px 3px;
       border-radius: 2px;
-      margin-top: 2px;
+      margin-top: 3px;
       display: inline-block;
     }
     .h-badge.dl { background: #0ff2; color: #0ff; }
     .h-badge.wh { background: #f0f2; color: #f0f; }
+    .h-badge.alert { background: #f902; color: #f90; }
+    .h-badge.firebase { background: #f602; color: #f80; }
 
     .h-conn {
-      width: 20px;
+      width: 16px;
       height: 2px;
       background: #222;
       flex-shrink: 0;
+      margin-top: 35px;
     }
     .h-conn.active { background: #fff; }
     .h-conn.done { background: #444; }
 
-    /* Branch */
-    .h-branch {
+    /* Branch step */
+    .h-branch-step {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 4px;
+      flex: 1;
+      max-width: 120px;
     }
     .h-branch-row {
       display: flex;
-      gap: 8px;
+      gap: 4px;
+      width: 100%;
     }
-    .h-branch-label {
-      font-size: 7px;
-      color: #555;
+    .h-branch-row .h-box {
+      flex: 1;
+      padding: 6px 4px;
+      min-height: 60px;
     }
+    .h-branch-row .h-icon { font-size: 14px; }
+    .h-branch-row .h-name { font-size: 8px; }
 
-    /* Duplicate flow row */
+    /* Duplicate flow */
     .dup-section {
-      margin-top: 12px;
+      margin-top: 16px;
       padding-top: 12px;
-      border-top: 1px solid #222;
+      border-top: 1px solid #333;
       display: none;
+      width: 100%;
     }
     .dup-section.visible { display: block; }
     .dup-label {
       text-align: center;
       font-size: 8px;
       color: #f90;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       text-transform: uppercase;
       letter-spacing: 1px;
     }
 
-    /* Log Panel */
-    .log-panel {
+    /* Annotation Area */
+    .annotation-area {
+      padding: 10px 14px;
       border-top: 1px solid #222;
       background: #111;
-      grid-column: 2;
+      min-height: 55px;
+    }
+    .annotation-title {
+      font-size: 8px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+    .annotation-text {
+      font-size: 10px;
+      color: #fff;
+      line-height: 1.3;
+    }
+    .annotation-detail {
+      font-size: 8px;
+      color: #888;
+      margin-top: 3px;
+      font-family: monospace;
+    }
+
+    /* Log Panel (right side) */
+    .log-panel {
+      background: #111;
+      border-left: 1px solid #222;
+      display: flex;
+      flex-direction: column;
     }
     .log-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 4px 12px;
-      cursor: pointer;
+      padding: 6px 10px;
+      border-bottom: 1px solid #222;
     }
-    .log-title { font-size: 8px; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+    .log-title { font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 1px; }
     .log-container {
-      height: 60px;
+      flex: 1;
       overflow-y: auto;
       background: #0a0a0a;
       font-family: monospace;
       font-size: 8px;
     }
-    .log-panel.collapsed .log-container { height: 0; }
     .log-entry {
-      padding: 2px 8px;
-      display: flex;
-      gap: 6px;
+      padding: 3px 8px;
       border-bottom: 1px solid #111;
     }
-    .log-time { color: #333; width: 40px; }
+    .log-time { color: #333; font-size: 7px; }
     .log-src {
-      width: 45px;
-      padding: 0 3px;
+      display: inline-block;
+      padding: 1px 4px;
       border-radius: 2px;
-      text-align: center;
       font-size: 7px;
       font-weight: 600;
+      margin: 0 4px;
     }
     .log-src.site { background: #1a1a2e; color: #88f; }
-    .log-src.sdk { background: #2e1a2a; color: #f8a; }
+    .log-src.firebase { background: #2e2a1a; color: #fa0; }
+    .log-src.datalayer { background: #1a2e2e; color: #8ff; }
     .log-src.adapter { background: #1a2e1a; color: #8f8; }
     .log-src.netsuite { background: #2e1a1a; color: #f88; }
     .log-src.iterable { background: #2e1a2e; color: #f8f; }
     .log-src.amplitude { background: #2e2e1a; color: #ff8; }
     .log-src.sales { background: #2e2a1a; color: #fa8; }
-    .log-src.datalayer { background: #1a2e2e; color: #8ff; }
-    .log-msg { color: #777; flex: 1; }
+    .log-msg { color: #666; }
     .clear-btn {
       background: transparent;
       border: 1px solid #333;
       color: #555;
-      padding: 1px 5px;
+      padding: 2px 6px;
       border-radius: 2px;
       font-size: 7px;
       cursor: pointer;
@@ -394,7 +426,7 @@
         </div>
         <div class="form-group full">
           <label>Device ID</label>
-          <input type="text" id="deviceId" readonly style="color:#555;font-size:8px;">
+          <input type="text" id="deviceId" readonly style="color:#555;font-size:7px;">
         </div>
       </div>
 
@@ -409,128 +441,154 @@
         <button class="btn" id="submitBtn" onclick="runFlow()">Submit Lead</button>
         <button class="btn btn-next" id="nextBtn" onclick="nextStep()">Next Step →</button>
         <button class="btn btn-reset" onclick="resetDemo()">Reset</button>
-        <div class="kbd-hint" id="kbdHint"><kbd>Space</kbd> or <kbd>→</kbd> next</div>
+        <div class="kbd-hint" id="kbdHint"><kbd>Space</kbd> / <kbd>→</kbd></div>
       </div>
 
-      <div class="status-ids">
-        <div class="mini-box"><div class="mini-label">Site</div><div class="mini-value ready" id="stat-site">Ready</div></div>
+      <div class="status-row">
+        <div class="mini-box"><div class="mini-label">Firebase</div><div class="mini-value" id="stat-firebase">—</div></div>
         <div class="mini-box"><div class="mini-label">Adapter</div><div class="mini-value" id="stat-adapter">—</div></div>
         <div class="mini-box"><div class="mini-label">NS</div><div class="mini-value" id="stat-netsuite">—</div></div>
+      </div>
+      <div class="status-row">
         <div class="mini-box"><div class="mini-label">Iter</div><div class="mini-value" id="stat-iterable">—</div></div>
         <div class="mini-box"><div class="mini-label">Amp</div><div class="mini-value" id="stat-amplitude">—</div></div>
       </div>
-      <div class="status-ids">
-        <div class="mini-box"><div class="mini-label">UID</div><div class="mini-value" id="dispUid">—</div></div>
+      <div class="status-row">
+        <div class="mini-box"><div class="mini-label">UID</div><div class="mini-value" id="dispUid" style="font-size:7px;">—</div></div>
         <div class="mini-box"><div class="mini-label">NS ID</div><div class="mini-value" id="dispNsId">—</div></div>
-        <div class="mini-box"><div class="mini-label">Amp ID</div><div class="mini-value" id="dispAmpId">—</div></div>
       </div>
     </div>
 
     <div class="main-panel">
       <div class="flow-header">
-        <h2>Data Flow</h2>
-        <div class="flow-header-sub">Site → Adapter → NetSuite → Iterable + Amplitude</div>
+        <h2>Lead Capture Flow</h2>
+        <div class="flow-header-sub">Firebase → DataLayer → Adapter → NetSuite → Iterable + Amplitude</div>
       </div>
+
       <div class="flow-area">
-        <!-- Main horizontal flow -->
         <div class="h-flow" id="mainFlow">
+          <!-- Step 1: Firebase -->
           <div class="h-step">
             <div class="h-num" id="n1">1</div>
             <div class="h-box" id="b1">
-              <div class="h-icon">📝</div>
-              <div class="h-name">Form</div>
-              <div class="h-badge dl">submit</div>
+              <div class="h-icon">🔥</div>
+              <div class="h-name">Firebase</div>
+              <div class="h-sub">Generate UID</div>
+              <div class="h-badge firebase">SDK</div>
             </div>
           </div>
           <div class="h-conn" id="c1"></div>
+
+          <!-- Step 2: Form + DataLayer -->
           <div class="h-step">
             <div class="h-num" id="n2">2</div>
             <div class="h-box" id="b2">
-              <div class="h-icon">⚡</div>
-              <div class="h-name">Adapter</div>
+              <div class="h-icon">📝</div>
+              <div class="h-name">Form Submit</div>
+              <div class="h-sub">Push to DataLayer</div>
+              <div class="h-badge dl">form_submit</div>
             </div>
           </div>
           <div class="h-conn" id="c2"></div>
+
+          <!-- Step 3: NS Adapter -->
           <div class="h-step">
             <div class="h-num" id="n3">3</div>
             <div class="h-box" id="b3">
-              <div class="h-icon">🏢</div>
-              <div class="h-name">NetSuite</div>
-              <div class="h-badge dl">created</div>
+              <div class="h-icon">⚡</div>
+              <div class="h-name">NS Adapter</div>
+              <div class="h-sub">Check duplicates</div>
             </div>
           </div>
           <div class="h-conn" id="c3"></div>
-          <div class="h-branch">
-            <div class="h-branch-label">parallel</div>
+
+          <!-- Step 4: NetSuite -->
+          <div class="h-step">
+            <div class="h-num" id="n4">4</div>
+            <div class="h-box" id="b4">
+              <div class="h-icon">🏢</div>
+              <div class="h-name">NetSuite</div>
+              <div class="h-sub">Create Lead</div>
+              <div class="h-badge dl">lead_created</div>
+            </div>
+          </div>
+          <div class="h-conn" id="c4"></div>
+
+          <!-- Step 5: Parallel sync -->
+          <div class="h-branch-step">
+            <div class="h-num" id="n5">5</div>
             <div class="h-branch-row">
-              <div class="h-box" id="b-iter" style="min-width:60px;">
+              <div class="h-box" id="b-iter">
                 <div class="h-icon">📧</div>
                 <div class="h-name">Iterable</div>
               </div>
-              <div class="h-box" id="b-amp" style="min-width:60px;">
+              <div class="h-box" id="b-amp">
                 <div class="h-icon">📊</div>
                 <div class="h-name">Amplitude</div>
               </div>
             </div>
           </div>
-          <div class="h-conn" id="c4"></div>
-          <div class="h-step">
-            <div class="h-num" id="n4">4</div>
-            <div class="h-box" id="b4">
-              <div class="h-icon">🔔</div>
-              <div class="h-name">Webhook</div>
-              <div class="h-badge wh">back</div>
-            </div>
-          </div>
           <div class="h-conn" id="c5"></div>
+
+          <!-- Step 6: Webhook + Enrich -->
           <div class="h-step">
-            <div class="h-num" id="n5">5</div>
-            <div class="h-box" id="b5">
+            <div class="h-num" id="n6">6</div>
+            <div class="h-box" id="b6">
               <div class="h-icon">✨</div>
-              <div class="h-name">Personalize</div>
-              <div class="h-badge dl">enriched</div>
+              <div class="h-name">Enrich</div>
+              <div class="h-sub">Webhook return</div>
+              <div class="h-badge dl">lead_enriched</div>
             </div>
           </div>
         </div>
 
-        <!-- Duplicate detection flow -->
+        <!-- Duplicate Detection Flow -->
         <div class="dup-section" id="dupSection">
-          <div class="dup-label">⚠️ Duplicate Detected</div>
+          <div class="dup-label" id="dupLabel">⚠️ Duplicate Detection</div>
           <div class="h-flow">
-            <div class="h-step">
-              <div class="h-num" id="n6">6</div>
-              <div class="h-box" id="b6">
-                <div class="h-icon">📊</div>
-                <div class="h-name">Amp Event</div>
-                <div class="h-badge dl">dup_detect</div>
-              </div>
-            </div>
-            <div class="h-conn" id="c6"></div>
             <div class="h-step">
               <div class="h-num" id="n7">7</div>
               <div class="h-box" id="b7">
-                <div class="h-icon">📧</div>
-                <div class="h-name">Iterable</div>
-                <div class="h-badge wh">journey</div>
+                <div class="h-icon">📊</div>
+                <div class="h-name">Amplitude</div>
+                <div class="h-sub">dup_detected event</div>
+                <div class="h-badge alert">event</div>
               </div>
             </div>
             <div class="h-conn" id="c7"></div>
             <div class="h-step">
               <div class="h-num" id="n8">8</div>
               <div class="h-box" id="b8">
+                <div class="h-icon">📧</div>
+                <div class="h-name">Iterable</div>
+                <div class="h-sub">Trigger journey</div>
+                <div class="h-badge wh">journey</div>
+              </div>
+            </div>
+            <div class="h-conn" id="c8"></div>
+            <div class="h-step">
+              <div class="h-num" id="n9">9</div>
+              <div class="h-box" id="b9">
                 <div class="h-icon">👤</div>
                 <div class="h-name">Sales Alert</div>
+                <div class="h-sub">Email notification</div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <div class="annotation-area">
+        <div class="annotation-title">Current Step</div>
+        <div class="annotation-text" id="annotationText">Select a scenario and click "Submit Lead" to begin.</div>
+        <div class="annotation-detail" id="annotationDetail"></div>
+      </div>
     </div>
 
-    <div class="log-panel" id="logPanel">
-      <div class="log-header" onclick="toggleLog()">
+    <div class="log-panel">
+      <div class="log-header">
         <span class="log-title">Event Log</span>
-        <button class="clear-btn" onclick="event.stopPropagation();clearLog()">Clear</button>
+        <button class="clear-btn" onclick="clearLog()">Clear</button>
       </div>
       <div class="log-container" id="logContainer"></div>
     </div>
@@ -539,15 +597,15 @@
   <script>
     const existing = { email:'john.smith@acme.com.au', phone:'0412 345 678', name:'John Smith', deviceId:'DEV-EXISTING-ABC123' };
     const presets = {
-      'new-user': { email:'sarah@newco.com', phone:'0498765432', name:'Sarah Jones', brand:'clg', deviceId:()=>'DEV-'+rnd(), matchType:'none' },
-      'same-device': { email:'diff@other.com', phone:'0411222333', name:'Mystery', brand:'access-hire', deviceId:()=>existing.deviceId, matchType:'device' },
-      'same-email': { email:existing.email, phone:'0499888777', name:'John S', brand:'access-express', deviceId:()=>'DEV-'+rnd(), matchType:'email' },
-      'same-phone': { email:'j.smith@work.com', phone:existing.phone, name:'J Smith', brand:'clg', deviceId:()=>'DEV-'+rnd(), matchType:'phone' },
-      'cross-brand': { email:existing.email, phone:existing.phone, name:existing.name, brand:'access-express', deviceId:()=>'DEV-'+rnd(), matchType:'cross-brand' },
-      'full-match': { email:existing.email, phone:existing.phone, name:existing.name, brand:'access-hire', deviceId:()=>existing.deviceId, matchType:'duplicate' }
+      'new-user': { email:'sarah@newco.com', phone:'0498765432', name:'Sarah Jones', brand:'clg', deviceId:()=>'DEV-'+rnd(), matchType:'none', desc:'Brand new user - no matches anywhere' },
+      'same-device': { email:'diff@other.com', phone:'0411222333', name:'Mystery', brand:'access-hire', deviceId:()=>existing.deviceId, matchType:'device', desc:'Firebase detects same device as existing customer' },
+      'same-email': { email:existing.email, phone:'0499888777', name:'John S', brand:'access-express', deviceId:()=>'DEV-'+rnd(), matchType:'email', desc:'NS Adapter detects email match' },
+      'same-phone': { email:'j.smith@work.com', phone:existing.phone, name:'J Smith', brand:'clg', deviceId:()=>'DEV-'+rnd(), matchType:'phone', desc:'NS Adapter detects phone match' },
+      'cross-brand': { email:existing.email, phone:existing.phone, name:existing.name, brand:'access-express', deviceId:()=>'DEV-'+rnd(), matchType:'cross-brand', desc:'NS Adapter detects existing customer on different brand' },
+      'full-match': { email:existing.email, phone:existing.phone, name:existing.name, brand:'access-hire', deviceId:()=>existing.deviceId, matchType:'duplicate', desc:'Both Firebase (device) AND NS Adapter (email/phone) detect match' }
     };
 
-    let preset='new-user', devId='', mode='auto', stepIdx=0, resolver=null, running=false, total=5;
+    let preset='new-user', devId='', mode='auto', stepIdx=0, resolver=null, running=false, total=6;
 
     function rnd() { return Math.random().toString(36).substr(2,6).toUpperCase(); }
     function uuid() { return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&0x3|0x8)).toString(16).toUpperCase();}); }
@@ -558,15 +616,20 @@
       el.insertAdjacentHTML('afterbegin', `<div class="log-entry"><span class="log-time">${t}</span><span class="log-src ${src.toLowerCase()}">${src}</span><span class="log-msg">${msg}</span></div>`);
     }
     function clearLog() { document.getElementById('logContainer').innerHTML=''; }
-    function toggleLog() { document.getElementById('logPanel').classList.toggle('collapsed'); }
+
+    function annotate(title, detail='') {
+      document.getElementById('annotationText').textContent = title;
+      document.getElementById('annotationDetail').textContent = detail;
+    }
 
     function stat(id,txt,cls='') { const e=document.getElementById('stat-'+id); e.textContent=txt; e.className='mini-value '+cls; }
     function updStep(c,t) { document.getElementById('stepInd').innerHTML=`Step <span>${c}</span> / <span>${t}</span>`; }
 
     function actNum(n) { document.getElementById('n'+n).classList.add('active'); }
     function doneNum(n) { const e=document.getElementById('n'+n); e.classList.remove('active'); e.classList.add('done'); }
-    async function actBox(id) { const b=document.getElementById(id); b.classList.add('active'); return new Promise(r=>setTimeout(()=>{b.classList.remove('active');b.classList.add('done');r();},400)); }
-    function actConn(id) { const c=document.getElementById(id); if(c){c.classList.add('active');setTimeout(()=>{c.classList.remove('active');c.classList.add('done');},200);} }
+    async function actBox(id) { const b=document.getElementById(id); b.classList.add('active'); return new Promise(r=>setTimeout(()=>{b.classList.remove('active');b.classList.add('done');r();},350)); }
+    function warnBox(id) { document.getElementById(id).classList.add('warning'); }
+    function actConn(id) { const c=document.getElementById(id); if(c){c.classList.add('active');setTimeout(()=>{c.classList.remove('active');c.classList.add('done');},150);} }
 
     function loadPreset(p) {
       preset = p;
@@ -579,11 +642,11 @@
       document.getElementById('deviceId').value = devId;
       document.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
       document.getElementById('preset-'+p).classList.add('active');
-      total = d.matchType !== 'none' ? 8 : 5;
+      total = d.matchType !== 'none' ? 9 : 6;
       updStep('-', total);
       clearLog();
-      log('SITE', `Scenario: ${p.replace('-',' ')}`);
-      log('SITE', 'Ready');
+      annotate(d.desc);
+      log('SITE', `Scenario: ${p.replace(/-/g,' ')}`);
     }
 
     function setMode(m) {
@@ -611,125 +674,235 @@
       const adapterMatch = mt==='email'||mt==='phone'||mt==='cross-brand'||mt==='duplicate';
       const anyMatch = firebaseMatch || adapterMatch;
 
-      running=true; total=hasMatch?8:5;
+      running=true; total=hasMatch?9:6;
       const btn=document.getElementById('submitBtn'), nxt=document.getElementById('nextBtn');
       btn.disabled=true; btn.textContent='Running...';
       if(mode==='manual') nxt.classList.add('visible');
 
-      // Reset
+      // Reset UI
       document.querySelectorAll('.h-num').forEach(e=>e.classList.remove('active','done'));
-      document.querySelectorAll('.h-box').forEach(e=>e.classList.remove('active','done'));
+      document.querySelectorAll('.h-box').forEach(e=>e.classList.remove('active','done','warning'));
       document.querySelectorAll('.h-conn').forEach(e=>e.classList.remove('active','done'));
       document.getElementById('dupSection').classList.remove('visible');
+      stat('firebase','—',''); stat('adapter','—',''); stat('netsuite','—','');
+      stat('iterable','—',''); stat('amplitude','—','');
 
       const uid=uuid(), nsId='NS-'+Math.floor(Math.random()*100000), ampId='AMP-'+uid.substr(0,8);
 
-      // Step 1
+      // ========== STEP 1: Firebase SDK ==========
       stepIdx=1; updStep(1,total); await waitNext();
-      actNum(1); stat('site','Send','active');
-      log('SDK','Generating UID');
-      document.getElementById('dispUid').textContent=uid.substr(0,10)+'...';
+      actNum(1); stat('firebase','Init','active');
+      annotate('Step 1: Firebase SDK Initialization', 'Firebase generates unique identifier (UID) and checks device ID against existing records');
+      log('FIREBASE','Initializing SDK...');
+      log('FIREBASE','Generating UID: '+uid.substr(0,12)+'...');
+      document.getElementById('dispUid').textContent=uid.substr(0,12)+'...';
       document.getElementById('dispUid').classList.add('done');
-      if(firebaseMatch) { log('SDK','⚠️ Device match: '+devId); log('SDK','Adding dup flag'); }
-      log('SITE','Form submitted on '+brand);
-      log('DATALAYER','form_submit');
-      await actBox('b1'); doneNum(1); stat('site','✓','done'); actConn('c1');
 
-      // Step 2
+      if(firebaseMatch) {
+        log('FIREBASE','Checking device ID: '+devId);
+        log('FIREBASE','⚠️ DEVICE MATCH FOUND!');
+        log('FIREBASE','Matched to existing customer record');
+        annotate('Step 1: Firebase SDK - DUPLICATE DETECTED', 'Device ID matches existing customer! Adding duplicate_alert flag to payload.');
+        stat('firebase','DUP!','warning');
+        warnBox('b1');
+      } else {
+        log('FIREBASE','Device ID: '+devId+' (new device)');
+        stat('firebase','✓','done');
+      }
+      await actBox('b1'); doneNum(1); actConn('c1');
+
+      // ========== STEP 2: Form Submit + DataLayer ==========
       stepIdx=2; updStep(2,total); await waitNext();
-      actNum(2); stat('adapter','Proc','active');
-      log('ADAPTER','Received UID: '+uid.substr(0,8));
-      if(firebaseMatch) log('ADAPTER','📋 Firebase dup flag');
-      if(mode==='auto') await new Promise(r=>setTimeout(r,200));
-      log('ADAPTER','Checking email/phone...');
-      if(mt==='none') log('ADAPTER','✓ No match');
-      else if(mt==='device') log('ADAPTER','✓ No email/phone (device only)');
-      else if(mt==='email') log('ADAPTER','🔗 Email match');
-      else if(mt==='phone') log('ADAPTER','🔗 Phone match');
-      else if(mt==='cross-brand') log('ADAPTER','🔗 Cross-brand');
-      else if(mt==='duplicate') log('ADAPTER','⚠️ Full duplicate');
-      await actBox('b2'); doneNum(2); stat('adapter','✓','done'); actConn('c2');
+      actNum(2);
+      annotate('Step 2: Form Submission', 'User submits form. Data pushed to DataLayer with UID'+(firebaseMatch?' and duplicate_alert flag':''));
+      log('SITE','User clicks Submit on '+brand);
+      log('SITE','Collecting form data: '+name+', '+email+', '+phone);
+      if(mode==='auto') await new Promise(r=>setTimeout(r,150));
 
-      // Step 3
+      const dlPayload = firebaseMatch
+        ? '{ uid, email, phone, brand, duplicate_alert: true, matched_device: "'+devId+'" }'
+        : '{ uid, email, phone, brand }';
+      log('DATALAYER','push: form_submit '+dlPayload);
+      log('SITE','→ Sending to NS Adapter API endpoint');
+      await actBox('b2'); doneNum(2); actConn('c2');
+
+      // ========== STEP 3: NS Adapter ==========
       stepIdx=3; updStep(3,total); await waitNext();
-      actNum(3); stat('netsuite','Create','active');
-      log('NETSUITE','Creating lead...');
+      actNum(3); stat('adapter','Proc','active');
+      annotate('Step 3: NS Adapter Processing', 'Receives data from DataLayer. Checks email/phone against NetSuite for existing matches.');
+      log('ADAPTER','Received payload from DataLayer');
+      log('ADAPTER','UID: '+uid.substr(0,8)+'...');
+      if(firebaseMatch) {
+        log('ADAPTER','📋 Firebase already flagged duplicate_alert=true');
+      }
+      if(mode==='auto') await new Promise(r=>setTimeout(r,200));
+      log('ADAPTER','Checking email against NetSuite...');
+      log('ADAPTER','Checking phone against NetSuite...');
+
+      if(mt==='none') {
+        log('ADAPTER','✓ No email match');
+        log('ADAPTER','✓ No phone match');
+        log('ADAPTER','Result: NEW LEAD');
+        stat('adapter','✓','done');
+        annotate('Step 3: NS Adapter - No Match', 'No duplicates found. Creating new lead in NetSuite.');
+      }
+      else if(mt==='device') {
+        log('ADAPTER','✓ No email match');
+        log('ADAPTER','✓ No phone match');
+        log('ADAPTER','Note: Firebase flagged device match (will include in NS record)');
+        stat('adapter','✓','done');
+        annotate('Step 3: NS Adapter - Device Only', 'No email/phone match, but Firebase detected device match. Passing flag to NetSuite.');
+      }
+      else if(mt==='email') {
+        log('ADAPTER','⚠️ EMAIL MATCH: '+existing.email);
+        log('ADAPTER','Matched to: '+existing.name+' (existing customer)');
+        stat('adapter','DUP!','warning');
+        warnBox('b3');
+        annotate('Step 3: NS Adapter - EMAIL DUPLICATE', 'Email matches existing customer: '+existing.name+' <'+existing.email+'>');
+      }
+      else if(mt==='phone') {
+        log('ADAPTER','⚠️ PHONE MATCH: '+existing.phone);
+        log('ADAPTER','Matched to: '+existing.name+' (existing customer)');
+        stat('adapter','DUP!','warning');
+        warnBox('b3');
+        annotate('Step 3: NS Adapter - PHONE DUPLICATE', 'Phone matches existing customer: '+existing.name+' ('+existing.phone+')');
+      }
+      else if(mt==='cross-brand') {
+        log('ADAPTER','⚠️ CROSS-BRAND MATCH');
+        log('ADAPTER','Email: '+existing.email+' exists on Access Hire');
+        log('ADAPTER','Same customer visiting different brand');
+        stat('adapter','X-Brand','warning');
+        warnBox('b3');
+        annotate('Step 3: NS Adapter - CROSS-BRAND', 'Existing Access Hire customer visiting Access Express');
+      }
+      else if(mt==='duplicate') {
+        log('ADAPTER','⚠️ FULL DUPLICATE DETECTED');
+        log('ADAPTER','Email match: '+existing.email);
+        log('ADAPTER','Phone match: '+existing.phone);
+        log('ADAPTER','+ Firebase device match');
+        stat('adapter','DUP!','warning');
+        warnBox('b3');
+        annotate('Step 3: NS Adapter - FULL DUPLICATE', 'Both Firebase (device) AND Adapter (email+phone) detected match!');
+      }
+      await actBox('b3'); doneNum(3); actConn('c3');
+
+      // ========== STEP 4: NetSuite Lead Creation ==========
+      stepIdx=4; updStep(4,total); await waitNext();
+      actNum(4); stat('netsuite','Create','active');
+      annotate('Step 4: NetSuite Lead Creation', 'Creating lead record. UID ensures record is created even if duplicate (for tracking).');
+      log('NETSUITE','Creating lead record...');
       if(mode==='auto') await new Promise(r=>setTimeout(r,200));
       document.getElementById('dispNsId').textContent=nsId;
       document.getElementById('dispNsId').classList.add('done');
-      log('NETSUITE','Lead: '+nsId);
-      if(firebaseMatch) { log('NETSUITE','📋 Dup alert in record'); log('NETSUITE','Device: '+devId); }
-      if(anyMatch) { stat('netsuite','Alert','warning'); log('NETSUITE','⚠️ Dup indicator set'); }
-      else stat('netsuite','✓','done');
-      log('DATALAYER','lead_created');
-      await actBox('b3'); doneNum(3); actConn('c3');
+      log('NETSUITE','Lead created: '+nsId);
 
-      // Branch
-      stat('iterable','Sync','active'); log('NETSUITE','→ Iterable');
-      if(mode==='auto') await new Promise(r=>setTimeout(r,100));
-      log('ITERABLE','Contact created');
-      await actBox('b-iter'); stat('iterable','✓','done');
-      stat('amplitude','Sync','active'); log('NETSUITE','→ Amplitude');
-      if(mode==='auto') await new Promise(r=>setTimeout(r,100));
-      document.getElementById('dispAmpId').textContent=ampId;
-      document.getElementById('dispAmpId').classList.add('done');
-      log('AMPLITUDE','Profile: '+ampId);
-      await actBox('b-amp'); stat('amplitude','✓','done');
-      actConn('c4');
+      if(firebaseMatch) {
+        log('NETSUITE','📋 Record includes: Duplicate Alert (Firebase device match)');
+        log('NETSUITE','📋 Matched device ID: '+devId);
+      }
+      if(adapterMatch) {
+        log('NETSUITE','📋 Record includes: Duplicate Alert (Adapter match)');
+        if(mt==='email'||mt==='duplicate') log('NETSUITE','📋 Matched email: '+existing.email);
+        if(mt==='phone'||mt==='duplicate') log('NETSUITE','📋 Matched phone: '+existing.phone);
+        if(mt==='cross-brand') log('NETSUITE','📋 Cross-brand: Access Hire customer');
+      }
 
-      // Step 4
-      stepIdx=4; updStep(4,total); await waitNext();
-      actNum(4);
-      log('AMPLITUDE','→ Webhook back');
-      log('SITE','Received enriched data');
-      await actBox('b4'); doneNum(4); actConn('c5');
+      if(anyMatch) {
+        stat('netsuite','Alert','warning');
+        warnBox('b4');
+        log('NETSUITE','⚠️ DUPLICATE INDICATOR set on lead record');
+        log('NETSUITE','Sales will see alert when viewing this lead');
+      } else {
+        stat('netsuite','✓','done');
+      }
+      log('DATALAYER','push: lead_created { nsId: "'+nsId+'" }');
+      await actBox('b4'); doneNum(4); actConn('c4');
 
-      // Step 5
+      // ========== STEP 5: Parallel Sync ==========
       stepIdx=5; updStep(5,total); await waitNext();
       actNum(5);
-      log('DATALAYER','lead_enriched');
-      log('SITE','Ready for personalization');
-      await actBox('b5'); doneNum(5);
+      annotate('Step 5: Parallel Sync to Marketing + Analytics', 'NetSuite sends lead data to Iterable (marketing) and Amplitude (analytics)');
+      stat('iterable','Sync','active');
+      stat('amplitude','Sync','active');
+      log('NETSUITE','→ Sending to Iterable');
+      log('NETSUITE','→ Sending to Amplitude');
+      if(mode==='auto') await new Promise(r=>setTimeout(r,150));
+      log('ITERABLE','Contact created');
+      log('ITERABLE','Added to Welcome Journey');
+      await actBox('b-iter'); stat('iterable','✓','done');
+      if(mode==='auto') await new Promise(r=>setTimeout(r,100));
+      log('AMPLITUDE','User profile created: '+ampId);
+      log('AMPLITUDE','Properties: { nsId, email, brand, leadSource }');
+      await actBox('b-amp'); stat('amplitude','✓','done');
+      doneNum(5); actConn('c5');
 
-      // Duplicate flow
+      // ========== STEP 6: Webhook + Enrichment ==========
+      stepIdx=6; updStep(6,total); await waitNext();
+      actNum(6);
+      annotate('Step 6: Enrichment via Webhook', 'Amplitude sends enriched data back to site. DataLayer updated for personalization.');
+      log('AMPLITUDE','→ Webhook: Sending enriched profile back');
+      log('SITE','Received enriched data from Amplitude');
+      if(mode==='auto') await new Promise(r=>setTimeout(r,100));
+      log('DATALAYER','push: lead_enriched { segment, interests, predictedValue, nsId }');
+      log('SITE','DataLayer updated - ready for personalization');
+      await actBox('b6'); doneNum(6);
+
+      // ========== DUPLICATE DETECTION FLOW ==========
       if(anyMatch) {
         if(mode==='auto') await new Promise(r=>setTimeout(r,300));
         document.getElementById('dupSection').classList.add('visible');
-        log('SITE','─── DUPLICATE FLOW ───');
-        if(firebaseMatch&&adapterMatch) log('SITE','Detected: Firebase + Adapter');
-        else if(firebaseMatch) log('SITE','Detected: Firebase (device)');
-        else log('SITE','Detected: Adapter (email/phone)');
 
-        stepIdx=6; updStep(6,total); await waitNext();
-        actNum(6);
-        const src=firebaseMatch?'SDK':'ADAPTER';
-        log(src,'→ Push dup_detected to Amplitude');
-        log('AMPLITUDE','Event: duplicate_detected');
-        await actBox('b6'); doneNum(6); actConn('c6');
-        if(mode==='auto') await new Promise(r=>setTimeout(r,200));
+        // Update label based on detection source
+        let dupSource = '';
+        if(firebaseMatch && adapterMatch) dupSource = 'Detected by: Firebase (device) + NS Adapter (email/phone)';
+        else if(firebaseMatch) dupSource = 'Detected by: Firebase SDK (device match)';
+        else dupSource = 'Detected by: NS Adapter ('+mt+' match)';
+        document.getElementById('dupLabel').textContent = '⚠️ '+dupSource;
 
+        log('SITE','═══ DUPLICATE ALERT FLOW ═══');
+        log('SITE', dupSource);
+
+        // Step 7: Push to Amplitude
         stepIdx=7; updStep(7,total); await waitNext();
         actNum(7);
-        log('AMPLITUDE','→ Trigger Iterable journey');
-        log('ITERABLE','Journey: Sales Dup Alert');
-        if(firebaseMatch) log('ITERABLE','Reason: Device match');
-        if(mt==='email') log('ITERABLE','Reason: Same email');
-        if(mt==='phone') log('ITERABLE','Reason: Same phone');
-        if(mt==='cross-brand') log('ITERABLE','Reason: Cross-brand');
-        if(mt==='duplicate') log('ITERABLE','Reason: Full match');
+        const eventSource = firebaseMatch ? 'Firebase' : 'NS Adapter';
+        annotate('Step 7: Duplicate Event to Amplitude', eventSource+' pushes duplicate_detected event to Amplitude');
+        log(firebaseMatch?'FIREBASE':'ADAPTER','→ Pushing duplicate_detected event');
+        log('AMPLITUDE','Event: duplicate_detected');
+        log('AMPLITUDE','{ matchType: "'+mt+'", source: "'+eventSource+'", newLead: "'+nsId+'" }');
         await actBox('b7'); doneNum(7); actConn('c7');
+        if(mode==='auto') await new Promise(r=>setTimeout(r,200));
 
+        // Step 8: Iterable Journey
         stepIdx=8; updStep(8,total); await waitNext();
         actNum(8);
-        log('ITERABLE','→ Send alert');
-        log('SALES','📧 "Potential Duplicate Lead"');
-        log('SALES','New: '+name+' <'+email+'>');
-        log('SALES','Match: '+existing.name+' <'+existing.email+'>');
-        if(firebaseMatch) log('SALES','Device: '+devId);
-        await actBox('b8'); doneNum(8);
+        annotate('Step 8: Iterable Journey Triggered', 'Amplitude event triggers Sales Duplicate Alert journey in Iterable');
+        log('AMPLITUDE','→ Triggering Iterable journey');
+        log('ITERABLE','Journey triggered: Sales Duplicate Alert');
+        if(firebaseMatch) log('ITERABLE','Include: Device match details');
+        if(mt==='email'||mt==='duplicate'||mt==='cross-brand') log('ITERABLE','Include: Email match ('+existing.email+')');
+        if(mt==='phone'||mt==='duplicate') log('ITERABLE','Include: Phone match ('+existing.phone+')');
+        await actBox('b8'); doneNum(8); actConn('c8');
+
+        // Step 9: Sales Alert
+        stepIdx=9; updStep(9,total); await waitNext();
+        actNum(9);
+        annotate('Step 9: Sales Team Notified', 'Sales receives email with duplicate details for review and potential merge');
+        log('ITERABLE','→ Sending alert email');
+        log('SALES','📧 "Potential Duplicate Lead Detected"');
+        log('SALES','New Lead: '+name+' <'+email+'>');
+        log('SALES','Potential Match: '+existing.name+' <'+existing.email+'>');
+        if(firebaseMatch) log('SALES','Device Match: '+devId);
+        log('SALES','NetSuite ID: '+nsId);
+        log('SALES','Action: Review and merge if appropriate');
+        await actBox('b9'); doneNum(9);
       }
 
-      log('SITE','✓ Complete');
+      // Complete
+      log('SITE','✓ Flow complete');
+      annotate('Flow Complete', anyMatch
+        ? 'Lead created with duplicate alert. Sales team notified for review.'
+        : 'New lead created and synced across all systems.');
       updStep('✓',total);
       running=false;
       btn.disabled=false; btn.textContent='Submit Lead';
@@ -738,17 +911,15 @@
 
     function resetDemo() {
       document.querySelectorAll('.h-num').forEach(e=>e.classList.remove('active','done'));
-      document.querySelectorAll('.h-box').forEach(e=>e.classList.remove('active','done'));
+      document.querySelectorAll('.h-box').forEach(e=>e.classList.remove('active','done','warning'));
       document.querySelectorAll('.h-conn').forEach(e=>e.classList.remove('active','done'));
       document.getElementById('dupSection').classList.remove('visible');
-      stat('site','Ready','ready'); stat('adapter','—',''); stat('netsuite','—','');
+      stat('firebase','—',''); stat('adapter','—',''); stat('netsuite','—','');
       stat('iterable','—',''); stat('amplitude','—','');
       document.getElementById('dispUid').textContent='—';
       document.getElementById('dispUid').classList.remove('done');
       document.getElementById('dispNsId').textContent='—';
       document.getElementById('dispNsId').classList.remove('done');
-      document.getElementById('dispAmpId').textContent='—';
-      document.getElementById('dispAmpId').classList.remove('done');
       clearLog();
       loadPreset(preset);
     }
