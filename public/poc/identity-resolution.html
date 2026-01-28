@@ -320,8 +320,8 @@
       box-shadow: 0 8px 40px rgba(255,255,255,0.1);
     }
     .step-card.done {
-      border-color: #2a2a2a;
-      opacity: 0.6;
+      border-color: #333;
+      opacity: 0.85;
     }
     .step-card.warning {
       border-color: #ff9900;
@@ -427,8 +427,8 @@
       transform: scale(1.05);
     }
     .branch-card.done {
-      border-color: #2a2a2a;
-      opacity: 0.6;
+      border-color: #333;
+      opacity: 0.85;
     }
     .branch-icon { font-size: 18px; }
     .branch-name { font-size: 14px; font-weight: 600; }
@@ -455,22 +455,21 @@
     .annotation {
       background: #111;
       border-top: 1px solid #1a1a1a;
-      padding: 20px 40px;
-      height: 110px;
+      padding: 16px 40px;
+      min-height: 100px;
       flex-shrink: 0;
-      overflow-y: auto;
     }
     .annotation-label {
       font-size: 11px;
       text-transform: uppercase;
       letter-spacing: 1.5px;
       color: #555;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
     .annotation-text {
-      font-size: 18px;
+      font-size: 15px;
       color: #666;
-      line-height: 1.6;
+      line-height: 1.5;
     }
     .annotation-text.active { color: #fff; }
     .annotation-text code {
@@ -611,22 +610,22 @@
       display: flex;
       gap: 12px;
       align-items: flex-start;
-      font-size: 12px;
+      font-size: 13px;
     }
     .log-time {
-      color: #444;
+      color: #555;
       font-family: 'SF Mono', Monaco, monospace;
-      font-size: 10px;
+      font-size: 11px;
       flex-shrink: 0;
     }
     .log-source {
-      padding: 2px 8px;
+      padding: 3px 8px;
       border-radius: 4px;
-      font-size: 9px;
+      font-size: 10px;
       font-weight: 700;
       text-transform: uppercase;
       flex-shrink: 0;
-      min-width: 65px;
+      min-width: 70px;
       text-align: center;
     }
     .log-source.user { background: #1a1a3e; color: #88f; }
@@ -639,7 +638,7 @@
     .log-source.amplitude { background: #3e3e1a; color: #ff8; }
     .log-source.sales { background: #3e2a1a; color: #fa8; }
     .log-message {
-      color: #888;
+      color: #999;
       flex: 1;
       line-height: 1.4;
     }
