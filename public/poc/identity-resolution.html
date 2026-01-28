@@ -3,122 +3,58 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Identity Resolution POC</title>
+  <title>Identity Resolution Architecture POC</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
       background: #000;
       color: #fff;
       font-family: 'Courier New', monospace;
-      font-size: 14px;
+      font-size: 13px;
       line-height: 1.4;
-      padding: 20px;
+      padding: 15px;
       min-height: 100vh;
     }
-    .container { max-width: 1400px; margin: 0 auto; }
+    .container { max-width: 1600px; margin: 0 auto; }
     header {
       border: 1px solid #fff;
-      padding: 15px 20px;
-      margin-bottom: 20px;
+      padding: 12px 20px;
+      margin-bottom: 15px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
-    header h1 { font-size: 18px; font-weight: normal; }
+    header h1 { font-size: 16px; font-weight: normal; }
     .brand-select {
       background: #000;
       color: #fff;
       border: 1px solid #fff;
       padding: 5px 10px;
       font-family: inherit;
-      font-size: 14px;
-      cursor: pointer;
+      font-size: 13px;
     }
-    .grid {
+    .main-grid {
       display: grid;
-      grid-template-columns: 320px 1fr;
-      gap: 20px;
+      grid-template-columns: 280px 1fr 300px;
+      gap: 15px;
     }
     .panel {
       border: 1px solid #fff;
-      padding: 15px;
+      padding: 12px;
     }
     .panel-title {
-      font-size: 12px;
-      margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #333;
-    }
-    .signal-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 8px;
-      font-size: 12px;
-    }
-    .signal-label { color: #888; }
-    .signal-value {
-      color: #fff;
-      text-align: right;
-      max-width: 160px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .status-indicator {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      margin-right: 8px;
-    }
-    .status-indicator.active {
-      background: #fff;
-      animation: pulse 1s infinite;
-    }
-    .status-indicator.success { background: #fff; }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
-    .right-column {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-    .flow-diagram {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 20px;
-      flex-wrap: wrap;
-    }
-    .flow-step {
-      border: 1px solid #333;
-      padding: 10px 15px;
-      text-align: center;
-      min-width: 100px;
       font-size: 11px;
-      transition: all 0.3s;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #333;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
-    .flow-step.active {
-      border-color: #fff;
-      background: #fff;
-      color: #000;
-    }
-    .flow-step.complete { border-color: #fff; }
-    .flow-arrow { color: #333; font-size: 18px; }
-    .flow-arrow.active { color: #fff; }
-    .flow-branch {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-    }
-    .form-group { margin-bottom: 12px; }
+    .form-group { margin-bottom: 10px; }
     .form-group label {
       display: block;
-      margin-bottom: 5px;
-      font-size: 12px;
+      margin-bottom: 4px;
+      font-size: 11px;
       color: #888;
     }
     .form-group input, .form-group select {
@@ -126,197 +62,223 @@
       background: #000;
       border: 1px solid #fff;
       color: #fff;
-      padding: 8px 10px;
+      padding: 6px 8px;
       font-family: inherit;
-      font-size: 13px;
-    }
-    .form-group input:focus, .form-group select:focus {
-      outline: none;
-      background: #111;
+      font-size: 12px;
     }
     .btn {
       background: #fff;
       color: #000;
       border: none;
-      padding: 10px 20px;
+      padding: 10px 15px;
       font-family: inherit;
-      font-size: 14px;
+      font-size: 13px;
       cursor: pointer;
       width: 100%;
-      transition: all 0.2s;
     }
     .btn:hover { background: #ccc; }
-    .btn:disabled {
-      background: #333;
-      color: #666;
-      cursor: not-allowed;
+    .btn:disabled { background: #333; color: #666; }
+    .btn-sm {
+      padding: 6px 10px;
+      font-size: 11px;
+      margin-top: 8px;
     }
-    .btn-outline {
-      background: transparent;
-      color: #fff;
-      border: 1px solid #fff;
-      margin-top: 10px;
+    
+    /* Architecture Diagram */
+    .arch-diagram {
+      display: grid;
+      grid-template-rows: auto auto auto auto;
+      gap: 10px;
+      padding: 15px;
+      min-height: 500px;
     }
-    .btn-outline:hover {
+    .arch-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    .arch-node {
+      border: 1px solid #333;
+      padding: 10px 15px;
+      text-align: center;
+      min-width: 120px;
+      font-size: 11px;
+      position: relative;
+      transition: all 0.3s;
+    }
+    .arch-node.active {
+      border-color: #fff;
       background: #fff;
       color: #000;
     }
-    .scenario-box {
-      background: #111;
-      border: 1px solid #333;
-      padding: 12px;
-      margin-bottom: 15px;
-      font-size: 11px;
+    .arch-node.complete {
+      border-color: #fff;
     }
-    .scenario-box.highlight { border-color: #fff; }
-    .scenario-label {
-      color: #888;
-      margin-bottom: 8px;
-      font-size: 10px;
+    .arch-node.waiting {
+      border-color: #444;
+      color: #666;
+    }
+    .arch-node-label {
+      font-size: 9px;
+      color: #666;
+      margin-bottom: 4px;
       text-transform: uppercase;
     }
-    .scenario-desc {
-      color: #fff;
-      line-height: 1.5;
+    .arch-node.active .arch-node-label { color: #666; }
+    .arch-node-title { font-weight: normal; }
+    .arch-connector {
+      color: #333;
+      font-size: 16px;
     }
-    .lookup-result {
-      font-size: 12px;
+    .arch-connector.active { color: #fff; }
+    .arch-connector.down { transform: rotate(90deg); }
+    
+    .arch-section {
+      border: 1px dashed #333;
       padding: 15px;
-      background: #111;
-      margin-top: 10px;
+      margin: 5px 0;
     }
-    .lookup-result.match { border-left: 3px solid #fff; }
-    .lookup-result.no-match { border-left: 3px solid #333; }
-    .payload-box {
-      background: #111;
-      padding: 15px;
-      font-size: 11px;
-      overflow-x: auto;
-      white-space: pre;
-      max-height: 180px;
-      overflow-y: auto;
-    }
-    .payload-label {
-      font-size: 11px;
-      color: #888;
-      margin-bottom: 5px;
-      margin-top: 15px;
-    }
-    .payload-label:first-child { margin-top: 0; }
-    .event-log {
-      height: 180px;
-      overflow-y: auto;
-      background: #111;
-      padding: 10px;
-      font-size: 11px;
-    }
-    .log-entry {
-      margin-bottom: 5px;
-      display: flex;
-      gap: 10px;
-    }
-    .log-time { color: #666; flex-shrink: 0; }
-    .log-indicator { flex-shrink: 0; }
-    .log-message { color: #fff; }
-    .clear-btn {
-      background: transparent;
-      color: #666;
-      border: 1px solid #333;
-      padding: 5px 10px;
-      font-size: 11px;
-      cursor: pointer;
-      float: right;
-    }
-    .clear-btn:hover {
-      border-color: #fff;
-      color: #fff;
-    }
-    .two-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-    .master-record {
-      margin-top: 15px;
-      padding: 15px;
-      background: #111;
-      font-size: 11px;
-    }
-    .master-record h4 {
+    .arch-section-label {
+      font-size: 9px;
+      color: #444;
       margin-bottom: 10px;
-      font-weight: normal;
-      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
-    .device-list { margin-top: 10px; }
-    .device-item {
-      padding: 8px;
+    
+    /* Data boxes */
+    .data-box {
+      background: #111;
       border: 1px solid #333;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 10px;
+      max-height: 150px;
+      overflow-y: auto;
+    }
+    .data-box.highlight { border-color: #fff; }
+    .data-box pre {
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .data-label {
+      font-size: 9px;
+      color: #666;
       margin-bottom: 5px;
+      text-transform: uppercase;
+    }
+    
+    /* Event log */
+    .event-log {
+      height: 200px;
+      overflow-y: auto;
+      background: #111;
+      padding: 8px;
       font-size: 10px;
     }
-    .device-item.current { border-color: #fff; }
+    .log-entry {
+      margin-bottom: 4px;
+      display: flex;
+      gap: 8px;
+      padding: 3px 0;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    .log-time { color: #444; flex-shrink: 0; width: 60px; }
+    .log-source {
+      flex-shrink: 0;
+      width: 70px;
+      font-size: 9px;
+      padding: 1px 4px;
+      border: 1px solid #333;
+      text-align: center;
+    }
+    .log-source.frontend { border-color: #666; }
+    .log-source.firebase { border-color: #f90; color: #f90; }
+    .log-source.netsuite { border-color: #0af; color: #0af; }
+    .log-source.amplitude { border-color: #f0a; color: #f0a; }
+    .log-source.iterable { border-color: #0fa; color: #0fa; }
+    .log-source.datalayer { border-color: #ff0; color: #ff0; }
+    .log-message { color: #fff; }
+    
+    /* Status indicators */
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid #222;
+      font-size: 11px;
+    }
+    .status-label { color: #888; }
+    .status-value { color: #fff; }
+    .status-value.pending { color: #444; }
+    .status-value.active { color: #fff; animation: pulse 1s infinite; }
+    .status-value.done { color: #fff; }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    
     .tag {
       display: inline-block;
       border: 1px solid #fff;
       padding: 2px 6px;
-      font-size: 10px;
-      margin-right: 5px;
-      margin-top: 5px;
+      font-size: 9px;
+      margin: 2px;
     }
-    .tag.warning { border-color: #888; color: #888; }
     .tag.new { background: #fff; color: #000; }
-    .hidden { display: none; }
-    .processing { animation: blink 0.5s infinite; }
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-    .submission-counter {
+    .tag.enriched { border-color: #f0a; color: #f0a; }
+    
+    .webhook-indicator {
       background: #111;
-      padding: 10px;
-      margin-top: 15px;
-      font-size: 11px;
-      text-align: center;
-    }
-    .counter-value {
-      font-size: 24px;
-      margin: 5px 0;
-    }
-    .dup-warning {
-      background: #fff;
-      color: #000;
-      padding: 15px;
-      margin-top: 15px;
-      text-align: center;
-    }
-    .dup-warning strong {
-      display: block;
-      font-size: 14px;
-      margin-bottom: 5px;
-    }
-    .history-table {
-      width: 100%;
-      margin-top: 15px;
-      border-collapse: collapse;
+      border: 1px solid #333;
+      padding: 8px;
+      margin-top: 10px;
       font-size: 10px;
     }
-    .history-table th, .history-table td {
-      border: 1px solid #333;
-      padding: 6px;
-      text-align: left;
+    .webhook-indicator.received {
+      border-color: #fff;
+      animation: flash 0.5s;
     }
-    .history-table th {
+    @keyframes flash {
+      0% { background: #fff; color: #000; }
+      100% { background: #111; color: #fff; }
+    }
+    
+    .datalayer-state {
       background: #111;
-      color: #888;
+      border: 1px solid #ff0;
+      padding: 10px;
+      margin-top: 10px;
+      font-size: 10px;
     }
+    .datalayer-state h4 {
+      color: #ff0;
+      font-size: 10px;
+      margin-bottom: 8px;
+      font-weight: normal;
+    }
+    
+    .clear-btn {
+      background: transparent;
+      color: #666;
+      border: 1px solid #333;
+      padding: 4px 8px;
+      font-size: 10px;
+      cursor: pointer;
+      float: right;
+    }
+    .clear-btn:hover { border-color: #fff; color: #fff; }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>■ IDENTITY RESOLUTION POC</h1>
+      <h1>■ IDENTITY RESOLUTION ARCHITECTURE</h1>
       <div style="display: flex; gap: 10px; align-items: center;">
-        <span style="color: #888; font-size: 12px;">Current Brand:</span>
+        <span style="color: #888; font-size: 11px;">Brand:</span>
         <select class="brand-select" id="brandSelect">
           <option value="clg">CLG</option>
           <option value="access-hire">Access Hire</option>
@@ -325,216 +287,245 @@
       </div>
     </header>
     
-    <div class="grid">
-      <div class="left-column">
+    <div class="main-grid">
+      <!-- Left: Form & Status -->
+      <div class="left-col">
         <div class="panel">
-          <div class="panel-title">■ TEST SCENARIO</div>
-          
+          <div class="panel-title">■ Test Lead</div>
           <div class="form-group">
-            <label>Quick Select</label>
+            <label>Scenario</label>
             <select id="scenarioSelect" onchange="loadScenario()">
-              <option value="returning-user">↻ Returning User (John)</option>
-              <option value="returning-user-jane">↻ Returning User (Jane)</option>
-              <option value="new-user">+ New User</option>
-              <option value="same-email-diff-phone">↻ Same Email, Diff Phone</option>
-              <option value="same-phone-diff-email">↻ Same Phone, Diff Email</option>
-              <option value="custom">✎ Custom Entry</option>
+              <option value="returning">↻ Returning User</option>
+              <option value="new">+ New User</option>
+              <option value="duplicate">⚠ Duplicate Submit</option>
             </select>
           </div>
-          
-          <div class="scenario-box highlight" id="scenarioDesc">
-            <div class="scenario-label">What Will Happen</div>
-            <div class="scenario-desc" id="scenarioText">
-              Known user - will match and link to existing record.
-            </div>
-          </div>
-          
           <div class="form-group">
             <label>Email</label>
-            <input type="email" id="testEmail" placeholder="user@example.com">
+            <input type="email" id="testEmail">
           </div>
           <div class="form-group">
             <label>Phone</label>
-            <input type="tel" id="testPhone" placeholder="0400000000">
+            <input type="tel" id="testPhone">
           </div>
           <div class="form-group">
             <label>Name</label>
-            <input type="text" id="testName" placeholder="Full Name">
+            <input type="text" id="testName">
           </div>
-          
-          <button class="btn" id="submitBtn" onclick="submitTestLead()">
-            SUBMIT LEAD
-          </button>
-          
-          <button class="btn btn-outline" onclick="resetDemo()">
-            RESET SESSION
-          </button>
-          
-          <div class="submission-counter">
-            <div style="color: #888;">SESSION SUBMISSIONS</div>
-            <div class="counter-value" id="sessionCounter">0</div>
-            <div style="color: #666; font-size: 10px;">Each gets unique UID for NetSuite</div>
+          <button class="btn" id="submitBtn" onclick="submitLead()">SUBMIT LEAD</button>
+          <button class="btn btn-sm" onclick="resetDemo()" style="background: transparent; color: #fff; border: 1px solid #444;">RESET</button>
+        </div>
+        
+        <div class="panel" style="margin-top: 15px;">
+          <div class="panel-title">■ System Status</div>
+          <div class="status-row">
+            <span class="status-label">Firebase</span>
+            <span class="status-value" id="statusFirebase">Ready</span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">NetSuite</span>
+            <span class="status-value" id="statusNetsuite">Waiting</span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">Amplitude</span>
+            <span class="status-value" id="statusAmplitude">Waiting</span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">Iterable</span>
+            <span class="status-value" id="statusIterable">Waiting</span>
+          </div>
+          <div class="status-row">
+            <span class="status-label">DataLayer</span>
+            <span class="status-value" id="statusDatalayer">Ready</span>
           </div>
         </div>
         
-        <div class="panel" style="margin-top: 20px;">
-          <div class="panel-title">■ CURRENT DEVICE</div>
-          <div class="signal-row">
-            <span class="signal-label">Device ID</span>
-            <span class="signal-value" id="deviceId">-</span>
+        <div class="panel" style="margin-top: 15px;">
+          <div class="panel-title">■ Webhooks Received</div>
+          <div class="webhook-indicator" id="webhookNS">
+            <strong>NetSuite:</strong> <span id="webhookNSStatus">Waiting...</span>
           </div>
-          <div class="signal-row">
-            <span class="signal-label">Platform</span>
-            <span class="signal-value" id="platform">-</span>
+          <div class="webhook-indicator" id="webhookAmp">
+            <strong>Amplitude:</strong> <span id="webhookAmpStatus">Waiting...</span>
           </div>
-          <div class="signal-row">
-            <span class="signal-label">Browser</span>
-            <span class="signal-value" id="browser">-</span>
-          </div>
-          <div class="signal-row">
-            <span class="signal-label">Visitor ID</span>
-            <span class="signal-value" id="visitorId">-</span>
-          </div>
-          <div class="signal-row">
-            <span class="signal-label">Session ID</span>
-            <span class="signal-value" id="sessionId">-</span>
+          <div class="webhook-indicator" id="webhookIter">
+            <strong>Iterable:</strong> <span id="webhookIterStatus">Waiting...</span>
           </div>
         </div>
       </div>
       
-      <div class="right-column">
-        <div class="panel">
-          <div class="panel-title">■ DEDUPLICATION FLOW</div>
-          <div class="flow-diagram">
-            <div class="flow-step" id="step-capture">CAPTURE<br>SIGNALS</div>
-            <span class="flow-arrow" id="arrow-1">→</span>
-            <div class="flow-step" id="step-check">QUERY<br>FIREBASE</div>
-            <span class="flow-arrow" id="arrow-2">→</span>
-            <div class="flow-step" id="step-match">MATCH<br>EMAIL/PHONE</div>
-            <span class="flow-arrow" id="arrow-3">→</span>
-            <div class="flow-branch">
-              <div class="flow-step" id="step-new">CREATE<br>NEW</div>
-              <span style="color: #333;">─ OR ─</span>
-              <div class="flow-step" id="step-link">LINK TO<br>EXISTING</div>
-            </div>
-            <span class="flow-arrow" id="arrow-4">→</span>
-            <div class="flow-step" id="step-push">SEND<br>UNIQUE UID</div>
-          </div>
-        </div>
-        
-        <div class="two-col">
-          <div class="panel">
-            <div class="panel-title">■ FIREBASE DEDUPLICATION</div>
-            <div id="lookupStatus">
-              <span style="color: #666;">Submit a lead to see deduplication...</span>
-            </div>
-            <div id="lookupResult" class="hidden"></div>
-            <div id="masterRecord" class="hidden"></div>
-            <div id="dupWarning" class="hidden"></div>
-          </div>
+      <!-- Center: Architecture Diagram -->
+      <div class="center-col">
+        <div class="panel" style="height: 100%;">
+          <div class="panel-title">■ Data Flow Architecture</div>
           
-          <div class="panel">
-            <div class="panel-title">■ OUTBOUND PAYLOADS</div>
-            <div class="payload-label">▼ DataLayer Push</div>
-            <div class="payload-box" id="dataLayerPayload">// Submit a lead...</div>
-            <div class="payload-label">▼ NetSuite Payload (unique UID)</div>
-            <div class="payload-box" id="netsuitePayload">// Submit a lead...</div>
+          <div class="arch-diagram">
+            <!-- Row 1: Frontend -->
+            <div class="arch-section">
+              <div class="arch-section-label">Frontend (Browser)</div>
+              <div class="arch-row">
+                <div class="arch-node" id="node-form">
+                  <div class="arch-node-label">User Action</div>
+                  <div class="arch-node-title">FORM<br>SUBMIT</div>
+                </div>
+                <span class="arch-connector" id="conn-1">→</span>
+                <div class="arch-node" id="node-datalayer">
+                  <div class="arch-node-label">GTM</div>
+                  <div class="arch-node-title">DATALAYER<br>PUSH</div>
+                </div>
+                <span class="arch-connector" id="conn-2">→</span>
+                <div class="arch-node" id="node-visitor">
+                  <div class="arch-node-label">SDK</div>
+                  <div class="arch-node-title">VISITOR<br>IDENTIFY</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="arch-row">
+              <span class="arch-connector down" id="conn-3">→</span>
+            </div>
+            
+            <!-- Row 2: Firebase -->
+            <div class="arch-section">
+              <div class="arch-section-label">Firebase / GCP</div>
+              <div class="arch-row">
+                <div class="arch-node" id="node-firebase">
+                  <div class="arch-node-label">Firestore</div>
+                  <div class="arch-node-title">DEDUPE<br>LOOKUP</div>
+                </div>
+                <span class="arch-connector" id="conn-4">→</span>
+                <div class="arch-node" id="node-master">
+                  <div class="arch-node-label">Identity</div>
+                  <div class="arch-node-title">MASTER<br>RECORD</div>
+                </div>
+                <span class="arch-connector" id="conn-5">→</span>
+                <div class="arch-node" id="node-uid">
+                  <div class="arch-node-label">Generate</div>
+                  <div class="arch-node-title">UNIQUE<br>UID</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="arch-row">
+              <span class="arch-connector down" id="conn-6">→</span>
+            </div>
+            
+            <!-- Row 3: External Systems -->
+            <div class="arch-section">
+              <div class="arch-section-label">External Systems</div>
+              <div class="arch-row">
+                <div class="arch-node" id="node-netsuite">
+                  <div class="arch-node-label">CRM</div>
+                  <div class="arch-node-title">NETSUITE<br>LEAD</div>
+                </div>
+                <span class="arch-connector" id="conn-7">→</span>
+                <div class="arch-node" id="node-amplitude">
+                  <div class="arch-node-label">CDP</div>
+                  <div class="arch-node-title">AMPLITUDE<br>ENRICH</div>
+                </div>
+                <span class="arch-connector" id="conn-8">→</span>
+                <div class="arch-node" id="node-iterable">
+                  <div class="arch-node-label">Marketing</div>
+                  <div class="arch-node-title">ITERABLE<br>RECORD</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="arch-row">
+              <span class="arch-connector down" id="conn-9">→</span>
+              <span style="color: #666; font-size: 10px; margin: 0 20px;">WEBHOOKS BACK</span>
+              <span class="arch-connector down" id="conn-10">→</span>
+            </div>
+            
+            <!-- Row 4: Webhook Returns -->
+            <div class="arch-section">
+              <div class="arch-section-label">Webhook Response → Frontend Update</div>
+              <div class="arch-row">
+                <div class="arch-node" id="node-ns-webhook">
+                  <div class="arch-node-label">Webhook</div>
+                  <div class="arch-node-title">NS LEAD<br>CREATED</div>
+                </div>
+                <span class="arch-connector" id="conn-11">→</span>
+                <div class="arch-node" id="node-amp-webhook">
+                  <div class="arch-node-label">Webhook</div>
+                  <div class="arch-node-title">AMPLITUDE<br>ENRICHED</div>
+                </div>
+                <span class="arch-connector" id="conn-12">→</span>
+                <div class="arch-node" id="node-datalayer-update">
+                  <div class="arch-node-label">Update</div>
+                  <div class="arch-node-title">DATALAYER<br>ENRICH</div>
+                </div>
+                <span class="arch-connector" id="conn-13">→</span>
+                <div class="arch-node" id="node-personalize">
+                  <div class="arch-node-label">Action</div>
+                  <div class="arch-node-title">PERSONALIZE<br>SITE</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Right: DataLayer & Logs -->
+      <div class="right-col">
+        <div class="panel">
+          <div class="panel-title">■ DataLayer State</div>
+          <div class="datalayer-state">
+            <h4>window.dataLayer</h4>
+            <pre id="datalayerContent">// Empty - submit a lead</pre>
+          </div>
+          <div class="data-box" id="enrichedData" style="display: none;">
+            <div class="data-label">Amplitude Enrichment</div>
+            <pre id="enrichedContent"></pre>
           </div>
         </div>
         
-        <div class="panel">
+        <div class="panel" style="margin-top: 15px;">
           <div class="panel-title">
-            ■ SESSION HISTORY
-            <button class="clear-btn" onclick="clearLog()">CLEAR LOG</button>
+            ■ Event Stream
+            <button class="clear-btn" onclick="clearLog()">CLEAR</button>
           </div>
-          <div id="sessionHistory"></div>
           <div class="event-log" id="eventLog"></div>
+        </div>
+        
+        <div class="panel" style="margin-top: 15px;">
+          <div class="panel-title">■ Payloads</div>
+          <div class="data-label">To NetSuite</div>
+          <div class="data-box">
+            <pre id="nsPayload">// Waiting...</pre>
+          </div>
+          <div class="data-label" style="margin-top: 10px;">To Amplitude</div>
+          <div class="data-box">
+            <pre id="ampPayload">// Waiting...</pre>
+          </div>
         </div>
       </div>
     </div>
   </div>
   
   <script>
-    // Simulated Firebase database
-    const database = {
+    // Database simulation
+    const db = {
       leads: {
         'LEAD-ABC123': {
           masterLeadId: 'LEAD-ABC123',
           email: 'john@example.com',
           phone: '0412345678',
-          firstName: 'John',
-          lastName: 'Smith',
-          firstSeen: '2026-01-15T10:30:00Z',
-          devices: {
-            'DEV-PREV01': { deviceType: 'desktop', platform: 'Win32', browser: 'Chrome', brands: ['access-hire'] },
-            'DEV-PREV02': { deviceType: 'mobile', platform: 'iPhone', browser: 'Safari', brands: ['access-hire', 'access-express'] }
-          },
-          siteIds: {
-            'access-hire': ['UID-001', 'UID-003'],
-            'access-express': ['UID-002']
-          },
-          totalSubmissions: 3
-        },
-        'LEAD-DEF456': {
-          masterLeadId: 'LEAD-DEF456',
-          email: 'jane@company.com',
-          phone: '0498765432',
-          firstName: 'Jane',
-          lastName: 'Doe',
-          firstSeen: '2026-01-20T14:00:00Z',
-          devices: {
-            'DEV-PREV03': { deviceType: 'desktop', platform: 'MacIntel', browser: 'Safari', brands: ['clg'] }
-          },
-          siteIds: { 'clg': ['UID-004'] },
-          totalSubmissions: 1
+          name: 'John Smith',
+          siteIds: { 'access-hire': ['UID-001'], 'access-express': ['UID-002'] },
+          totalSubmissions: 2
         }
       }
     };
     
-    // Scenarios
     const scenarios = {
-      'returning-user': {
-        email: 'john@example.com',
-        phone: '0412345678',
-        name: 'John Smith',
-        desc: '↻ MATCH: Email + Phone match existing lead LEAD-ABC123. Will link this submission to master record.'
-      },
-      'returning-user-jane': {
-        email: 'jane@company.com',
-        phone: '0498765432',
-        name: 'Jane Doe',
-        desc: '↻ MATCH: Will match existing lead LEAD-DEF456 from CLG site.'
-      },
-      'new-user': {
-        email: 'brand.new@user.com',
-        phone: '0400111222',
-        name: 'Brand New User',
-        desc: '+ NEW: No email or phone match. Will create NEW master lead record.'
-      },
-      'same-email-diff-phone': {
-        email: 'john@example.com',
-        phone: '0499999999',
-        name: 'John Smith',
-        desc: '↻ MATCH: Same email as John (different phone). EMAIL MATCH links to LEAD-ABC123.'
-      },
-      'same-phone-diff-email': {
-        email: 'different@email.com',
-        phone: '0412345678',
-        name: 'J Smith',
-        desc: '↻ MATCH: Different email but same phone. PHONE MATCH links to LEAD-ABC123.'
-      },
-      'custom': {
-        email: '',
-        phone: '',
-        name: '',
-        desc: '✎ Enter any values to test. Try submitting same data twice to see duplicate handling.'
-      }
+      'returning': { email: 'john@example.com', phone: '0412345678', name: 'John Smith' },
+      'new': { email: 'newuser@test.com', phone: '0400111222', name: 'New User' },
+      'duplicate': { email: 'john@example.com', phone: '0412345678', name: 'John Smith' }
     };
     
-    // Session state
-    let deviceId, visitorId, sessionId;
-    let sessionSubmissions = 0;
-    let sessionLeads = []; // Track submissions this session
+    let sessionSubmissions = [];
+    let currentDataLayer = [];
     
     function generateUUID() {
       return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
@@ -547,13 +538,16 @@
       return prefix + '-' + Math.random().toString(36).substr(2, 6).toUpperCase();
     }
     
-    function log(msg, type = 'info') {
+    function log(source, message) {
       const el = document.getElementById('eventLog');
-      const time = new Date().toLocaleTimeString('en-AU', { hour12: false });
-      const icon = type === 'success' ? '●' : type === 'warning' ? '▲' : type === 'processing' ? '◐' : '○';
+      const time = new Date().toLocaleTimeString('en-AU', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
       const entry = document.createElement('div');
       entry.className = 'log-entry';
-      entry.innerHTML = `<span class="log-time">${time}</span><span class="log-indicator">${icon}</span><span class="log-message">${msg}</span>`;
+      entry.innerHTML = `
+        <span class="log-time">${time}</span>
+        <span class="log-source ${source.toLowerCase()}">${source}</span>
+        <span class="log-message">${message}</span>
+      `;
       el.insertBefore(entry, el.firstChild);
     }
     
@@ -561,323 +555,278 @@
       document.getElementById('eventLog').innerHTML = '';
     }
     
+    function setStatus(system, status) {
+      const el = document.getElementById('status' + system);
+      el.textContent = status;
+      el.className = 'status-value ' + (status === 'Waiting' ? 'pending' : status === 'Processing...' ? 'active' : 'done');
+    }
+    
+    function activateNode(id) {
+      document.getElementById(id).classList.add('active');
+      return new Promise(r => setTimeout(() => {
+        document.getElementById(id).classList.remove('active');
+        document.getElementById(id).classList.add('complete');
+        r();
+      }, 400));
+    }
+    
+    function activateConnector(id) {
+      document.getElementById(id).classList.add('active');
+    }
+    
     function loadScenario() {
-      const id = document.getElementById('scenarioSelect').value;
-      const s = scenarios[id];
+      const s = scenarios[document.getElementById('scenarioSelect').value];
       document.getElementById('testEmail').value = s.email;
       document.getElementById('testPhone').value = s.phone;
       document.getElementById('testName').value = s.name;
-      document.getElementById('scenarioText').textContent = s.desc;
     }
     
-    function init() {
-      deviceId = generateId('DEV');
-      visitorId = generateId('VIS');
-      sessionId = generateId('SES');
-      
-      document.getElementById('deviceId').textContent = deviceId;
-      document.getElementById('platform').textContent = navigator.platform;
-      document.getElementById('browser').textContent = navigator.userAgent.includes('Chrome') ? 'Chrome' : 'Safari';
-      document.getElementById('visitorId').textContent = visitorId;
-      document.getElementById('sessionId').textContent = sessionId;
-      
-      document.getElementById('step-capture').classList.add('complete');
-      loadScenario();
-      log('Session started: ' + sessionId);
+    function updateDataLayer(event) {
+      currentDataLayer.push(event);
+      document.getElementById('datalayerContent').textContent = JSON.stringify(currentDataLayer, null, 2);
     }
     
-    async function activateStep(stepId, arrowId) {
-      if (arrowId) document.getElementById(arrowId).classList.add('active');
-      const step = document.getElementById(stepId);
-      step.classList.add('active');
-      await new Promise(r => setTimeout(r, 500));
-      step.classList.remove('active');
-      step.classList.add('complete');
-    }
-    
-    function findMatch(email, phone) {
-      for (const id in database.leads) {
-        const lead = database.leads[id];
-        if (email && lead.email.toLowerCase() === email.toLowerCase()) {
-          return { lead, matchType: 'EMAIL' };
-        }
-        if (phone && lead.phone === phone) {
-          return { lead, matchType: 'PHONE' };
-        }
-      }
-      return null;
-    }
-    
-    function checkDuplicate(email, phone) {
-      // Check if we've already submitted this email/phone in this session
-      return sessionLeads.find(l => 
-        (email && l.email.toLowerCase() === email.toLowerCase()) || 
-        (phone && l.phone === phone)
-      );
-    }
-    
-    function updateSessionHistory() {
-      if (sessionLeads.length === 0) {
-        document.getElementById('sessionHistory').innerHTML = '';
-        return;
-      }
-      
-      let html = `<table class="history-table">
-        <tr><th>#</th><th>UID (NetSuite)</th><th>Master ID</th><th>Email</th><th>Brand</th><th>Type</th></tr>`;
-      
-      sessionLeads.forEach((l, i) => {
-        html += `<tr>
-          <td>${i + 1}</td>
-          <td>${l.uid.substring(0, 8)}...</td>
-          <td>${l.masterId}</td>
-          <td>${l.email || '-'}</td>
-          <td>${l.brand}</td>
-          <td>${l.type}</td>
-        </tr>`;
-      });
-      
-      html += '</table>';
-      document.getElementById('sessionHistory').innerHTML = html;
-    }
-    
-    async function submitTestLead() {
-      const email = document.getElementById('testEmail').value.trim();
-      const phone = document.getElementById('testPhone').value.trim();
-      const name = document.getElementById('testName').value.trim();
+    async function submitLead() {
+      const email = document.getElementById('testEmail').value;
+      const phone = document.getElementById('testPhone').value;
+      const name = document.getElementById('testName').value;
       const brand = document.getElementById('brandSelect').value;
       
-      if (!email && !phone) {
-        alert('Enter at least email or phone');
-        return;
-      }
+      if (!email && !phone) { alert('Enter email or phone'); return; }
       
       const btn = document.getElementById('submitBtn');
       btn.disabled = true;
       btn.textContent = 'PROCESSING...';
       
-      // Reset flow
-      document.querySelectorAll('.flow-step').forEach(el => el.classList.remove('active', 'complete'));
-      document.querySelectorAll('.flow-arrow').forEach(el => el.classList.remove('active'));
-      document.getElementById('step-capture').classList.add('complete');
-      document.getElementById('dupWarning').classList.add('hidden');
+      // Reset nodes
+      document.querySelectorAll('.arch-node').forEach(n => n.classList.remove('active', 'complete'));
+      document.querySelectorAll('.arch-connector').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.webhook-indicator').forEach(w => w.classList.remove('received'));
+      document.getElementById('enrichedData').style.display = 'none';
       
-      log('━━━━━━━━━━━━━━━━━━━━━━━━');
-      log(`SUBMISSION #${sessionSubmissions + 1} on ${brand.toUpperCase()}`);
+      // 1. Form Submit
+      log('FRONTEND', 'Form submitted');
+      await activateNode('node-form');
+      activateConnector('conn-1');
       
-      // Check for session duplicate FIRST
-      const prevSubmission = checkDuplicate(email, phone);
-      const isDuplicate = !!prevSubmission;
+      // 2. Initial DataLayer Push
+      const initialEvent = {
+        event: 'form_submit',
+        form_name: 'lead_enquiry',
+        brand: brand,
+        timestamp: new Date().toISOString()
+      };
+      updateDataLayer(initialEvent);
+      log('DATALAYER', 'Push: form_submit');
+      setStatus('Datalayer', 'Updated');
+      await activateNode('node-datalayer');
+      activateConnector('conn-2');
       
-      if (isDuplicate) {
-        log('⚠ DUPLICATE in this session!', 'warning');
+      // 3. Visitor Identify
+      log('FRONTEND', 'Calling visitor SDK');
+      await activateNode('node-visitor');
+      activateConnector('conn-3');
+      
+      // 4. Firebase Dedupe
+      setStatus('Firebase', 'Processing...');
+      log('FIREBASE', 'Querying for email/phone match...');
+      await activateNode('node-firebase');
+      activateConnector('conn-4');
+      
+      // Check for match
+      let masterLead = null;
+      let isReturning = false;
+      for (const id in db.leads) {
+        if (db.leads[id].email === email || db.leads[id].phone === phone) {
+          masterLead = db.leads[id];
+          isReturning = true;
+          break;
+        }
       }
       
-      await activateStep('step-check', 'arrow-1');
-      log('Querying Firebase...', 'processing');
+      // Check session duplicate
+      const isDuplicate = sessionSubmissions.some(s => s.email === email || s.phone === phone);
       
-      document.getElementById('lookupStatus').innerHTML = `
-        <div class="processing">
-          Checking: ${email || '(no email)'}<br>
-          Checking: ${phone || '(no phone)'}
-        </div>
-      `;
-      
-      await new Promise(r => setTimeout(r, 300));
-      await activateStep('step-match', 'arrow-2');
-      
-      const result = findMatch(email, phone);
-      let masterId, isReturning = false, matchedLead = null, matchType = null;
-      
-      if (result) {
-        isReturning = true;
-        masterId = result.lead.masterLeadId;
-        matchedLead = result.lead;
-        matchType = result.matchType;
-        
-        log(`✓ MATCH via ${matchType}: ${masterId}`, 'success');
-        
-        const isNewBrand = !matchedLead.siteIds[brand];
-        const isNewDevice = !matchedLead.devices[deviceId];
-        
-        document.getElementById('lookupStatus').innerHTML = '';
-        document.getElementById('lookupResult').classList.remove('hidden');
-        document.getElementById('lookupResult').className = 'lookup-result match';
-        document.getElementById('lookupResult').innerHTML = `
-          <strong>✓ MATCH FOUND (${matchType})</strong><br><br>
-          Master ID: <strong>${masterId}</strong><br>
-          Stored Email: ${matchedLead.email}<br>
-          Stored Phone: ${matchedLead.phone}<br>
-          Previous submissions: ${matchedLead.totalSubmissions}<br>
-          Known brands: ${Object.keys(matchedLead.siteIds).join(', ')}<br>
-          Known devices: ${Object.keys(matchedLead.devices).length}
-        `;
-        
-        document.getElementById('masterRecord').classList.remove('hidden');
-        document.getElementById('masterRecord').innerHTML = `
-          <div class="master-record">
-            <h4>UPDATING MASTER RECORD</h4>
-            ${isNewBrand ? `<span class="tag new">+ NEW BRAND: ${brand}</span>` : `<span class="tag">EXISTING BRAND: ${brand}</span>`}
-            ${isNewDevice ? `<span class="tag new">+ NEW DEVICE</span>` : ''}
-            ${isDuplicate ? `<span class="tag warning">DUPLICATE SESSION</span>` : ''}
-            <div style="margin-top: 10px;">
-              Submissions: ${matchedLead.totalSubmissions} → <strong>${matchedLead.totalSubmissions + 1}</strong>
-            </div>
-            <div>
-              UIDs for ${brand}: [${(matchedLead.siteIds[brand] || []).join(', ')}${matchedLead.siteIds[brand] ? ', ' : ''}<strong>+NEW</strong>]
-            </div>
-          </div>
-        `;
-        
-        await activateStep('step-link', 'arrow-3');
-        
+      let masterId;
+      if (masterLead) {
+        masterId = masterLead.masterLeadId;
+        log('FIREBASE', `MATCH FOUND: ${masterId}`);
+        if (isDuplicate) log('FIREBASE', '⚠ Duplicate in session');
       } else {
         masterId = generateId('LEAD');
-        log(`+ NEW LEAD: ${masterId}`);
-        
-        document.getElementById('lookupStatus').innerHTML = '';
-        document.getElementById('lookupResult').classList.remove('hidden');
-        document.getElementById('lookupResult').className = 'lookup-result no-match';
-        document.getElementById('lookupResult').innerHTML = `
-          <strong>○ NO MATCH</strong><br><br>
-          No existing lead found.<br>
-          Creating new master record...
-        `;
-        
-        document.getElementById('masterRecord').classList.remove('hidden');
-        document.getElementById('masterRecord').innerHTML = `
-          <div class="master-record">
-            <h4>NEW MASTER RECORD</h4>
-            <div>ID: <strong>${masterId}</strong></div>
-            <div>Email: ${email || '(none)'}</div>
-            <div>Phone: ${phone || '(none)'}</div>
-            <div>Brand: ${brand}</div>
-            <span class="tag new">NEW LEAD</span>
-          </div>
-        `;
-        
-        // Add to database for future lookups
-        database.leads[masterId] = {
-          masterLeadId: masterId,
-          email: email,
-          phone: phone,
-          firstName: name,
-          firstSeen: new Date().toISOString(),
-          devices: { [deviceId]: { deviceType: 'desktop', platform: navigator.platform, browser: 'Chrome', brands: [brand] } },
-          siteIds: { [brand]: [] },
-          totalSubmissions: 0
-        };
-        
-        await activateStep('step-new', 'arrow-3');
+        log('FIREBASE', `NEW LEAD: ${masterId}`);
+        db.leads[masterId] = { masterLeadId: masterId, email, phone, name, siteIds: {}, totalSubmissions: 0 };
       }
       
-      // Show duplicate warning
-      if (isDuplicate) {
-        document.getElementById('dupWarning').classList.remove('hidden');
-        document.getElementById('dupWarning').innerHTML = `
-          <div class="dup-warning">
-            <strong>⚠ DUPLICATE SUBMISSION DETECTED</strong>
-            Same user submitted earlier in this session.<br>
-            Previous UID: ${prevSubmission.uid.substring(0, 8)}...<br>
-            <strong>NEW unique UID generated for NetSuite.</strong>
-          </div>
-        `;
-      }
+      setStatus('Firebase', 'Complete');
+      await activateNode('node-master');
+      activateConnector('conn-5');
       
-      await activateStep('step-push', 'arrow-4');
-      
-      // Generate unique UID for NetSuite
+      // 5. Generate Unique UID
       const uid = generateUUID();
-      sessionSubmissions++;
+      log('FIREBASE', `Generated UID: ${uid.substring(0,8)}...`);
+      await activateNode('node-uid');
+      activateConnector('conn-6');
       
-      // Track in session
-      sessionLeads.push({
-        uid,
-        masterId,
-        email,
-        phone,
-        brand,
-        type: isReturning ? (isDuplicate ? 'DUPLICATE' : 'RETURNING') : 'NEW'
-      });
+      // Update DB
+      if (!db.leads[masterId].siteIds[brand]) db.leads[masterId].siteIds[brand] = [];
+      db.leads[masterId].siteIds[brand].push(uid);
+      db.leads[masterId].totalSubmissions++;
       
-      // Update database
-      if (database.leads[masterId]) {
-        database.leads[masterId].totalSubmissions++;
-        if (!database.leads[masterId].siteIds[brand]) {
-          database.leads[masterId].siteIds[brand] = [];
+      // Track session
+      sessionSubmissions.push({ uid, masterId, email, phone, brand });
+      
+      // 6. Send to NetSuite
+      setStatus('Netsuite', 'Processing...');
+      const nsPayload = {
+        contactRequestId: uid,
+        masterLeadId: masterId,
+        email, phone, name, brand,
+        isReturning, isDuplicate
+      };
+      document.getElementById('nsPayload').textContent = JSON.stringify(nsPayload, null, 2);
+      log('NETSUITE', 'Sending lead...');
+      await activateNode('node-netsuite');
+      activateConnector('conn-7');
+      
+      // 7. Send to Amplitude
+      setStatus('Amplitude', 'Processing...');
+      const ampPayload = {
+        event_type: 'lead_captured',
+        user_id: masterId,
+        device_id: generateId('DEV'),
+        event_properties: { brand, form: 'enquiry', uid },
+        user_properties: { email, phone, name }
+      };
+      document.getElementById('ampPayload').textContent = JSON.stringify(ampPayload, null, 2);
+      log('AMPLITUDE', 'Sending event...');
+      await activateNode('node-amplitude');
+      activateConnector('conn-8');
+      
+      // 8. Iterable (from NetSuite)
+      setStatus('Iterable', 'Processing...');
+      log('ITERABLE', 'Record created from NetSuite');
+      await activateNode('node-iterable');
+      activateConnector('conn-9');
+      activateConnector('conn-10');
+      
+      // 9. Webhooks return
+      await new Promise(r => setTimeout(r, 500));
+      
+      // NetSuite webhook
+      setStatus('Netsuite', 'Lead Created');
+      document.getElementById('webhookNS').classList.add('received');
+      document.getElementById('webhookNSStatus').textContent = `Lead ID: NS-${Math.random().toString(36).substr(2,6).toUpperCase()}`;
+      log('NETSUITE', '← Webhook: Lead created');
+      await activateNode('node-ns-webhook');
+      activateConnector('conn-11');
+      
+      // Amplitude webhook with enriched data
+      await new Promise(r => setTimeout(r, 400));
+      setStatus('Amplitude', 'Enriched');
+      const enrichedData = {
+        user_id: masterId,
+        computed_properties: {
+          lifetime_value_score: Math.floor(Math.random() * 100),
+          engagement_level: ['high', 'medium', 'low'][Math.floor(Math.random() * 3)],
+          predicted_conversion: (Math.random() * 0.8 + 0.1).toFixed(2),
+          industry_segment: 'Construction',
+          company_size: 'SMB',
+          behavioral_cohort: 'active_researcher'
+        },
+        audiences: ['high_intent', 'equipment_rental', 'returning_visitor'],
+        last_30_days: {
+          sessions: Math.floor(Math.random() * 10) + 1,
+          pages_viewed: Math.floor(Math.random() * 50) + 5,
+          products_viewed: Math.floor(Math.random() * 20) + 1
         }
-        database.leads[masterId].siteIds[brand].push(uid);
-      }
+      };
+      document.getElementById('webhookAmp').classList.add('received');
+      document.getElementById('webhookAmpStatus').textContent = 'Enrichment received';
+      document.getElementById('enrichedData').style.display = 'block';
+      document.getElementById('enrichedContent').textContent = JSON.stringify(enrichedData, null, 2);
+      log('AMPLITUDE', '← Webhook: Enriched data');
+      await activateNode('node-amp-webhook');
+      activateConnector('conn-12');
       
-      document.getElementById('sessionCounter').textContent = sessionSubmissions;
-      updateSessionHistory();
+      // Iterable confirmation
+      setStatus('Iterable', 'Subscribed');
+      document.getElementById('webhookIter').classList.add('received');
+      document.getElementById('webhookIterStatus').textContent = 'Contact synced';
+      log('ITERABLE', '← Confirmed: Contact in list');
       
-      // Payloads
-      const dataLayer = {
-        event: 'lead_identified',
+      // 10. Update DataLayer with enrichment
+      const enrichedEvent = {
+        event: 'lead_enriched',
         master_lead_id: masterId,
         submission_uid: uid,
         is_returning: isReturning,
         is_duplicate: isDuplicate,
-        match_type: matchType || 'NONE',
-        brand: brand,
-        device_id: deviceId,
-        cross_brand_history: Object.keys(database.leads[masterId]?.siteIds || {})
+        amplitude_ltv_score: enrichedData.computed_properties.lifetime_value_score,
+        amplitude_engagement: enrichedData.computed_properties.engagement_level,
+        amplitude_conversion_prob: enrichedData.computed_properties.predicted_conversion,
+        amplitude_audiences: enrichedData.audiences,
+        netsuite_lead_created: true,
+        iterable_subscribed: true,
+        personalization_ready: true
       };
+      updateDataLayer(enrichedEvent);
+      setStatus('Datalayer', 'Enriched');
+      log('DATALAYER', 'Push: lead_enriched (with Amplitude data)');
+      await activateNode('node-datalayer-update');
+      activateConnector('conn-13');
       
-      const netsuite = {
-        contactRequestId: uid,
-        masterLeadId: masterId,
-        isReturning: isReturning,
-        isDuplicate: isDuplicate,
-        email: email,
-        phone: phone,
-        name: name,
-        brand: brand
-      };
+      // 11. Personalization ready
+      log('FRONTEND', 'Personalization data available');
+      await activateNode('node-personalize');
       
-      document.getElementById('dataLayerPayload').textContent = JSON.stringify(dataLayer, null, 2);
-      document.getElementById('netsuitePayload').textContent = JSON.stringify(netsuite, null, 2);
-      
-      log(`NetSuite UID: ${uid.substring(0, 8)}...`, 'success');
-      log('Submission complete ✓', 'success');
+      log('FRONTEND', '✓ Complete - ready for personalization');
       
       btn.disabled = false;
       btn.textContent = 'SUBMIT LEAD';
     }
     
     function resetDemo() {
-      sessionSubmissions = 0;
-      sessionLeads = [];
+      sessionSubmissions = [];
+      currentDataLayer = [];
       
-      // Reset database to original
-      delete database.leads['LEAD-ABC123'].siteIds['clg'];
-      database.leads['LEAD-ABC123'].totalSubmissions = 3;
-      database.leads['LEAD-DEF456'].totalSubmissions = 1;
-      
-      // Remove any new leads
-      for (const id in database.leads) {
-        if (!['LEAD-ABC123', 'LEAD-DEF456'].includes(id)) {
-          delete database.leads[id];
+      // Reset DB
+      db.leads = {
+        'LEAD-ABC123': {
+          masterLeadId: 'LEAD-ABC123',
+          email: 'john@example.com',
+          phone: '0412345678',
+          name: 'John Smith',
+          siteIds: { 'access-hire': ['UID-001'], 'access-express': ['UID-002'] },
+          totalSubmissions: 2
         }
-      }
+      };
       
-      document.getElementById('sessionCounter').textContent = '0';
-      document.querySelectorAll('.flow-step').forEach(el => el.classList.remove('active', 'complete'));
-      document.querySelectorAll('.flow-arrow').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.arch-node').forEach(n => n.classList.remove('active', 'complete'));
+      document.querySelectorAll('.arch-connector').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.webhook-indicator').forEach(w => w.classList.remove('received'));
       
-      document.getElementById('lookupStatus').innerHTML = '<span style="color: #666;">Submit a lead to see deduplication...</span>';
-      document.getElementById('lookupResult').classList.add('hidden');
-      document.getElementById('masterRecord').classList.add('hidden');
-      document.getElementById('dupWarning').classList.add('hidden');
-      document.getElementById('sessionHistory').innerHTML = '';
-      document.getElementById('dataLayerPayload').textContent = '// Submit a lead...';
-      document.getElementById('netsuitePayload').textContent = '// Submit a lead...';
+      ['Firebase', 'Netsuite', 'Amplitude', 'Iterable', 'Datalayer'].forEach(s => {
+        setStatus(s, s === 'Firebase' || s === 'Datalayer' ? 'Ready' : 'Waiting');
+      });
+      
+      document.getElementById('webhookNSStatus').textContent = 'Waiting...';
+      document.getElementById('webhookAmpStatus').textContent = 'Waiting...';
+      document.getElementById('webhookIterStatus').textContent = 'Waiting...';
+      
+      document.getElementById('datalayerContent').textContent = '// Empty - submit a lead';
+      document.getElementById('enrichedData').style.display = 'none';
+      document.getElementById('nsPayload').textContent = '// Waiting...';
+      document.getElementById('ampPayload').textContent = '// Waiting...';
       
       clearLog();
-      init();
+      log('FRONTEND', 'Demo reset');
     }
     
-    window.onload = init;
+    window.onload = () => {
+      loadScenario();
+      log('FRONTEND', 'System ready');
+    };
   </script>
 </body>
 </html>
