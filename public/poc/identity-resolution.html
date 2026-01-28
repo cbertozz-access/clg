@@ -1469,18 +1469,10 @@
 
     function openFeedback() {
       console.log('Feedback clicked, Marker:', window.Marker);
-      if (window.Marker && typeof Marker.capture === 'function') {
-        try {
-          Marker.capture();
-        } catch (e) {
-          console.error('Marker.capture error:', e);
-          // Fallback: try to show the widget
-          if (typeof Marker.show === 'function') {
-            Marker.show();
-          }
-        }
+      if (window.Marker) {
+        // Use show() to open the widget UI - more reliable than capture()
+        Marker.show();
       } else {
-        console.log('Marker not ready yet');
         alert('Feedback widget is still loading. Please wait a moment and try again.');
       }
     }
