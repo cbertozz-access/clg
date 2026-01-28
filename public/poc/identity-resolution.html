@@ -9,15 +9,6 @@
     window.markerConfig = {
       project: '6979f1c4cd39869705a0b56d',
       source: 'snippet',
-      silent: true,
-      reporter: {
-        email: 'test@clg.com',
-        fullName: 'CLG Tester',
-      },
-      customData: {
-        page: 'identity-resolution-poc',
-        version: '1.0',
-      },
     }
   </script>
   <script>
@@ -531,34 +522,6 @@
       transition: all 0.2s;
     }
     .log-action-btn:hover { border-color: #555; color: #999; }
-
-    /* Feedback Button */
-    .feedback-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      padding: 12px 20px;
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
-      border: none;
-      border-radius: 50px;
-      color: #fff;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
-      transition: all 0.2s;
-      z-index: 1000;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .feedback-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 25px rgba(99, 102, 241, 0.5);
-    }
-    .feedback-btn:active {
-      transform: translateY(0);
-    }
 
     /* IDs Section */
     .ids-section {
@@ -1389,40 +1352,6 @@
     window.onload = () => {
       log('SITE', 'System ready');
     };
-
-    // Track Marker.io ready state
-    let markerReady = false;
-    if (window.Marker) {
-      Marker.on('load', function() {
-        console.log('Marker.io widget loaded');
-        markerReady = true;
-        // Hide the default Marker.io button - we use our own
-        Marker.hide();
-      });
-    }
-
-    function openFeedback() {
-      console.log('Feedback clicked');
-      console.log('window.Marker:', window.Marker);
-      console.log('window.__Marker:', window.__Marker);
-      console.log('markerReady:', markerReady);
-
-      if (window.Marker && typeof window.Marker.capture === 'function') {
-        console.log('Calling Marker.capture()');
-        window.Marker.capture();
-      } else {
-        console.log('Marker not available, showing alert');
-        alert('Feedback widget is still loading. Please wait a moment and try again.');
-      }
-    }
   </script>
-
-  <!-- Feedback Button -->
-  <button class="feedback-btn" onclick="openFeedback()">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-    </svg>
-    Feedback
-  </button>
 </body>
 </html>
