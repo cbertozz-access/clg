@@ -399,6 +399,91 @@
       cursor: pointer;
     }
     .clear-btn:hover { border-color: #666; color: #999; }
+
+    /* Playback controls */
+    .playback-controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #222;
+    }
+    .mode-toggle {
+      display: flex;
+      background: #0a0a0a;
+      border: 1px solid #333;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .mode-btn {
+      padding: 8px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      background: transparent;
+      border: none;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .mode-btn.active {
+      background: #fff;
+      color: #000;
+    }
+    .mode-btn:hover:not(.active) {
+      color: #999;
+    }
+    .next-step-btn {
+      flex: 1;
+      padding: 10px 16px;
+      background: #1a2e1a;
+      border: 1px solid #2a4a2a;
+      border-radius: 4px;
+      color: #8f8;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: none;
+    }
+    .next-step-btn:hover {
+      background: #2a4a2a;
+      border-color: #4a6a4a;
+    }
+    .next-step-btn:disabled {
+      background: #1a1a1a;
+      border-color: #333;
+      color: #444;
+      cursor: not-allowed;
+    }
+    .next-step-btn.visible {
+      display: block;
+    }
+    .step-indicator {
+      font-size: 11px;
+      color: #666;
+      padding: 8px 12px;
+      background: #0a0a0a;
+      border: 1px solid #222;
+      border-radius: 4px;
+    }
+    .step-indicator span {
+      color: #fff;
+      font-weight: 600;
+    }
+    .keyboard-hint {
+      font-size: 10px;
+      color: #444;
+      text-align: center;
+      margin-top: 8px;
+    }
+    .keyboard-hint kbd {
+      background: #222;
+      padding: 2px 6px;
+      border-radius: 3px;
+      border: 1px solid #333;
+      font-family: monospace;
+    }
   </style>
 </head>
 <body>
@@ -503,12 +588,26 @@
             <input type="text" id="deviceId" value="" readonly style="color: #666; font-family: monospace; font-size: 11px;">
           </div>
 
-          <button class="btn btn-primary" id="submitBtn" onclick="runFlow()">
+          <div class="playback-controls">
+            <div class="mode-toggle">
+              <button class="mode-btn active" id="mode-auto" onclick="setPlaybackMode('auto')">Auto</button>
+              <button class="mode-btn" id="mode-manual" onclick="setPlaybackMode('manual')">Manual</button>
+            </div>
+            <div class="step-indicator" id="stepIndicator">Step <span>-</span> / <span>-</span></div>
+          </div>
+
+          <button class="btn btn-primary" id="submitBtn" onclick="startFlow()">
             Submit Lead
+          </button>
+          <button class="next-step-btn" id="nextStepBtn" onclick="nextStep()">
+            Next Step →
           </button>
           <button class="btn btn-secondary" onclick="resetDemo()">
             Reset Demo
           </button>
+          <div class="keyboard-hint" id="keyboardHint" style="display: none;">
+            Press <kbd>Space</kbd> or <kbd>→</kbd> for next step
+          </div>
         </div>
 
         <div class="panel">
@@ -791,6 +890,12 @@
 
     let currentPreset = 'new-user';
     let currentDeviceId = '';
+    let playbackMode = 'auto'; // 'auto' or 'manual'
+    let flowSteps = [];
+    let currentStepIndex = 0;
+    let stepResolver = null;
+    let isFlowRunning = false;
+    let totalSteps = 5; // Base steps, increases to 8 for duplicates
 
     function generateShortId() {
       return Math.random().toString(36).substr(2, 8).toUpperCase();
@@ -801,6 +906,18 @@
         const r = Math.random() * 16 | 0;
         return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16).toUpperCase();
       });
+    }
+
+    function setPlaybackMode(mode) {
+      playbackMode = mode;
+      document.getElementById('mode-auto').classList.toggle('active', mode === 'auto');
+      document.getElementById('mode-manual').classList.toggle('active', mode === 'manual');
+      document.getElementById('keyboardHint').style.display = mode === 'manual' ? 'block' : 'none';
+    }
+
+    function updateStepIndicator(current, total) {
+      const indicator = document.getElementById('stepIndicator');
+      indicator.innerHTML = `Step <span>${current}</span> / <span>${total}</span>`;
     }
 
     function loadPreset(presetId) {
@@ -821,6 +938,10 @@
       document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
       document.getElementById('preset-' + presetId).classList.add('active');
 
+      // Update step count
+      totalSteps = preset.matchType === 'duplicate' ? 8 : 5;
+      updateStepIndicator('-', totalSteps);
+
       // Log the scenario
       clearLog();
       log('SITE', `Scenario: ${preset.description}`);
@@ -828,6 +949,39 @@
         log('SITE', `Expected match: ${preset.matchType.toUpperCase()}`);
       }
       log('SITE', 'Ready to submit');
+    }
+
+    // Wait for user to click "Next Step" in manual mode
+    function waitForNextStep() {
+      if (playbackMode === 'auto') {
+        return Promise.resolve();
+      }
+      return new Promise(resolve => {
+        stepResolver = resolve;
+        document.getElementById('nextStepBtn').disabled = false;
+      });
+    }
+
+    function nextStep() {
+      if (stepResolver) {
+        document.getElementById('nextStepBtn').disabled = true;
+        stepResolver();
+        stepResolver = null;
+      }
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (!isFlowRunning) return;
+      if (playbackMode !== 'manual') return;
+      if (e.code === 'Space' || e.code === 'ArrowRight') {
+        e.preventDefault();
+        nextStep();
+      }
+    });
+
+    function startFlow() {
+      runFlow();
     }
 
     function log(source, message) {
@@ -893,9 +1047,19 @@
       const matchType = preset ? preset.matchType : 'none';
       const isDuplicate = matchType === 'duplicate';
 
+      isFlowRunning = true;
+      currentStepIndex = 0;
+      totalSteps = isDuplicate ? 8 : 5;
+
       const btn = document.getElementById('submitBtn');
+      const nextBtn = document.getElementById('nextStepBtn');
       btn.disabled = true;
-      btn.textContent = 'Processing...';
+      btn.textContent = 'Running...';
+
+      if (playbackMode === 'manual') {
+        nextBtn.classList.add('visible');
+        nextBtn.disabled = true;
+      }
 
       // Reset
       document.querySelectorAll('.step-number').forEach(el => el.classList.remove('active', 'done'));
@@ -910,6 +1074,10 @@
       const ampId = 'AMP-' + uid.substring(0, 8);
 
       // === STEP 1: Form Submit ===
+      currentStepIndex = 1;
+      updateStepIndicator(1, totalSteps);
+      await waitForNextStep();
+
       activateStep(1);
       setStatus('site', 'Submitting...', 'active');
       log('SITE', `Form submitted on ${brand}`);
@@ -920,10 +1088,14 @@
       activateConnector('conn-1');
 
       // === STEP 2: NS Adapter ===
+      currentStepIndex = 2;
+      updateStepIndicator(2, totalSteps);
+      await waitForNextStep();
+
       activateStep(2);
       setStatus('adapter', 'Processing...', 'active');
       log('ADAPTER', 'Received lead data from site');
-      await new Promise(r => setTimeout(r, 300));
+      if (playbackMode === 'auto') await new Promise(r => setTimeout(r, 300));
 
       document.getElementById('displayUid').textContent = uid;
       document.getElementById('displayUid').classList.add('set');
@@ -962,11 +1134,15 @@
       setStatus('adapter', 'Sent', 'done');
       activateConnector('conn-2');
 
-      // === STEP 3: NetSuite ===
+      // === STEP 3: NetSuite + Iterable + Amplitude ===
+      currentStepIndex = 3;
+      updateStepIndicator(3, totalSteps);
+      await waitForNextStep();
+
       activateStep(3);
       setStatus('netsuite', 'Creating lead...', 'active');
       log('NETSUITE', 'API: Creating lead record');
-      await new Promise(r => setTimeout(r, 400));
+      if (playbackMode === 'auto') await new Promise(r => setTimeout(r, 400));
 
       document.getElementById('displayNsId').textContent = nsId;
       document.getElementById('displayNsId').classList.add('set');
@@ -984,14 +1160,14 @@
       completeStep(3);
       activateConnector('conn-3');
 
-      // === STEP 3b: Branch to Iterable + Amplitude ===
+      // Branch to Iterable + Amplitude
       document.getElementById('branch-1').classList.add('active');
 
       // Iterable
       activateConnector('bconn-1');
       setStatus('iterable', 'Creating contact...', 'active');
       log('NETSUITE', '→ Webhook: Sending to Iterable');
-      await new Promise(r => setTimeout(r, 200));
+      if (playbackMode === 'auto') await new Promise(r => setTimeout(r, 200));
       log('ITERABLE', 'Contact created');
       log('ITERABLE', 'Added to welcome email sequence');
       await activateBox('box-iterable');
@@ -1001,7 +1177,7 @@
       activateConnector('bconn-2');
       setStatus('amplitude', 'Creating profile...', 'active');
       log('NETSUITE', '→ Webhook: Sending to Amplitude');
-      await new Promise(r => setTimeout(r, 200));
+      if (playbackMode === 'auto') await new Promise(r => setTimeout(r, 200));
 
       document.getElementById('displayAmpId').textContent = ampId;
       document.getElementById('displayAmpId').classList.add('set');
@@ -1013,6 +1189,10 @@
       activateConnector('conn-4');
 
       // === STEP 4: Webhook back ===
+      currentStepIndex = 4;
+      updateStepIndicator(4, totalSteps);
+      await waitForNextStep();
+
       activateStep(4);
       log('AMPLITUDE', '→ Webhook: Sending enriched data back to site');
       log('SITE', 'Received webhook from Amplitude');
@@ -1021,6 +1201,10 @@
       activateConnector('conn-5');
 
       // === STEP 5: Enriched ===
+      currentStepIndex = 5;
+      updateStepIndicator(5, totalSteps);
+      await waitForNextStep();
+
       activateStep(5);
       log('DATALAYER', 'Push: lead_enriched { predicted_value, segment, interests }');
       log('SITE', 'DataLayer updated - ready for personalization');
@@ -1029,7 +1213,7 @@
 
       // === DUPLICATE FLOW ===
       if (isDuplicate) {
-        await new Promise(r => setTimeout(r, 600));
+        if (playbackMode === 'auto') await new Promise(r => setTimeout(r, 600));
 
         document.getElementById('dup-divider').style.display = 'block';
         document.getElementById('dup-flow').style.display = 'flex';
@@ -1038,6 +1222,10 @@
         log('SITE', 'DUPLICATE RESOLUTION FLOW');
 
         // Step 6: Sales Review
+        currentStepIndex = 6;
+        updateStepIndicator(6, totalSteps);
+        await waitForNextStep();
+
         activateStep(6);
         log('NETSUITE', '→ Email: Sending duplicate alert to sales');
         log('SALES', 'Email received: "Potential Duplicate Lead"');
@@ -1047,9 +1235,13 @@
         completeStep(6);
         activateConnector('conn-6');
 
-        await new Promise(r => setTimeout(r, 400));
+        if (playbackMode === 'auto') await new Promise(r => setTimeout(r, 400));
 
         // Step 7: NetSuite Merge
+        currentStepIndex = 7;
+        updateStepIndicator(7, totalSteps);
+        await waitForNextStep();
+
         activateStep(7);
         log('SALES', '→ Action: Merging records in NetSuite');
         log('NETSUITE', 'Merging duplicate into master record');
@@ -1059,6 +1251,10 @@
         activateConnector('conn-7');
 
         // Step 8: Amplitude Update
+        currentStepIndex = 8;
+        updateStepIndicator(8, totalSteps);
+        await waitForNextStep();
+
         activateStep(8);
         log('NETSUITE', '→ Webhook: Updating Amplitude profile');
         log('AMPLITUDE', 'Profile merged with existing user');
@@ -1071,9 +1267,12 @@
       }
 
       log('SITE', '✓ Flow complete');
+      updateStepIndicator('✓', totalSteps);
 
+      isFlowRunning = false;
       btn.disabled = false;
       btn.textContent = 'Submit Lead';
+      nextBtn.classList.remove('visible');
     }
 
     function resetDemo() {
