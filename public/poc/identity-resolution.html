@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Identity Resolution Architecture POC</title>
+  <title>Lead Flow Architecture</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -11,46 +11,42 @@
       color: #fff;
       font-family: 'Courier New', monospace;
       font-size: 13px;
-      line-height: 1.4;
-      padding: 15px;
-      min-height: 100vh;
+      padding: 20px;
     }
-    .container { max-width: 1600px; margin: 0 auto; }
+    .container { max-width: 1400px; margin: 0 auto; }
+    
     header {
       border: 1px solid #fff;
-      padding: 12px 20px;
-      margin-bottom: 15px;
+      padding: 15px 20px;
+      margin-bottom: 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
     header h1 { font-size: 16px; font-weight: normal; }
-    .brand-select {
-      background: #000;
-      color: #fff;
-      border: 1px solid #fff;
-      padding: 5px 10px;
-      font-family: inherit;
-      font-size: 13px;
-    }
-    .main-grid {
+    
+    .main-layout {
       display: grid;
-      grid-template-columns: 280px 1fr 300px;
-      gap: 15px;
+      grid-template-columns: 260px 1fr;
+      gap: 20px;
     }
+    
     .panel {
       border: 1px solid #fff;
-      padding: 12px;
+      padding: 15px;
+      margin-bottom: 15px;
     }
     .panel-title {
       font-size: 11px;
-      margin-bottom: 12px;
-      padding-bottom: 8px;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
       border-bottom: 1px solid #333;
       text-transform: uppercase;
       letter-spacing: 1px;
     }
-    .form-group { margin-bottom: 10px; }
+    
+    /* Form styles */
+    .form-group { margin-bottom: 12px; }
     .form-group label {
       display: block;
       margin-bottom: 4px;
@@ -62,7 +58,7 @@
       background: #000;
       border: 1px solid #fff;
       color: #fff;
-      padding: 6px 8px;
+      padding: 8px;
       font-family: inherit;
       font-size: 12px;
     }
@@ -70,462 +66,490 @@
       background: #fff;
       color: #000;
       border: none;
-      padding: 10px 15px;
+      padding: 12px;
       font-family: inherit;
       font-size: 13px;
       cursor: pointer;
       width: 100%;
+      margin-top: 10px;
     }
-    .btn:hover { background: #ccc; }
     .btn:disabled { background: #333; color: #666; }
-    .btn-sm {
-      padding: 6px 10px;
-      font-size: 11px;
-      margin-top: 8px;
+    .btn-outline {
+      background: #000;
+      color: #666;
+      border: 1px solid #333;
+    }
+    .btn-outline:hover { border-color: #fff; color: #fff; }
+    
+    /* Flow diagram */
+    .flow-container {
+      padding: 20px;
     }
     
-    /* Architecture Diagram */
-    .arch-diagram {
-      display: grid;
-      grid-template-rows: auto auto auto auto;
-      gap: 10px;
-      padding: 15px;
-      min-height: 500px;
-    }
-    .arch-row {
+    .flow-row {
       display: flex;
-      justify-content: center;
       align-items: center;
-      gap: 15px;
-      flex-wrap: wrap;
+      margin-bottom: 30px;
     }
-    .arch-node {
-      border: 1px solid #333;
-      padding: 10px 15px;
+    
+    .flow-stage {
       text-align: center;
-      min-width: 120px;
-      font-size: 11px;
-      position: relative;
+      flex-shrink: 0;
+    }
+    
+    .flow-stage-label {
+      font-size: 9px;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    
+    .flow-box {
+      border: 2px solid #333;
+      padding: 15px 20px;
+      min-width: 140px;
+      text-align: center;
       transition: all 0.3s;
     }
-    .arch-node.active {
+    .flow-box.active {
       border-color: #fff;
       background: #fff;
       color: #000;
     }
-    .arch-node.complete {
+    .flow-box.complete {
       border-color: #fff;
     }
-    .arch-node.waiting {
-      border-color: #444;
-      color: #666;
-    }
-    .arch-node-label {
-      font-size: 9px;
-      color: #666;
+    .flow-box-title {
+      font-size: 12px;
+      font-weight: bold;
       margin-bottom: 4px;
-      text-transform: uppercase;
     }
-    .arch-node.active .arch-node-label { color: #666; }
-    .arch-node-title { font-weight: normal; }
-    .arch-connector {
+    .flow-box-sub {
+      font-size: 10px;
+      color: #888;
+    }
+    .flow-box.active .flow-box-sub { color: #666; }
+    
+    .flow-arrow {
+      flex-grow: 1;
+      height: 2px;
+      background: #333;
+      margin: 0 10px;
+      position: relative;
+      min-width: 40px;
+    }
+    .flow-arrow.active { background: #fff; }
+    .flow-arrow::after {
+      content: '→';
+      position: absolute;
+      right: -5px;
+      top: -10px;
       color: #333;
-      font-size: 16px;
     }
-    .arch-connector.active { color: #fff; }
-    .arch-connector.down { transform: rotate(90deg); }
+    .flow-arrow.active::after { color: #fff; }
     
-    .arch-section {
-      border: 1px dashed #333;
-      padding: 15px;
-      margin: 5px 0;
+    .flow-arrow-down {
+      width: 2px;
+      height: 40px;
+      background: #333;
+      margin: 10px auto;
     }
-    .arch-section-label {
+    .flow-arrow-down.active { background: #fff; }
+    
+    .flow-branch {
+      display: flex;
+      justify-content: center;
+      gap: 60px;
+      margin-top: 20px;
+    }
+    
+    .flow-branch-line {
+      position: relative;
+    }
+    .flow-branch-line::before {
+      content: '';
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      width: 200px;
+      height: 2px;
+      background: #333;
+      transform: translateX(-50%);
+    }
+    
+    /* Manual action box */
+    .manual-action {
+      border: 2px dashed #666;
+      padding: 15px 20px;
+      text-align: center;
+      margin: 20px auto;
+      max-width: 300px;
+    }
+    .manual-action.active {
+      border-color: #fff;
+      border-style: solid;
+    }
+    .manual-action-label {
       font-size: 9px;
-      color: #444;
-      margin-bottom: 10px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
+      color: #f90;
+      margin-bottom: 5px;
     }
     
-    /* Data boxes */
-    .data-box {
+    /* Info boxes */
+    .info-box {
       background: #111;
       border: 1px solid #333;
       padding: 10px;
       margin-top: 10px;
-      font-size: 10px;
-      max-height: 150px;
-      overflow-y: auto;
+      font-size: 11px;
     }
-    .data-box.highlight { border-color: #fff; }
-    .data-box pre {
-      white-space: pre-wrap;
-      word-break: break-all;
-    }
-    .data-label {
+    .info-box.highlight { border-color: #fff; }
+    .info-label {
       font-size: 9px;
       color: #666;
       margin-bottom: 5px;
-      text-transform: uppercase;
     }
     
     /* Event log */
     .event-log {
-      height: 200px;
-      overflow-y: auto;
       background: #111;
-      padding: 8px;
-      font-size: 10px;
+      padding: 10px;
+      height: 250px;
+      overflow-y: auto;
+      font-size: 11px;
     }
     .log-entry {
-      margin-bottom: 4px;
-      display: flex;
-      gap: 8px;
-      padding: 3px 0;
+      padding: 4px 0;
       border-bottom: 1px solid #1a1a1a;
+      display: flex;
+      gap: 10px;
     }
-    .log-time { color: #444; flex-shrink: 0; width: 60px; }
+    .log-time { color: #444; width: 55px; flex-shrink: 0; }
     .log-source {
+      width: 80px;
       flex-shrink: 0;
-      width: 70px;
       font-size: 9px;
-      padding: 1px 4px;
-      border: 1px solid #333;
       text-align: center;
+      padding: 2px 4px;
+      border: 1px solid #333;
     }
-    .log-source.frontend { border-color: #666; }
-    .log-source.firebase { border-color: #f90; color: #f90; }
-    .log-source.netsuite { border-color: #0af; color: #0af; }
-    .log-source.amplitude { border-color: #f0a; color: #f0a; }
-    .log-source.iterable { border-color: #0fa; color: #0fa; }
-    .log-source.datalayer { border-color: #ff0; color: #ff0; }
-    .log-message { color: #fff; }
+    .log-source.site { border-color: #fff; }
+    .log-source.adapter { border-color: #0af; color: #0af; }
+    .log-source.netsuite { border-color: #0f0; color: #0f0; }
+    .log-source.iterable { border-color: #f0f; color: #f0f; }
+    .log-source.amplitude { border-color: #ff0; color: #ff0; }
+    .log-source.sales { border-color: #f90; color: #f90; }
+    .log-source.datalayer { border-color: #0ff; color: #0ff; }
     
-    /* Status indicators */
-    .status-row {
+    .clear-btn {
+      float: right;
+      background: transparent;
+      border: 1px solid #333;
+      color: #666;
+      padding: 3px 8px;
+      font-size: 10px;
+      cursor: pointer;
+    }
+    .clear-btn:hover { border-color: #fff; color: #fff; }
+    
+    /* Status panel */
+    .status-item {
       display: flex;
       justify-content: space-between;
-      padding: 6px 0;
+      padding: 8px 0;
       border-bottom: 1px solid #222;
       font-size: 11px;
     }
     .status-label { color: #888; }
     .status-value { color: #fff; }
-    .status-value.pending { color: #444; }
-    .status-value.active { color: #fff; animation: pulse 1s infinite; }
-    .status-value.done { color: #fff; }
+    .status-value.waiting { color: #444; }
+    .status-value.processing { color: #fff; animation: blink 0.5s infinite; }
+    @keyframes blink { 50% { opacity: 0.3; } }
     
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
-    }
-    
-    .tag {
+    /* Duplicate indicator */
+    .dup-badge {
       display: inline-block;
-      border: 1px solid #fff;
-      padding: 2px 6px;
-      font-size: 9px;
-      margin: 2px;
-    }
-    .tag.new { background: #fff; color: #000; }
-    .tag.enriched { border-color: #f0a; color: #f0a; }
-    
-    .webhook-indicator {
-      background: #111;
-      border: 1px solid #333;
-      padding: 8px;
-      margin-top: 10px;
+      background: #f90;
+      color: #000;
+      padding: 2px 8px;
       font-size: 10px;
-    }
-    .webhook-indicator.received {
-      border-color: #fff;
-      animation: flash 0.5s;
-    }
-    @keyframes flash {
-      0% { background: #fff; color: #000; }
-      100% { background: #111; color: #fff; }
+      margin-left: 10px;
     }
     
-    .datalayer-state {
-      background: #111;
-      border: 1px solid #ff0;
-      padding: 10px;
-      margin-top: 10px;
-      font-size: 10px;
+    .section-divider {
+      border-top: 1px dashed #333;
+      margin: 30px 0;
+      position: relative;
     }
-    .datalayer-state h4 {
-      color: #ff0;
+    .section-divider span {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #000;
+      padding: 0 15px;
       font-size: 10px;
-      margin-bottom: 8px;
-      font-weight: normal;
-    }
-    
-    .clear-btn {
-      background: transparent;
       color: #666;
-      border: 1px solid #333;
-      padding: 4px 8px;
-      font-size: 10px;
-      cursor: pointer;
-      float: right;
     }
-    .clear-btn:hover { border-color: #fff; color: #fff; }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>■ IDENTITY RESOLUTION ARCHITECTURE</h1>
-      <div style="display: flex; gap: 10px; align-items: center;">
-        <span style="color: #888; font-size: 11px;">Brand:</span>
-        <select class="brand-select" id="brandSelect">
-          <option value="clg">CLG</option>
-          <option value="access-hire">Access Hire</option>
-          <option value="access-express">Access Express</option>
-        </select>
+      <h1>■ LEAD FLOW ARCHITECTURE</h1>
+      <div style="font-size: 11px; color: #888;">
+        Site → Adapter → NetSuite → Iterable / Amplitude
       </div>
     </header>
     
-    <div class="main-grid">
-      <!-- Left: Form & Status -->
-      <div class="left-col">
+    <div class="main-layout">
+      <!-- Left Panel: Controls -->
+      <div class="left-panel">
         <div class="panel">
-          <div class="panel-title">■ Test Lead</div>
+          <div class="panel-title">■ Simulate Lead</div>
+          
           <div class="form-group">
             <label>Scenario</label>
-            <select id="scenarioSelect" onchange="loadScenario()">
-              <option value="returning">↻ Returning User</option>
-              <option value="new">+ New User</option>
-              <option value="duplicate">⚠ Duplicate Submit</option>
+            <select id="scenario" onchange="loadScenario()">
+              <option value="new">New Lead (no duplicate)</option>
+              <option value="duplicate">Duplicate Lead (needs merge)</option>
             </select>
           </div>
+          
+          <div class="form-group">
+            <label>Brand/Site</label>
+            <select id="brand">
+              <option value="access-hire">Access Hire</option>
+              <option value="access-express">Access Express</option>
+              <option value="clg">CLG Landing Page</option>
+            </select>
+          </div>
+          
           <div class="form-group">
             <label>Email</label>
-            <input type="email" id="testEmail">
+            <input type="email" id="email" value="newlead@company.com">
           </div>
+          
           <div class="form-group">
             <label>Phone</label>
-            <input type="tel" id="testPhone">
+            <input type="tel" id="phone" value="0400111222">
           </div>
+          
           <div class="form-group">
             <label>Name</label>
-            <input type="text" id="testName">
+            <input type="text" id="name" value="New Lead">
           </div>
-          <button class="btn" id="submitBtn" onclick="submitLead()">SUBMIT LEAD</button>
-          <button class="btn btn-sm" onclick="resetDemo()" style="background: transparent; color: #fff; border: 1px solid #444;">RESET</button>
-        </div>
-        
-        <div class="panel" style="margin-top: 15px;">
-          <div class="panel-title">■ System Status</div>
-          <div class="status-row">
-            <span class="status-label">Firebase</span>
-            <span class="status-value" id="statusFirebase">Ready</span>
-          </div>
-          <div class="status-row">
-            <span class="status-label">NetSuite</span>
-            <span class="status-value" id="statusNetsuite">Waiting</span>
-          </div>
-          <div class="status-row">
-            <span class="status-label">Amplitude</span>
-            <span class="status-value" id="statusAmplitude">Waiting</span>
-          </div>
-          <div class="status-row">
-            <span class="status-label">Iterable</span>
-            <span class="status-value" id="statusIterable">Waiting</span>
-          </div>
-          <div class="status-row">
-            <span class="status-label">DataLayer</span>
-            <span class="status-value" id="statusDatalayer">Ready</span>
-          </div>
-        </div>
-        
-        <div class="panel" style="margin-top: 15px;">
-          <div class="panel-title">■ Webhooks Received</div>
-          <div class="webhook-indicator" id="webhookNS">
-            <strong>NetSuite:</strong> <span id="webhookNSStatus">Waiting...</span>
-          </div>
-          <div class="webhook-indicator" id="webhookAmp">
-            <strong>Amplitude:</strong> <span id="webhookAmpStatus">Waiting...</span>
-          </div>
-          <div class="webhook-indicator" id="webhookIter">
-            <strong>Iterable:</strong> <span id="webhookIterStatus">Waiting...</span>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Center: Architecture Diagram -->
-      <div class="center-col">
-        <div class="panel" style="height: 100%;">
-          <div class="panel-title">■ Data Flow Architecture</div>
           
-          <div class="arch-diagram">
-            <!-- Row 1: Frontend -->
-            <div class="arch-section">
-              <div class="arch-section-label">Frontend (Browser)</div>
-              <div class="arch-row">
-                <div class="arch-node" id="node-form">
-                  <div class="arch-node-label">User Action</div>
-                  <div class="arch-node-title">FORM<br>SUBMIT</div>
-                </div>
-                <span class="arch-connector" id="conn-1">→</span>
-                <div class="arch-node" id="node-datalayer">
-                  <div class="arch-node-label">GTM</div>
-                  <div class="arch-node-title">DATALAYER<br>PUSH</div>
-                </div>
-                <span class="arch-connector" id="conn-2">→</span>
-                <div class="arch-node" id="node-visitor">
-                  <div class="arch-node-label">SDK</div>
-                  <div class="arch-node-title">VISITOR<br>IDENTIFY</div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="arch-row">
-              <span class="arch-connector down" id="conn-3">→</span>
-            </div>
-            
-            <!-- Row 2: Firebase -->
-            <div class="arch-section">
-              <div class="arch-section-label">Firebase / GCP</div>
-              <div class="arch-row">
-                <div class="arch-node" id="node-firebase">
-                  <div class="arch-node-label">Firestore</div>
-                  <div class="arch-node-title">DEDUPE<br>LOOKUP</div>
-                </div>
-                <span class="arch-connector" id="conn-4">→</span>
-                <div class="arch-node" id="node-master">
-                  <div class="arch-node-label">Identity</div>
-                  <div class="arch-node-title">MASTER<br>RECORD</div>
-                </div>
-                <span class="arch-connector" id="conn-5">→</span>
-                <div class="arch-node" id="node-uid">
-                  <div class="arch-node-label">Generate</div>
-                  <div class="arch-node-title">UNIQUE<br>UID</div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="arch-row">
-              <span class="arch-connector down" id="conn-6">→</span>
-            </div>
-            
-            <!-- Row 3: External Systems -->
-            <div class="arch-section">
-              <div class="arch-section-label">External Systems</div>
-              <div class="arch-row">
-                <div class="arch-node" id="node-netsuite">
-                  <div class="arch-node-label">CRM</div>
-                  <div class="arch-node-title">NETSUITE<br>LEAD</div>
-                </div>
-                <span class="arch-connector" id="conn-7">→</span>
-                <div class="arch-node" id="node-amplitude">
-                  <div class="arch-node-label">CDP</div>
-                  <div class="arch-node-title">AMPLITUDE<br>ENRICH</div>
-                </div>
-                <span class="arch-connector" id="conn-8">→</span>
-                <div class="arch-node" id="node-iterable">
-                  <div class="arch-node-label">Marketing</div>
-                  <div class="arch-node-title">ITERABLE<br>RECORD</div>
-                </div>
-              </div>
-            </div>
-            
-            <div class="arch-row">
-              <span class="arch-connector down" id="conn-9">→</span>
-              <span style="color: #666; font-size: 10px; margin: 0 20px;">WEBHOOKS BACK</span>
-              <span class="arch-connector down" id="conn-10">→</span>
-            </div>
-            
-            <!-- Row 4: Webhook Returns -->
-            <div class="arch-section">
-              <div class="arch-section-label">Webhook Response → Frontend Update</div>
-              <div class="arch-row">
-                <div class="arch-node" id="node-ns-webhook">
-                  <div class="arch-node-label">Webhook</div>
-                  <div class="arch-node-title">NS LEAD<br>CREATED</div>
-                </div>
-                <span class="arch-connector" id="conn-11">→</span>
-                <div class="arch-node" id="node-amp-webhook">
-                  <div class="arch-node-label">Webhook</div>
-                  <div class="arch-node-title">AMPLITUDE<br>ENRICHED</div>
-                </div>
-                <span class="arch-connector" id="conn-12">→</span>
-                <div class="arch-node" id="node-datalayer-update">
-                  <div class="arch-node-label">Update</div>
-                  <div class="arch-node-title">DATALAYER<br>ENRICH</div>
-                </div>
-                <span class="arch-connector" id="conn-13">→</span>
-                <div class="arch-node" id="node-personalize">
-                  <div class="arch-node-label">Action</div>
-                  <div class="arch-node-title">PERSONALIZE<br>SITE</div>
-                </div>
-              </div>
-            </div>
+          <button class="btn" id="submitBtn" onclick="runFlow()">
+            SUBMIT LEAD
+          </button>
+          
+          <button class="btn btn-outline" onclick="resetDemo()">
+            RESET
+          </button>
+        </div>
+        
+        <div class="panel">
+          <div class="panel-title">■ System Status</div>
+          <div class="status-item">
+            <span class="status-label">Website/Form</span>
+            <span class="status-value" id="stat-site">Ready</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">NS Adapter</span>
+            <span class="status-value waiting" id="stat-adapter">Waiting</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">NetSuite</span>
+            <span class="status-value waiting" id="stat-netsuite">Waiting</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Iterable</span>
+            <span class="status-value waiting" id="stat-iterable">Waiting</span>
+          </div>
+          <div class="status-item">
+            <span class="status-label">Amplitude</span>
+            <span class="status-value waiting" id="stat-amplitude">Waiting</span>
+          </div>
+        </div>
+        
+        <div class="panel">
+          <div class="panel-title">■ IDs Generated</div>
+          <div class="info-box">
+            <div class="info-label">Frontend UID (for NetSuite)</div>
+            <div id="displayUid">-</div>
+          </div>
+          <div class="info-box">
+            <div class="info-label">Master Lead ID (Firebase)</div>
+            <div id="displayMaster">-</div>
+          </div>
+          <div class="info-box">
+            <div class="info-label">NetSuite Lead ID</div>
+            <div id="displayNsId">-</div>
           </div>
         </div>
       </div>
       
-      <!-- Right: DataLayer & Logs -->
-      <div class="right-col">
+      <!-- Right Panel: Flow Diagram -->
+      <div class="right-panel">
         <div class="panel">
-          <div class="panel-title">■ DataLayer State</div>
-          <div class="datalayer-state">
-            <h4>window.dataLayer</h4>
-            <pre id="datalayerContent">// Empty - submit a lead</pre>
-          </div>
-          <div class="data-box" id="enrichedData" style="display: none;">
-            <div class="data-label">Amplitude Enrichment</div>
-            <pre id="enrichedContent"></pre>
+          <div class="panel-title">■ Data Flow</div>
+          
+          <div class="flow-container">
+            <!-- Row 1: Form Submission -->
+            <div class="flow-row">
+              <div class="flow-stage">
+                <div class="flow-stage-label">1. User Action</div>
+                <div class="flow-box" id="box-form">
+                  <div class="flow-box-title">FORM</div>
+                  <div class="flow-box-sub">Website/CLG</div>
+                </div>
+              </div>
+              
+              <div class="flow-arrow" id="arrow-1"></div>
+              
+              <div class="flow-stage">
+                <div class="flow-stage-label">2. Generate UID</div>
+                <div class="flow-box" id="box-firebase">
+                  <div class="flow-box-title">FIREBASE</div>
+                  <div class="flow-box-sub">Dedupe + UID</div>
+                </div>
+              </div>
+              
+              <div class="flow-arrow" id="arrow-2"></div>
+              
+              <div class="flow-stage">
+                <div class="flow-stage-label">3. Transform</div>
+                <div class="flow-box" id="box-adapter">
+                  <div class="flow-box-title">NS ADAPTER</div>
+                  <div class="flow-box-sub">API Gateway</div>
+                </div>
+              </div>
+              
+              <div class="flow-arrow" id="arrow-3"></div>
+              
+              <div class="flow-stage">
+                <div class="flow-stage-label">4. Create Lead</div>
+                <div class="flow-box" id="box-netsuite">
+                  <div class="flow-box-title">NETSUITE</div>
+                  <div class="flow-box-sub">CRM</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Branch to Iterable and Amplitude -->
+            <div style="text-align: center; margin: 20px 0;">
+              <div style="color: #666; font-size: 10px; margin-bottom: 10px;">NetSuite sends to both systems</div>
+              <div style="display: flex; justify-content: center; gap: 100px;">
+                <div>
+                  <div class="flow-arrow-down" id="arrow-4a"></div>
+                  <div class="flow-stage">
+                    <div class="flow-stage-label">5a. Marketing</div>
+                    <div class="flow-box" id="box-iterable">
+                      <div class="flow-box-title">ITERABLE</div>
+                      <div class="flow-box-sub">Email/SMS</div>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <div class="flow-arrow-down" id="arrow-4b"></div>
+                  <div class="flow-stage">
+                    <div class="flow-stage-label">5b. Analytics</div>
+                    <div class="flow-box" id="box-amplitude">
+                      <div class="flow-box-title">AMPLITUDE</div>
+                      <div class="flow-box-sub">CDP</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Duplicate handling section -->
+            <div class="section-divider">
+              <span>IF DUPLICATE DETECTED</span>
+            </div>
+            
+            <div style="display: flex; justify-content: center; gap: 30px; align-items: center; margin: 20px 0;">
+              <div class="flow-stage">
+                <div class="flow-stage-label">6. Manual Review</div>
+                <div class="manual-action" id="box-sales">
+                  <div class="manual-action-label">👤 SALES PERSON</div>
+                  <div class="flow-box-title">DE-DUPLICATE</div>
+                  <div class="flow-box-sub">in NetSuite</div>
+                </div>
+              </div>
+              
+              <div class="flow-arrow" id="arrow-5" style="max-width: 80px;"></div>
+              
+              <div class="flow-stage">
+                <div class="flow-stage-label">7. Update CRM</div>
+                <div class="flow-box" id="box-ns-update">
+                  <div class="flow-box-title">NETSUITE</div>
+                  <div class="flow-box-sub">Merge Records</div>
+                </div>
+              </div>
+              
+              <div class="flow-arrow" id="arrow-6" style="max-width: 80px;"></div>
+              
+              <div class="flow-stage">
+                <div class="flow-stage-label">8. Sync Profile</div>
+                <div class="flow-box" id="box-amp-enrich">
+                  <div class="flow-box-title">AMPLITUDE</div>
+                  <div class="flow-box-sub">Enrich Profile</div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- DataLayer section -->
+            <div class="section-divider">
+              <span>DATALAYER UPDATES</span>
+            </div>
+            
+            <div style="display: flex; justify-content: center; gap: 40px; margin-top: 20px;">
+              <div class="flow-box" id="box-dl1">
+                <div class="flow-box-title">DATALAYER</div>
+                <div class="flow-box-sub">form_submit</div>
+              </div>
+              <div class="flow-box" id="box-dl2">
+                <div class="flow-box-title">DATALAYER</div>
+                <div class="flow-box-sub">lead_created</div>
+              </div>
+              <div class="flow-box" id="box-dl3">
+                <div class="flow-box-title">DATALAYER</div>
+                <div class="flow-box-sub">lead_enriched</div>
+              </div>
+            </div>
           </div>
         </div>
         
-        <div class="panel" style="margin-top: 15px;">
+        <!-- Event Log -->
+        <div class="panel">
           <div class="panel-title">
-            ■ Event Stream
-            <button class="clear-btn" onclick="clearLog()">CLEAR</button>
+            ■ Event Log
+            <button class="clear-btn" onclick="clearLog()">Clear</button>
           </div>
           <div class="event-log" id="eventLog"></div>
-        </div>
-        
-        <div class="panel" style="margin-top: 15px;">
-          <div class="panel-title">■ Payloads</div>
-          <div class="data-label">To NetSuite</div>
-          <div class="data-box">
-            <pre id="nsPayload">// Waiting...</pre>
-          </div>
-          <div class="data-label" style="margin-top: 10px;">To Amplitude</div>
-          <div class="data-box">
-            <pre id="ampPayload">// Waiting...</pre>
-          </div>
         </div>
       </div>
     </div>
   </div>
   
   <script>
-    // Database simulation
-    const db = {
-      leads: {
-        'LEAD-ABC123': {
-          masterLeadId: 'LEAD-ABC123',
-          email: 'john@example.com',
-          phone: '0412345678',
-          name: 'John Smith',
-          siteIds: { 'access-hire': ['UID-001'], 'access-express': ['UID-002'] },
-          totalSubmissions: 2
-        }
+    const scenarios = {
+      'new': {
+        email: 'newlead@company.com',
+        phone: '0400111222',
+        name: 'New Lead',
+        isDuplicate: false
+      },
+      'duplicate': {
+        email: 'john.smith@existing.com',
+        phone: '0412345678',
+        name: 'John Smith',
+        isDuplicate: true
       }
     };
-    
-    const scenarios = {
-      'returning': { email: 'john@example.com', phone: '0412345678', name: 'John Smith' },
-      'new': { email: 'newuser@test.com', phone: '0400111222', name: 'New User' },
-      'duplicate': { email: 'john@example.com', phone: '0412345678', name: 'John Smith' }
-    };
-    
-    let sessionSubmissions = [];
-    let currentDataLayer = [];
     
     function generateUUID() {
       return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
@@ -540,13 +564,13 @@
     
     function log(source, message) {
       const el = document.getElementById('eventLog');
-      const time = new Date().toLocaleTimeString('en-AU', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const time = new Date().toLocaleTimeString('en-AU', { hour12: false });
       const entry = document.createElement('div');
       entry.className = 'log-entry';
       entry.innerHTML = `
         <span class="log-time">${time}</span>
-        <span class="log-source ${source.toLowerCase()}">${source}</span>
-        <span class="log-message">${message}</span>
+        <span class="log-source ${source.toLowerCase()}">${source.toUpperCase()}</span>
+        <span>${message}</span>
       `;
       el.insertBefore(entry, el.firstChild);
     }
@@ -555,277 +579,202 @@
       document.getElementById('eventLog').innerHTML = '';
     }
     
-    function setStatus(system, status) {
-      const el = document.getElementById('status' + system);
+    function setStatus(id, status, isProcessing = false) {
+      const el = document.getElementById('stat-' + id);
       el.textContent = status;
-      el.className = 'status-value ' + (status === 'Waiting' ? 'pending' : status === 'Processing...' ? 'active' : 'done');
+      el.className = 'status-value' + (status === 'Waiting' ? ' waiting' : '') + (isProcessing ? ' processing' : '');
     }
     
-    function activateNode(id) {
-      document.getElementById(id).classList.add('active');
+    function activateBox(id) {
+      const box = document.getElementById(id);
+      box.classList.add('active');
       return new Promise(r => setTimeout(() => {
-        document.getElementById(id).classList.remove('active');
-        document.getElementById(id).classList.add('complete');
+        box.classList.remove('active');
+        box.classList.add('complete');
         r();
-      }, 400));
+      }, 500));
     }
     
-    function activateConnector(id) {
+    function activateArrow(id) {
       document.getElementById(id).classList.add('active');
     }
     
     function loadScenario() {
-      const s = scenarios[document.getElementById('scenarioSelect').value];
-      document.getElementById('testEmail').value = s.email;
-      document.getElementById('testPhone').value = s.phone;
-      document.getElementById('testName').value = s.name;
+      const s = scenarios[document.getElementById('scenario').value];
+      document.getElementById('email').value = s.email;
+      document.getElementById('phone').value = s.phone;
+      document.getElementById('name').value = s.name;
     }
     
-    function updateDataLayer(event) {
-      currentDataLayer.push(event);
-      document.getElementById('datalayerContent').textContent = JSON.stringify(currentDataLayer, null, 2);
-    }
-    
-    async function submitLead() {
-      const email = document.getElementById('testEmail').value;
-      const phone = document.getElementById('testPhone').value;
-      const name = document.getElementById('testName').value;
-      const brand = document.getElementById('brandSelect').value;
-      
-      if (!email && !phone) { alert('Enter email or phone'); return; }
+    async function runFlow() {
+      const email = document.getElementById('email').value;
+      const phone = document.getElementById('phone').value;
+      const name = document.getElementById('name').value;
+      const brand = document.getElementById('brand').value;
+      const isDuplicate = document.getElementById('scenario').value === 'duplicate';
       
       const btn = document.getElementById('submitBtn');
       btn.disabled = true;
       btn.textContent = 'PROCESSING...';
       
-      // Reset nodes
-      document.querySelectorAll('.arch-node').forEach(n => n.classList.remove('active', 'complete'));
-      document.querySelectorAll('.arch-connector').forEach(c => c.classList.remove('active'));
-      document.querySelectorAll('.webhook-indicator').forEach(w => w.classList.remove('received'));
-      document.getElementById('enrichedData').style.display = 'none';
+      // Reset visuals
+      document.querySelectorAll('.flow-box, .manual-action').forEach(b => b.classList.remove('active', 'complete'));
+      document.querySelectorAll('.flow-arrow, .flow-arrow-down').forEach(a => a.classList.remove('active'));
       
-      // 1. Form Submit
-      log('FRONTEND', 'Form submitted');
-      await activateNode('node-form');
-      activateConnector('conn-1');
-      
-      // 2. Initial DataLayer Push
-      const initialEvent = {
-        event: 'form_submit',
-        form_name: 'lead_enquiry',
-        brand: brand,
-        timestamp: new Date().toISOString()
-      };
-      updateDataLayer(initialEvent);
-      log('DATALAYER', 'Push: form_submit');
-      setStatus('Datalayer', 'Updated');
-      await activateNode('node-datalayer');
-      activateConnector('conn-2');
-      
-      // 3. Visitor Identify
-      log('FRONTEND', 'Calling visitor SDK');
-      await activateNode('node-visitor');
-      activateConnector('conn-3');
-      
-      // 4. Firebase Dedupe
-      setStatus('Firebase', 'Processing...');
-      log('FIREBASE', 'Querying for email/phone match...');
-      await activateNode('node-firebase');
-      activateConnector('conn-4');
-      
-      // Check for match
-      let masterLead = null;
-      let isReturning = false;
-      for (const id in db.leads) {
-        if (db.leads[id].email === email || db.leads[id].phone === phone) {
-          masterLead = db.leads[id];
-          isReturning = true;
-          break;
-        }
-      }
-      
-      // Check session duplicate
-      const isDuplicate = sessionSubmissions.some(s => s.email === email || s.phone === phone);
-      
-      let masterId;
-      if (masterLead) {
-        masterId = masterLead.masterLeadId;
-        log('FIREBASE', `MATCH FOUND: ${masterId}`);
-        if (isDuplicate) log('FIREBASE', '⚠ Duplicate in session');
-      } else {
-        masterId = generateId('LEAD');
-        log('FIREBASE', `NEW LEAD: ${masterId}`);
-        db.leads[masterId] = { masterLeadId: masterId, email, phone, name, siteIds: {}, totalSubmissions: 0 };
-      }
-      
-      setStatus('Firebase', 'Complete');
-      await activateNode('node-master');
-      activateConnector('conn-5');
-      
-      // 5. Generate Unique UID
+      // Generate IDs
       const uid = generateUUID();
-      log('FIREBASE', `Generated UID: ${uid.substring(0,8)}...`);
-      await activateNode('node-uid');
-      activateConnector('conn-6');
+      const masterId = generateId('LEAD');
+      const nsLeadId = 'NS-' + Math.floor(Math.random() * 100000);
       
-      // Update DB
-      if (!db.leads[masterId].siteIds[brand]) db.leads[masterId].siteIds[brand] = [];
-      db.leads[masterId].siteIds[brand].push(uid);
-      db.leads[masterId].totalSubmissions++;
+      document.getElementById('displayUid').textContent = uid;
+      document.getElementById('displayMaster').textContent = masterId;
       
-      // Track session
-      sessionSubmissions.push({ uid, masterId, email, phone, brand });
+      // ========== STEP 1: Form Submit ==========
+      log('SITE', `Form submitted on ${brand}`);
+      log('DATALAYER', 'Push: form_submit');
+      setStatus('site', 'Submitted');
+      await activateBox('box-form');
+      await activateBox('box-dl1');
+      activateArrow('arrow-1');
       
-      // 6. Send to NetSuite
-      setStatus('Netsuite', 'Processing...');
-      const nsPayload = {
-        contactRequestId: uid,
-        masterLeadId: masterId,
-        email, phone, name, brand,
-        isReturning, isDuplicate
-      };
-      document.getElementById('nsPayload').textContent = JSON.stringify(nsPayload, null, 2);
-      log('NETSUITE', 'Sending lead...');
-      await activateNode('node-netsuite');
-      activateConnector('conn-7');
+      // ========== STEP 2: Firebase Dedupe ==========
+      log('SITE', 'Calling Firebase for dedupe...');
+      await new Promise(r => setTimeout(r, 300));
       
-      // 7. Send to Amplitude
-      setStatus('Amplitude', 'Processing...');
-      const ampPayload = {
-        event_type: 'lead_captured',
-        user_id: masterId,
-        device_id: generateId('DEV'),
-        event_properties: { brand, form: 'enquiry', uid },
-        user_properties: { email, phone, name }
-      };
-      document.getElementById('ampPayload').textContent = JSON.stringify(ampPayload, null, 2);
-      log('AMPLITUDE', 'Sending event...');
-      await activateNode('node-amplitude');
-      activateConnector('conn-8');
+      if (isDuplicate) {
+        log('SITE', '⚠ Potential duplicate detected (email/phone exists)');
+        log('SITE', 'Flagging for sales review');
+      } else {
+        log('SITE', 'No duplicate found - new lead');
+      }
+      log('SITE', `Generated UID: ${uid.substring(0, 8)}...`);
+      log('SITE', `Master Lead ID: ${masterId}`);
+      await activateBox('box-firebase');
+      activateArrow('arrow-2');
       
-      // 8. Iterable (from NetSuite)
-      setStatus('Iterable', 'Processing...');
-      log('ITERABLE', 'Record created from NetSuite');
-      await activateNode('node-iterable');
-      activateConnector('conn-9');
-      activateConnector('conn-10');
+      // ========== STEP 3: NS Adapter ==========
+      setStatus('adapter', 'Processing...', true);
+      log('ADAPTER', 'Received lead data');
+      log('ADAPTER', 'Transforming for NetSuite API');
+      if (isDuplicate) {
+        log('ADAPTER', 'Including duplicate flag in payload');
+      }
+      await activateBox('box-adapter');
+      setStatus('adapter', 'Sent');
+      activateArrow('arrow-3');
       
-      // 9. Webhooks return
-      await new Promise(r => setTimeout(r, 500));
-      
-      // NetSuite webhook
-      setStatus('Netsuite', 'Lead Created');
-      document.getElementById('webhookNS').classList.add('received');
-      document.getElementById('webhookNSStatus').textContent = `Lead ID: NS-${Math.random().toString(36).substr(2,6).toUpperCase()}`;
-      log('NETSUITE', '← Webhook: Lead created');
-      await activateNode('node-ns-webhook');
-      activateConnector('conn-11');
-      
-      // Amplitude webhook with enriched data
+      // ========== STEP 4: NetSuite Create Lead ==========
+      setStatus('netsuite', 'Processing...', true);
+      log('NETSUITE', 'Creating lead record...');
       await new Promise(r => setTimeout(r, 400));
-      setStatus('Amplitude', 'Enriched');
-      const enrichedData = {
-        user_id: masterId,
-        computed_properties: {
-          lifetime_value_score: Math.floor(Math.random() * 100),
-          engagement_level: ['high', 'medium', 'low'][Math.floor(Math.random() * 3)],
-          predicted_conversion: (Math.random() * 0.8 + 0.1).toFixed(2),
-          industry_segment: 'Construction',
-          company_size: 'SMB',
-          behavioral_cohort: 'active_researcher'
-        },
-        audiences: ['high_intent', 'equipment_rental', 'returning_visitor'],
-        last_30_days: {
-          sessions: Math.floor(Math.random() * 10) + 1,
-          pages_viewed: Math.floor(Math.random() * 50) + 5,
-          products_viewed: Math.floor(Math.random() * 20) + 1
-        }
-      };
-      document.getElementById('webhookAmp').classList.add('received');
-      document.getElementById('webhookAmpStatus').textContent = 'Enrichment received';
-      document.getElementById('enrichedData').style.display = 'block';
-      document.getElementById('enrichedContent').textContent = JSON.stringify(enrichedData, null, 2);
-      log('AMPLITUDE', '← Webhook: Enriched data');
-      await activateNode('node-amp-webhook');
-      activateConnector('conn-12');
+      log('NETSUITE', `Lead created: ${nsLeadId}`);
+      document.getElementById('displayNsId').textContent = nsLeadId;
+      if (isDuplicate) {
+        log('NETSUITE', '⚠ Duplicate flag set - pending sales review');
+      }
+      await activateBox('box-netsuite');
+      setStatus('netsuite', isDuplicate ? 'Created (Dup)' : 'Created');
+      log('DATALAYER', 'Push: lead_created');
+      await activateBox('box-dl2');
       
-      // Iterable confirmation
-      setStatus('Iterable', 'Subscribed');
-      document.getElementById('webhookIter').classList.add('received');
-      document.getElementById('webhookIterStatus').textContent = 'Contact synced';
-      log('ITERABLE', '← Confirmed: Contact in list');
+      // ========== STEP 5a: Iterable ==========
+      activateArrow('arrow-4a');
+      setStatus('iterable', 'Processing...', true);
+      log('NETSUITE', '→ Sending to Iterable');
+      await new Promise(r => setTimeout(r, 300));
+      log('ITERABLE', 'Contact created');
+      log('ITERABLE', 'Added to welcome sequence');
+      await activateBox('box-iterable');
+      setStatus('iterable', 'Synced');
       
-      // 10. Update DataLayer with enrichment
-      const enrichedEvent = {
-        event: 'lead_enriched',
-        master_lead_id: masterId,
-        submission_uid: uid,
-        is_returning: isReturning,
-        is_duplicate: isDuplicate,
-        amplitude_ltv_score: enrichedData.computed_properties.lifetime_value_score,
-        amplitude_engagement: enrichedData.computed_properties.engagement_level,
-        amplitude_conversion_prob: enrichedData.computed_properties.predicted_conversion,
-        amplitude_audiences: enrichedData.audiences,
-        netsuite_lead_created: true,
-        iterable_subscribed: true,
-        personalization_ready: true
-      };
-      updateDataLayer(enrichedEvent);
-      setStatus('Datalayer', 'Enriched');
-      log('DATALAYER', 'Push: lead_enriched (with Amplitude data)');
-      await activateNode('node-datalayer-update');
-      activateConnector('conn-13');
+      // ========== STEP 5b: Amplitude ==========
+      activateArrow('arrow-4b');
+      setStatus('amplitude', 'Processing...', true);
+      log('NETSUITE', '→ Sending to Amplitude');
+      await new Promise(r => setTimeout(r, 300));
+      log('AMPLITUDE', 'User profile created');
+      log('AMPLITUDE', `Identify: ${masterId}`);
+      await activateBox('box-amplitude');
+      setStatus('amplitude', 'Synced');
       
-      // 11. Personalization ready
-      log('FRONTEND', 'Personalization data available');
-      await activateNode('node-personalize');
+      // ========== DUPLICATE FLOW ==========
+      if (isDuplicate) {
+        log('SITE', '─────────────────────────────');
+        log('SITE', 'DUPLICATE RESOLUTION FLOW');
+        log('SITE', '─────────────────────────────');
+        
+        await new Promise(r => setTimeout(r, 800));
+        
+        // Sales review
+        log('SALES', 'Email received: "Potential duplicate lead"');
+        log('SALES', `New: ${name} <${email}>`);
+        log('SALES', 'Existing: John Smith <john@example.com>');
+        await activateBox('box-sales');
+        
+        await new Promise(r => setTimeout(r, 600));
+        
+        // Sales merges in NetSuite
+        log('SALES', '→ Merging records in NetSuite');
+        activateArrow('arrow-5');
+        log('NETSUITE', 'Merging duplicate into master record');
+        log('NETSUITE', 'Master record updated with new submission');
+        await activateBox('box-ns-update');
+        
+        await new Promise(r => setTimeout(r, 400));
+        
+        // Amplitude enrichment
+        activateArrow('arrow-6');
+        log('NETSUITE', '→ Updating Amplitude profile');
+        log('AMPLITUDE', 'Profile merged');
+        log('AMPLITUDE', 'Behavioral data consolidated');
+        log('AMPLITUDE', 'Computed properties updated:');
+        log('AMPLITUDE', '  - lifetime_value: increased');
+        log('AMPLITUDE', '  - engagement_score: recalculated');
+        log('AMPLITUDE', '  - submission_count: 2 → 3');
+        await activateBox('box-amp-enrich');
+        
+        log('DATALAYER', 'Push: lead_enriched (merged profile)');
+        await activateBox('box-dl3');
+        setStatus('amplitude', 'Enriched');
+      } else {
+        // Non-duplicate enrichment
+        await new Promise(r => setTimeout(r, 500));
+        log('AMPLITUDE', 'Computing initial properties...');
+        log('AMPLITUDE', '  - predicted_value: calculated');
+        log('AMPLITUDE', '  - segment: assigned');
+        log('DATALAYER', 'Push: lead_enriched');
+        await activateBox('box-dl3');
+        setStatus('amplitude', 'Enriched');
+      }
       
-      log('FRONTEND', '✓ Complete - ready for personalization');
+      log('SITE', '✓ Flow complete');
       
       btn.disabled = false;
       btn.textContent = 'SUBMIT LEAD';
     }
     
     function resetDemo() {
-      sessionSubmissions = [];
-      currentDataLayer = [];
+      document.querySelectorAll('.flow-box, .manual-action').forEach(b => b.classList.remove('active', 'complete'));
+      document.querySelectorAll('.flow-arrow, .flow-arrow-down').forEach(a => a.classList.remove('active'));
       
-      // Reset DB
-      db.leads = {
-        'LEAD-ABC123': {
-          masterLeadId: 'LEAD-ABC123',
-          email: 'john@example.com',
-          phone: '0412345678',
-          name: 'John Smith',
-          siteIds: { 'access-hire': ['UID-001'], 'access-express': ['UID-002'] },
-          totalSubmissions: 2
-        }
-      };
+      setStatus('site', 'Ready');
+      setStatus('adapter', 'Waiting');
+      setStatus('netsuite', 'Waiting');
+      setStatus('iterable', 'Waiting');
+      setStatus('amplitude', 'Waiting');
       
-      document.querySelectorAll('.arch-node').forEach(n => n.classList.remove('active', 'complete'));
-      document.querySelectorAll('.arch-connector').forEach(c => c.classList.remove('active'));
-      document.querySelectorAll('.webhook-indicator').forEach(w => w.classList.remove('received'));
-      
-      ['Firebase', 'Netsuite', 'Amplitude', 'Iterable', 'Datalayer'].forEach(s => {
-        setStatus(s, s === 'Firebase' || s === 'Datalayer' ? 'Ready' : 'Waiting');
-      });
-      
-      document.getElementById('webhookNSStatus').textContent = 'Waiting...';
-      document.getElementById('webhookAmpStatus').textContent = 'Waiting...';
-      document.getElementById('webhookIterStatus').textContent = 'Waiting...';
-      
-      document.getElementById('datalayerContent').textContent = '// Empty - submit a lead';
-      document.getElementById('enrichedData').style.display = 'none';
-      document.getElementById('nsPayload').textContent = '// Waiting...';
-      document.getElementById('ampPayload').textContent = '// Waiting...';
+      document.getElementById('displayUid').textContent = '-';
+      document.getElementById('displayMaster').textContent = '-';
+      document.getElementById('displayNsId').textContent = '-';
       
       clearLog();
-      log('FRONTEND', 'Demo reset');
+      loadScenario();
+      log('SITE', 'Demo reset');
     }
     
     window.onload = () => {
       loadScenario();
-      log('FRONTEND', 'System ready');
+      log('SITE', 'System ready');
     };
   </script>
 </body>
