@@ -974,7 +974,7 @@
       document.getElementById('deviceId').value = currentDeviceId;
       document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
       document.getElementById('preset-' + presetId).classList.add('active');
-      totalSteps = preset.matchType === 'duplicate' ? 8 : 5;
+      totalSteps = preset.matchType !== 'none' ? 8 : 5;
       updateStepIndicator('-', totalSteps);
       clearLog();
       log('SITE', `Scenario: ${preset.description}`);
@@ -1046,10 +1046,10 @@
       const deviceId = currentDeviceId || document.getElementById('deviceId').value;
       const preset = presets[currentPreset];
       const matchType = preset ? preset.matchType : 'none';
-      const isDuplicate = matchType === 'duplicate';
+      const hasAnyMatch = matchType !== 'none';
 
       isFlowRunning = true;
-      totalSteps = isDuplicate ? 8 : 5;
+      totalSteps = hasAnyMatch ? 8 : 5;
 
       const btn = document.getElementById('submitBtn');
       const nextBtn = document.getElementById('nextStepBtn');
@@ -1155,19 +1155,34 @@
       log('SITE', 'Ready for personalization');
       await activateBox('box-enriched'); completeStep(5);
 
-      // Duplicate detection flow - NS Adapter detected email/phone match
-      if (isDuplicate) {
+      // Duplicate detection flow - triggered by ANY match (device, email, phone, cross-brand, full)
+      if (anyDuplicateFlag) {
         if (playbackMode === 'auto') await new Promise(r => setTimeout(r, 400));
         document.getElementById('dup-divider').style.display = 'block';
         document.getElementById('dup-flow').style.display = 'flex';
-        log('SITE', '─── DUPLICATE DETECTION ───');
-        log('ADAPTER', 'Email/phone match found in existing records');
 
-        // Step 6: NS Adapter pushes duplicate_detected event to Amplitude
+        // Determine detection source and details
+        const detectedByFirebase = firebaseDeviceMatch;
+        const detectedByAdapter = (matchType === 'email' || matchType === 'phone' || matchType === 'cross-brand' || matchType === 'duplicate');
+
+        log('SITE', '─── DUPLICATE DETECTION ───');
+        if (detectedByFirebase && detectedByAdapter) {
+          log('SITE', 'Detected by: Firebase (device) + NS Adapter (email/phone)');
+        } else if (detectedByFirebase) {
+          log('SITE', 'Detected by: Firebase (device match)');
+        } else {
+          log('SITE', 'Detected by: NS Adapter (email/phone match)');
+        }
+
+        // Step 6: Push duplicate_detected event to Amplitude
         currentStepIndex = 6; updateStepIndicator(6, totalSteps); await waitForNextStep();
         activateStep(6);
-        log('ADAPTER', '→ Pushing duplicate_detected to Amplitude');
-        log('AMPLITUDE', `Event: duplicate_detected { newUid: ${uid.substring(0,8)}..., matchedEmail: true }`);
+        const source = detectedByFirebase ? 'SDK' : 'ADAPTER';
+        log(source, '→ Pushing duplicate_detected to Amplitude');
+        const eventPayload = detectedByFirebase
+          ? `matchType: "device", deviceId: "${deviceId}"`
+          : `matchType: "${matchType}", matchedEmail: ${matchType === 'email' || matchType === 'cross-brand' || matchType === 'duplicate'}`;
+        log('AMPLITUDE', `Event: duplicate_detected { newUid: ${uid.substring(0,8)}..., ${eventPayload} }`);
         await activateBox('box-dup-event'); completeStep(6); activateConnector('conn-6');
         if (playbackMode === 'auto') await new Promise(r => setTimeout(r, 300));
 
@@ -1176,7 +1191,13 @@
         activateStep(7);
         log('AMPLITUDE', '→ Triggering Iterable journey');
         log('ITERABLE', 'Journey triggered: Sales Duplicate Alert');
-        log('ITERABLE', 'Building email with duplicate details...');
+        if (detectedByFirebase) {
+          log('ITERABLE', `Match reason: Same device (${deviceId})`);
+        }
+        if (matchType === 'email') log('ITERABLE', 'Match reason: Same email address');
+        if (matchType === 'phone') log('ITERABLE', 'Match reason: Same phone number');
+        if (matchType === 'cross-brand') log('ITERABLE', 'Match reason: Existing customer, different brand');
+        if (matchType === 'duplicate') log('ITERABLE', 'Match reason: Full match (email + phone + device)');
         await activateBox('box-iterable-alert'); completeStep(7); activateConnector('conn-7');
 
         // Step 8: Sales gets notified
@@ -1184,8 +1205,9 @@
         activateStep(8);
         log('ITERABLE', '→ Sending alert email');
         log('SALES', '📧 Email received: "Potential Duplicate Lead"');
-        log('SALES', `New: ${name} <${email}>`);
-        log('SALES', `Match: ${existingCustomer.name} <${existingCustomer.email}>`);
+        log('SALES', `New lead: ${name} <${email}>`);
+        log('SALES', `Potential match: ${existingCustomer.name} <${existingCustomer.email}>`);
+        if (detectedByFirebase) log('SALES', `Device match: ${deviceId}`);
         await activateBox('box-sales'); completeStep(8);
       }
 
