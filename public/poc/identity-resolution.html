@@ -970,7 +970,8 @@
         <span class="log-source ${source.toLowerCase()}">${source}</span>
         <span class="log-message">${message}</span>
       `;
-      el.insertBefore(entry, el.firstChild);
+      el.appendChild(entry);
+      el.scrollTop = el.scrollHeight;
     }
 
     function clearLog() {
