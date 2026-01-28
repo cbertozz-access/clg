@@ -1399,12 +1399,16 @@
     }
 
     function openFeedback() {
-      console.log('Feedback clicked, markerReady:', markerReady, 'Marker:', window.Marker);
-      if (window.Marker) {
-        // Try capture() which opens the screenshot tool
-        Marker.capture();
-        console.log('Marker.capture() called');
+      console.log('Feedback clicked');
+      console.log('window.Marker:', window.Marker);
+      console.log('window.__Marker:', window.__Marker);
+      console.log('markerReady:', markerReady);
+
+      if (window.Marker && typeof window.Marker.capture === 'function') {
+        console.log('Calling Marker.capture()');
+        window.Marker.capture();
       } else {
+        console.log('Marker not available, showing alert');
         alert('Feedback widget is still loading. Please wait a moment and try again.');
       }
     }
