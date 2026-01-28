@@ -1,0 +1,243 @@
+<!--
+================================================================================
+CLG FIREBASE UID SNIPPET
+================================================================================
+Universal visitor tracking snippet for any website (WordPress, static HTML, etc.)
+
+INSTALLATION:
+1. Add this entire snippet to your site's <head> section
+2. For WordPress: Use "Insert Headers and Footers" plugin or add to header.php
+3. For GTM: Create a Custom HTML tag that fires on All Pages
+
+WHAT IT DOES:
+- Initializes Firebase SDK on page load
+- Generates a unique visitor ID (UID) or retrieves existing one
+- Stores UID in localStorage for persistence
+- Pushes UID to dataLayer for GTM/analytics use
+- Optionally stores visitor record in Firestore
+
+CONFIGURATION:
+- Replace Firebase config values with your project's config
+- Adjust dataLayer event names as needed
+================================================================================
+-->
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<script>
+(function() {
+  'use strict';
+
+  // ============================================================================
+  // CONFIGURATION - Update these values for your Firebase project
+  // ============================================================================
+  const FIREBASE_CONFIG = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "composable-lg.firebaseapp.com",
+    projectId: "composable-lg",
+    storageBucket: "composable-lg.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+  };
+
+  // Storage key for the UID
+  const UID_STORAGE_KEY = 'clg_visitor_uid';
+  
+  // Device ID storage key (for cross-session tracking)
+  const DEVICE_STORAGE_KEY = 'clg_device_id';
+  
+  // Enable Firestore logging (set to true to store visitor records)
+  const ENABLE_FIRESTORE_LOGGING = false;
+  
+  // Firestore collection name for visitors
+  const VISITORS_COLLECTION = 'visitors';
+
+  // ============================================================================
+  // DO NOT EDIT BELOW THIS LINE (unless you know what you're doing)
+  // ============================================================================
+
+  // Initialize dataLayer
+  window.dataLayer = window.dataLayer || [];
+
+  // Generate UUID v4
+  function generateUUID() {
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return crypto.randomUUID();
+    }
+    // Fallback for older browsers
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+      var r = Math.random() * 16 | 0;
+      var v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  // Generate simple device fingerprint
+  function generateDeviceFingerprint() {
+    var components = [
+      navigator.userAgent,
+      navigator.language,
+      screen.width + 'x' + screen.height,
+      screen.colorDepth,
+      new Date().getTimezoneOffset()
+    ];
+    
+    // Simple hash function
+    var hash = 0;
+    var str = components.join('|');
+    for (var i = 0; i < str.length; i++) {
+      var char = str.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    return 'DV' + Math.abs(hash).toString(36).toUpperCase();
+  }
+
+  // Get or create UID
+  function getOrCreateUID() {
+    var uid = null;
+    var isNewVisitor = false;
+    
+    try {
+      uid = localStorage.getItem(UID_STORAGE_KEY);
+    } catch (e) {
+      console.warn('[CLG UID] localStorage not available');
+    }
+    
+    if (!uid) {
+      uid = generateUUID();
+      isNewVisitor = true;
+      
+      try {
+        localStorage.setItem(UID_STORAGE_KEY, uid);
+      } catch (e) {
+        console.warn('[CLG UID] Could not save UID to localStorage');
+      }
+    }
+    
+    return { uid: uid, isNew: isNewVisitor };
+  }
+
+  // Get or create Device ID
+  function getOrCreateDeviceId() {
+    var deviceId = null;
+    var isNewDevice = false;
+    
+    try {
+      deviceId = localStorage.getItem(DEVICE_STORAGE_KEY);
+    } catch (e) {
+      // localStorage not available
+    }
+    
+    if (!deviceId) {
+      deviceId = generateDeviceFingerprint();
+      isNewDevice = true;
+      
+      try {
+        localStorage.setItem(DEVICE_STORAGE_KEY, deviceId);
+      } catch (e) {
+        // Could not save
+      }
+    }
+    
+    return { deviceId: deviceId, isNew: isNewDevice };
+  }
+
+  // Initialize Firebase and get UID
+  function init() {
+    try {
+      // Initialize Firebase
+      if (!firebase.apps.length) {
+        firebase.initializeApp(FIREBASE_CONFIG);
+      }
+      
+      // Get or create identifiers
+      var uidResult = getOrCreateUID();
+      var deviceResult = getOrCreateDeviceId();
+      
+      // Push to dataLayer
+      window.dataLayer.push({
+        event: 'clg_uid_ready',
+        clg_uid: uidResult.uid,
+        clg_device_id: deviceResult.deviceId,
+        clg_is_new_visitor: uidResult.isNew,
+        clg_is_new_device: deviceResult.isNew
+      });
+      
+      console.log('[CLG UID] Initialized', {
+        uid: uidResult.uid.substring(0, 8) + '...',
+        deviceId: deviceResult.deviceId,
+        isNewVisitor: uidResult.isNew
+      });
+      
+      // Optionally log to Firestore
+      if (ENABLE_FIRESTORE_LOGGING) {
+        var db = firebase.firestore();
+        db.collection(VISITORS_COLLECTION).doc(uidResult.uid).set({
+          uid: uidResult.uid,
+          deviceId: deviceResult.deviceId,
+          lastSeen: firebase.firestore.FieldValue.serverTimestamp(),
+          userAgent: navigator.userAgent,
+          referrer: document.referrer || null,
+          url: window.location.href
+        }, { merge: true }).catch(function(error) {
+          console.warn('[CLG UID] Firestore write failed:', error);
+        });
+      }
+      
+      // Expose globally for form submissions
+      window.CLG_UID = uidResult.uid;
+      window.CLG_DEVICE_ID = deviceResult.deviceId;
+      
+    } catch (error) {
+      console.error('[CLG UID] Initialization failed:', error);
+    }
+  }
+
+  // Run on DOM ready or immediately if already loaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
+</script>
+
+<!--
+================================================================================
+USAGE IN FORMS
+================================================================================
+After this snippet loads, you can access the UID in your forms:
+
+JavaScript:
+  var uid = window.CLG_UID;
+  var deviceId = window.CLG_DEVICE_ID;
+
+Hidden form field (add to your forms):
+  <input type="hidden" name="clg_uid" id="clg_uid">
+  <script>
+    document.getElementById('clg_uid').value = window.CLG_UID || '';
+  </script>
+
+GTM Variable:
+  Create a Data Layer Variable named "clg_uid" to use in tags
+
+================================================================================
+DATALAYER EVENTS
+================================================================================
+This snippet pushes the following event on every page load:
+
+{
+  event: 'clg_uid_ready',
+  clg_uid: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+  clg_device_id: 'DVXXXXXX',
+  clg_is_new_visitor: true/false,
+  clg_is_new_device: true/false
+}
+
+You can trigger GTM tags on the 'clg_uid_ready' event.
+================================================================================
+-->
