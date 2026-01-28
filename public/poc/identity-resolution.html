@@ -632,10 +632,11 @@
       padding: 16px 24px;
       border-top: 1px solid #333;
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
+      gap: 12px;
     }
     .modal-btn {
-      padding: 10px 24px;
+      padding: 12px 28px;
       border: none;
       border-radius: 8px;
       font-size: 14px;
@@ -643,9 +644,26 @@
       cursor: pointer;
       background: #fff;
       color: #000;
+      transition: all 0.2s;
     }
     .modal-btn:hover {
       background: #ddd;
+    }
+    .modal-btn.secondary {
+      background: transparent;
+      border: 2px solid #444;
+      color: #999;
+    }
+    .modal-btn.secondary:hover {
+      border-color: #666;
+      color: #fff;
+    }
+    .modal-btn.primary {
+      background: #0f8;
+      color: #000;
+    }
+    .modal-btn.primary:hover {
+      background: #0d7;
     }
 
     /* IDs Section */
@@ -1295,7 +1313,7 @@
             log('SITE', 'Form submitted');
             log('DATALAYER', `Push: form_submit { uid, email: "${email}" }`);
 
-            // Show packet modal
+            // Show packet modal and wait for user to click Next
             const packetData = {
               message: "Hi, I'm interested in hiring equipment for a construction project in Sydney CBD. Need it for approximately 2 weeks starting next Monday. Please contact me to discuss availability and pricing.",
               equipment: [
@@ -1321,9 +1339,11 @@
                 timestamp: new Date().toISOString()
               }
             };
-            showPacketModal(packetData);
 
             await activateBox('box-form', s.deviceMatch);
+
+            // Wait for user to review packet and click Next
+            await showPacketModalAsync(packetData);
             completeStep(3, s.deviceMatch);
             activateConnector('conn-3');
           }
@@ -1508,28 +1528,51 @@
       log('SITE', 'System ready');
     };
 
-    function showPacketModal(data) {
-      document.getElementById('packetMessage').textContent = data.message || 'No message provided';
+    let modalResolve = null;
 
-      const equipmentList = document.getElementById('packetEquipment');
-      equipmentList.innerHTML = data.equipment.map(item => `<li>${item}</li>`).join('');
+    function showPacketModalAsync(data) {
+      return new Promise((resolve) => {
+        modalResolve = resolve;
 
-      const dupBadge = document.getElementById('packetDuplicate');
-      if (data.isDuplicate) {
-        dupBadge.className = 'duplicate-badge yes';
-        dupBadge.textContent = 'DUPLICATE DETECTED - Flagged for review';
-      } else {
-        dupBadge.className = 'duplicate-badge no';
-        dupBadge.textContent = 'NEW LEAD - No duplicates found';
-      }
+        document.getElementById('packetMessage').textContent = data.message || 'No message provided';
 
-      document.getElementById('packetJson').textContent = JSON.stringify(data.payload, null, 2);
+        const equipmentList = document.getElementById('packetEquipment');
+        equipmentList.innerHTML = data.equipment.map(item => `<li>${item}</li>`).join('');
 
-      document.getElementById('packetModal').classList.add('show');
+        const dupBadge = document.getElementById('packetDuplicate');
+        if (data.isDuplicate) {
+          dupBadge.className = 'duplicate-badge yes';
+          dupBadge.textContent = 'DUPLICATE DETECTED - Flagged for review';
+        } else {
+          dupBadge.className = 'duplicate-badge no';
+          dupBadge.textContent = 'NEW LEAD - No duplicates found';
+        }
+
+        document.getElementById('packetJson').textContent = JSON.stringify(data.payload, null, 2);
+
+        document.getElementById('packetModal').classList.add('show');
+      });
     }
 
     function closePacketModal() {
       document.getElementById('packetModal').classList.remove('show');
+    }
+
+    function goBackFromModal() {
+      closePacketModal();
+      if (modalResolve) {
+        modalResolve('back');
+        modalResolve = null;
+      }
+      resetDemo();
+    }
+
+    function continueFromModal() {
+      closePacketModal();
+      if (modalResolve) {
+        modalResolve('continue');
+        modalResolve = null;
+      }
     }
   </script>
 
@@ -1561,7 +1604,8 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button class="modal-btn" onclick="closePacketModal()">Close</button>
+        <button class="modal-btn secondary" onclick="goBackFromModal()">Back</button>
+        <button class="modal-btn primary" onclick="continueFromModal()">Next</button>
       </div>
     </div>
   </div>
