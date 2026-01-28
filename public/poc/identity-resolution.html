@@ -17,7 +17,7 @@
 
     .app {
       display: grid;
-      grid-template-columns: 240px 1fr 240px;
+      grid-template-columns: 260px 1fr 240px;
       height: 100vh;
     }
 
@@ -46,37 +46,49 @@
       text-transform: uppercase;
       letter-spacing: 1px;
       color: #555;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
-    /* Presets Grid */
+    /* Presets - single column for longer labels */
     .presets {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
       margin-bottom: 20px;
     }
     .preset {
       background: #111;
       border: 1px solid #222;
       border-radius: 6px;
-      padding: 10px;
+      padding: 10px 12px;
       cursor: pointer;
-      text-align: center;
+      display: flex;
+      align-items: center;
+      gap: 10px;
       transition: all 0.2s;
     }
     .preset:hover { border-color: #444; }
     .preset.active { border-color: #fff; background: #1a1a1a; }
-    .preset-icon { font-size: 18px; margin-bottom: 4px; }
-    .preset-label { font-size: 10px; font-weight: 600; color: #888; }
+    .preset-icon { font-size: 16px; flex-shrink: 0; }
+    .preset-text { flex: 1; }
+    .preset-label { font-size: 11px; font-weight: 600; color: #ccc; }
+    .preset-desc { font-size: 9px; color: #666; margin-top: 2px; }
 
     /* Form */
-    .form-group { margin-bottom: 12px; }
+    .form-section { margin-bottom: 16px; }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .form-group { }
+    .form-group.full { grid-column: span 2; }
     .form-group label {
       display: block;
-      font-size: 10px;
+      font-size: 9px;
       color: #555;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
       text-transform: uppercase;
     }
     .form-group input, .form-group select {
@@ -85,8 +97,8 @@
       border: 1px solid #222;
       border-radius: 4px;
       color: #fff;
-      padding: 8px 10px;
-      font-size: 12px;
+      padding: 7px 9px;
+      font-size: 11px;
     }
     .form-group input:focus, .form-group select:focus {
       outline: none;
@@ -97,30 +109,29 @@
     .playback {
       display: flex;
       gap: 8px;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
     .playback button {
       flex: 1;
-      padding: 10px;
+      padding: 8px;
       border: 1px solid #222;
       border-radius: 4px;
       background: #111;
       color: #888;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
     }
     .playback button:hover { border-color: #444; color: #fff; }
     .playback button.active { background: #fff; color: #000; border-color: #fff; }
-    .playback button:disabled { opacity: 0.3; cursor: not-allowed; }
 
     .btn {
       width: 100%;
-      padding: 12px;
+      padding: 11px;
       border: none;
       border-radius: 4px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
@@ -128,28 +139,29 @@
     .btn-primary { background: #fff; color: #000; }
     .btn-primary:hover { background: #ddd; }
     .btn-primary:disabled { background: #333; color: #666; cursor: not-allowed; }
-    .btn-secondary { background: transparent; color: #666; border: 1px solid #333; margin-top: 8px; }
+    .btn-secondary { background: transparent; color: #666; border: 1px solid #333; margin-top: 6px; }
     .btn-secondary:hover { border-color: #666; color: #999; }
 
     /* IDs Panel */
-    .ids-panel { margin-top: 20px; }
+    .ids-panel { margin-top: 16px; }
     .id-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 0;
+      padding: 6px 0;
       border-bottom: 1px solid #1a1a1a;
+      font-size: 10px;
     }
     .id-row:last-child { border-bottom: none; }
-    .id-label { font-size: 10px; color: #555; text-transform: uppercase; }
-    .id-value { font-family: monospace; font-size: 11px; color: #444; }
+    .id-label { color: #555; text-transform: uppercase; }
+    .id-value { font-family: monospace; color: #444; }
     .id-value.set { color: #0f0; }
 
     /* Main Flow Area */
     .main-area {
       display: flex;
       flex-direction: column;
-      padding: 20px;
+      padding: 16px 20px;
       overflow: hidden;
     }
 
@@ -165,25 +177,25 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
 
     /* Flow Steps */
     .flow-step {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
     .step-num {
-      width: 28px;
-      height: 28px;
+      width: 26px;
+      height: 26px;
       border: 2px solid #333;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       color: #444;
       flex-shrink: 0;
@@ -201,12 +213,12 @@
     .step-box {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       background: #111;
       border: 2px solid #222;
-      border-radius: 8px;
-      padding: 12px 16px;
-      min-width: 320px;
+      border-radius: 6px;
+      padding: 10px 14px;
+      min-width: 300px;
       transition: all 0.3s;
     }
     .step-box.active {
@@ -219,15 +231,16 @@
     .step-box.warning { border-color: #f90; background: #1a1500; }
 
     .step-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 6px;
+      width: 32px;
+      height: 32px;
+      border-radius: 5px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 16px;
+      font-size: 14px;
       flex-shrink: 0;
     }
+    .step-icon.user { background: #1a1a2e; }
     .step-icon.firebase { background: #2e2a1a; }
     .step-icon.site { background: #1a1a2e; }
     .step-icon.adapter { background: #1a2e1a; }
@@ -237,12 +250,12 @@
     .step-icon.sales { background: #2e2a1a; }
 
     .step-content { flex: 1; min-width: 0; }
-    .step-name { font-weight: 600; font-size: 13px; margin-bottom: 2px; }
-    .step-desc { font-size: 11px; color: #666; }
+    .step-name { font-weight: 600; font-size: 12px; margin-bottom: 1px; }
+    .step-desc { font-size: 10px; color: #666; }
 
     .step-badge {
-      font-size: 9px;
-      padding: 3px 6px;
+      font-size: 8px;
+      padding: 2px 5px;
       border-radius: 3px;
       text-transform: uppercase;
       font-weight: 600;
@@ -253,9 +266,9 @@
 
     .flow-connector {
       width: 2px;
-      height: 12px;
+      height: 10px;
       background: #222;
-      margin-left: 13px;
+      margin-left: 12px;
     }
     .flow-connector.active { background: #fff; }
     .flow-connector.done { background: #333; }
@@ -263,39 +276,39 @@
     /* Branch */
     .flow-branch {
       display: flex;
-      gap: 20px;
-      margin: 8px 0;
+      gap: 16px;
+      margin: 6px 0;
     }
     .branch-box {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       background: #111;
       border: 2px solid #222;
-      border-radius: 8px;
-      padding: 10px 14px;
+      border-radius: 6px;
+      padding: 8px 12px;
       transition: all 0.3s;
     }
     .branch-box.active { border-color: #fff; background: #1a1a1a; }
     .branch-box.done { border-color: #333; opacity: 0.7; }
-    .branch-icon { font-size: 14px; }
-    .branch-name { font-weight: 600; font-size: 12px; }
+    .branch-icon { font-size: 12px; }
+    .branch-name { font-weight: 600; font-size: 11px; }
 
     /* Duplicate Alert */
     .dup-section {
-      margin-top: 16px;
-      padding-top: 16px;
+      margin-top: 12px;
+      padding-top: 12px;
       border-top: 1px dashed #f90;
       display: none;
     }
     .dup-section.show { display: block; }
     .dup-label {
       text-align: center;
-      font-size: 10px;
+      font-size: 9px;
       text-transform: uppercase;
       letter-spacing: 1px;
       color: #f90;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     /* Annotation */
@@ -303,28 +316,28 @@
       background: #111;
       border: 1px solid #222;
       border-radius: 8px;
-      padding: 16px 20px;
-      margin-top: 16px;
-      min-height: 100px;
+      padding: 14px 18px;
+      margin-top: 12px;
+      min-height: 90px;
     }
     .annotation-title {
-      font-size: 10px;
+      font-size: 9px;
       text-transform: uppercase;
       letter-spacing: 1px;
       color: #555;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
     .annotation-text {
-      font-size: 16px;
+      font-size: 15px;
       color: #888;
       line-height: 1.5;
     }
     .annotation-text.active { color: #fff; }
     .annotation-text code {
       font-family: monospace;
-      font-size: 13px;
+      font-size: 12px;
       background: #1a1a1a;
-      padding: 2px 6px;
+      padding: 2px 5px;
       border-radius: 3px;
       color: #0ff;
     }
@@ -337,7 +350,7 @@
       flex-direction: column;
     }
     .logs-header {
-      padding: 16px;
+      padding: 12px 14px;
       border-bottom: 1px solid #1a1a1a;
       display: flex;
       justify-content: space-between;
@@ -354,9 +367,9 @@
       background: transparent;
       border: 1px solid #222;
       color: #555;
-      padding: 4px 8px;
+      padding: 3px 7px;
       border-radius: 3px;
-      font-size: 10px;
+      font-size: 9px;
       cursor: pointer;
     }
     .clear-btn:hover { border-color: #444; color: #888; }
@@ -365,24 +378,25 @@
       flex: 1;
       overflow-y: auto;
       font-family: monospace;
-      font-size: 10px;
+      font-size: 9px;
     }
     .log-entry {
-      padding: 6px 12px;
+      padding: 5px 10px;
       border-bottom: 1px solid #111;
       display: flex;
-      gap: 8px;
+      gap: 6px;
     }
-    .log-time { color: #333; width: 55px; flex-shrink: 0; }
+    .log-time { color: #333; width: 50px; flex-shrink: 0; }
     .log-source {
-      width: 55px;
+      width: 50px;
       flex-shrink: 0;
-      padding: 1px 4px;
+      padding: 1px 3px;
       border-radius: 2px;
       text-align: center;
-      font-size: 8px;
+      font-size: 7px;
       font-weight: 600;
     }
+    .log-source.user { background: #1a1a2e; color: #88f; }
     .log-source.firebase { background: #2e2a1a; color: #fa0; }
     .log-source.site { background: #1a1a2e; color: #88f; }
     .log-source.datalayer { background: #1a2e2e; color: #0ff; }
@@ -403,52 +417,91 @@
 
       <div class="panel-title">Scenario</div>
       <div class="presets">
-        <div class="preset active" data-scenario="new" onclick="selectPreset(this)">
+        <div class="preset active" data-scenario="new_first" onclick="selectPreset(this)">
           <div class="preset-icon">👤</div>
-          <div class="preset-label">New User</div>
+          <div class="preset-text">
+            <div class="preset-label">New User - First Visit</div>
+            <div class="preset-desc">Never visited any brand before</div>
+          </div>
         </div>
-        <div class="preset" data-scenario="device" onclick="selectPreset(this)">
+        <div class="preset" data-scenario="new_cross" onclick="selectPreset(this)">
+          <div class="preset-icon">🔀</div>
+          <div class="preset-text">
+            <div class="preset-label">New to Brand A, Visited B</div>
+            <div class="preset-desc">Same device, different brand site</div>
+          </div>
+        </div>
+        <div class="preset" data-scenario="return_same" onclick="selectPreset(this)">
+          <div class="preset-icon">🔄</div>
+          <div class="preset-text">
+            <div class="preset-label">Returning - Same Device</div>
+            <div class="preset-desc">Known user, same device as before</div>
+          </div>
+        </div>
+        <div class="preset" data-scenario="return_new_device" onclick="selectPreset(this)">
           <div class="preset-icon">📱</div>
-          <div class="preset-label">Same Device</div>
+          <div class="preset-text">
+            <div class="preset-label">Returning - New Device</div>
+            <div class="preset-desc">Known email/phone, different device</div>
+          </div>
         </div>
-        <div class="preset" data-scenario="email" onclick="selectPreset(this)">
-          <div class="preset-icon">📧</div>
-          <div class="preset-label">Same Email</div>
+        <div class="preset" data-scenario="return_cross_device" onclick="selectPreset(this)">
+          <div class="preset-icon">💻</div>
+          <div class="preset-text">
+            <div class="preset-label">Cross-Device Both Brands</div>
+            <div class="preset-desc">Different devices on Brand A and B</div>
+          </div>
         </div>
-        <div class="preset" data-scenario="phone" onclick="selectPreset(this)">
-          <div class="preset-icon">📞</div>
-          <div class="preset-label">Same Phone</div>
-        </div>
-        <div class="preset" data-scenario="crossbrand" onclick="selectPreset(this)">
-          <div class="preset-icon">🏢</div>
-          <div class="preset-label">Cross-Brand</div>
-        </div>
-        <div class="preset" data-scenario="duplicate" onclick="selectPreset(this)">
+        <div class="preset" data-scenario="ns_dupe" onclick="selectPreset(this)">
           <div class="preset-icon">⚠️</div>
-          <div class="preset-label">Full Duplicate</div>
+          <div class="preset-text">
+            <div class="preset-label">NS Detects Duplicate</div>
+            <div class="preset-desc">Appears new but NS finds match</div>
+          </div>
+        </div>
+        <div class="preset" data-scenario="custom" onclick="selectPreset(this)">
+          <div class="preset-icon">⚙️</div>
+          <div class="preset-text">
+            <div class="preset-label">Custom Scenario</div>
+            <div class="preset-desc">Configure your own test case</div>
+          </div>
         </div>
       </div>
 
       <div class="panel-title">Lead Details</div>
-      <div class="form-group">
-        <label>Brand</label>
-        <select id="brand">
-          <option value="access-hire">Access Hire</option>
-          <option value="access-express">Access Express</option>
-          <option value="clg">CLG Landing Page</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Email</label>
-        <input type="email" id="email" value="newlead@company.com">
-      </div>
-      <div class="form-group">
-        <label>Phone</label>
-        <input type="tel" id="phone" value="0400111222">
-      </div>
-      <div class="form-group">
-        <label>Name</label>
-        <input type="text" id="name" value="New Lead">
+      <div class="form-section">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Current Brand</label>
+            <select id="brand">
+              <option value="access-hire">Access Hire</option>
+              <option value="access-express">Access Express</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Visit Type</label>
+            <select id="visitType">
+              <option value="new">New Visit</option>
+              <option value="return">Return Visit</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group full">
+            <label>Email</label>
+            <input type="email" id="email" value="newlead@company.com">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Phone</label>
+            <input type="tel" id="phone" value="0400111222">
+          </div>
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" id="name" value="New Lead">
+          </div>
+        </div>
       </div>
 
       <div class="panel-title">Playback</div>
@@ -457,12 +510,8 @@
         <button id="manualBtn" onclick="setMode('manual')">Manual</button>
       </div>
 
-      <button class="btn btn-primary" id="runBtn" onclick="runFlow()">
-        Run Flow
-      </button>
-      <button class="btn btn-secondary" id="nextBtn" onclick="nextStep()" disabled style="display:none">
-        Next Step →
-      </button>
+      <button class="btn btn-primary" id="runBtn" onclick="runFlow()">Run Flow</button>
+      <button class="btn btn-secondary" id="nextBtn" onclick="nextStep()" disabled style="display:none">Next Step →</button>
       <button class="btn btn-secondary" onclick="resetDemo()">Reset</button>
 
       <div class="ids-panel">
@@ -486,66 +535,81 @@
     <div class="main-area">
       <div class="flow-wrapper">
         <div class="flow-container">
-          <!-- Step 1: Firebase SDK -->
+          <!-- Step 1: User Arrives -->
           <div class="flow-step">
             <div class="step-num" id="num-1">1</div>
-            <div class="step-box" id="box-firebase">
-              <div class="step-icon firebase">🔥</div>
+            <div class="step-box" id="box-arrive">
+              <div class="step-icon user">🌐</div>
               <div class="step-content">
-                <div class="step-name">Firebase SDK</div>
-                <div class="step-desc">Generate UID, check device fingerprint</div>
+                <div class="step-name">User Arrives</div>
+                <div class="step-desc">Page load on brand site</div>
               </div>
-              <div class="step-badge sdk">SDK</div>
+              <div class="step-badge datalayer">page_view</div>
             </div>
           </div>
 
           <div class="flow-connector" id="conn-1"></div>
 
-          <!-- Step 2: Form Submit -->
+          <!-- Step 2: Firebase SDK -->
           <div class="flow-step">
             <div class="step-num" id="num-2">2</div>
-            <div class="step-box" id="box-form">
-              <div class="step-icon site">📝</div>
+            <div class="step-box" id="box-firebase">
+              <div class="step-icon firebase">🔥</div>
               <div class="step-content">
-                <div class="step-name">Form Submission</div>
-                <div class="step-desc">User submits lead form with UID attached</div>
+                <div class="step-name">Firebase SDK</div>
+                <div class="step-desc">Generate/retrieve UID, check device</div>
               </div>
-              <div class="step-badge datalayer">form_submit</div>
+              <div class="step-badge sdk">SDK</div>
             </div>
           </div>
 
           <div class="flow-connector" id="conn-2"></div>
 
-          <!-- Step 3: NS Adapter -->
+          <!-- Step 3: Form Submit -->
           <div class="flow-step">
             <div class="step-num" id="num-3">3</div>
-            <div class="step-box" id="box-adapter">
-              <div class="step-icon adapter">⚡</div>
+            <div class="step-box" id="box-form">
+              <div class="step-icon site">📝</div>
               <div class="step-content">
-                <div class="step-name">NS Adapter</div>
-                <div class="step-desc">Transform data, check email/phone duplicates</div>
+                <div class="step-name">Form Submission</div>
+                <div class="step-desc">Lead form with UID attached</div>
               </div>
+              <div class="step-badge datalayer">form_submit</div>
             </div>
           </div>
 
           <div class="flow-connector" id="conn-3"></div>
 
-          <!-- Step 4: NetSuite -->
+          <!-- Step 4: NS Adapter -->
           <div class="flow-step">
             <div class="step-num" id="num-4">4</div>
-            <div class="step-box" id="box-netsuite">
-              <div class="step-icon netsuite">🏢</div>
+            <div class="step-box" id="box-adapter">
+              <div class="step-icon adapter">⚡</div>
               <div class="step-content">
-                <div class="step-name">NetSuite</div>
-                <div class="step-desc">Create lead record in CRM</div>
+                <div class="step-name">NS Adapter</div>
+                <div class="step-desc">Check email/phone duplicates</div>
               </div>
-              <div class="step-badge datalayer">lead_created</div>
             </div>
           </div>
 
           <div class="flow-connector" id="conn-4"></div>
 
-          <!-- Step 5: Branch -->
+          <!-- Step 5: NetSuite -->
+          <div class="flow-step">
+            <div class="step-num" id="num-5">5</div>
+            <div class="step-box" id="box-netsuite">
+              <div class="step-icon netsuite">🏢</div>
+              <div class="step-content">
+                <div class="step-name">NetSuite</div>
+                <div class="step-desc">Create lead record</div>
+              </div>
+              <div class="step-badge datalayer">lead_created</div>
+            </div>
+          </div>
+
+          <div class="flow-connector" id="conn-5"></div>
+
+          <!-- Step 6: Branch -->
           <div class="flow-branch" id="branch-sync">
             <div class="branch-box" id="box-iterable">
               <span class="branch-icon">📧</span>
@@ -557,16 +621,16 @@
             </div>
           </div>
 
-          <div class="flow-connector" id="conn-5"></div>
+          <div class="flow-connector" id="conn-6"></div>
 
-          <!-- Step 6: Enrichment -->
+          <!-- Step 7: Enrichment -->
           <div class="flow-step">
-            <div class="step-num" id="num-6">6</div>
+            <div class="step-num" id="num-7">7</div>
             <div class="step-box" id="box-enrich">
               <div class="step-icon site">✨</div>
               <div class="step-content">
                 <div class="step-name">Enrichment Webhook</div>
-                <div class="step-desc">Amplitude sends enriched profile back</div>
+                <div class="step-desc">Profile data returned to site</div>
               </div>
               <div class="step-badge datalayer">lead_enriched</div>
             </div>
@@ -577,25 +641,12 @@
             <div class="dup-label">⚠️ Duplicate Alert Flow</div>
 
             <div class="flow-step">
-              <div class="step-num" id="num-7">7</div>
+              <div class="step-num" id="num-8">8</div>
               <div class="step-box" id="box-amp-event">
                 <div class="step-icon amplitude">📊</div>
                 <div class="step-content">
                   <div class="step-name">Amplitude Event</div>
-                  <div class="step-desc">Push duplicate_detected event</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="flow-connector" id="conn-7"></div>
-
-            <div class="flow-step">
-              <div class="step-num" id="num-8">8</div>
-              <div class="step-box" id="box-iterable-journey">
-                <div class="step-icon iterable">📧</div>
-                <div class="step-content">
-                  <div class="step-name">Iterable Journey</div>
-                  <div class="step-desc">Trigger sales notification workflow</div>
+                  <div class="step-desc">duplicate_detected event</div>
                 </div>
               </div>
             </div>
@@ -604,11 +655,24 @@
 
             <div class="flow-step">
               <div class="step-num" id="num-9">9</div>
+              <div class="step-box" id="box-iterable-journey">
+                <div class="step-icon iterable">📧</div>
+                <div class="step-content">
+                  <div class="step-name">Iterable Journey</div>
+                  <div class="step-desc">Sales notification workflow</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="flow-connector" id="conn-9"></div>
+
+            <div class="flow-step">
+              <div class="step-num" id="num-10">10</div>
               <div class="step-box" id="box-sales">
                 <div class="step-icon sales">👤</div>
                 <div class="step-content">
                   <div class="step-name">Sales Alert</div>
-                  <div class="step-desc">Email sent to sales team with duplicate info</div>
+                  <div class="step-desc">Email with duplicate info</div>
                 </div>
               </div>
             </div>
@@ -637,42 +701,60 @@
 
   <script>
     const scenarios = {
-      'new': {
-        email: 'newlead@company.com', phone: '0400111222', name: 'New Lead',
-        deviceMatch: false, emailMatch: false, phoneMatch: false,
-        desc: 'Brand new user, no matches found anywhere'
+      'new_first': {
+        email: 'brand.new@company.com', phone: '0400111222', name: 'Brand New Lead',
+        brand: 'access-hire', visitType: 'new',
+        isReturn: false, deviceMatch: false, emailMatch: false, phoneMatch: false,
+        crossBrand: false, previousBrand: null,
+        desc: 'First time visitor to any CLG brand site. No device fingerprint, email, or phone matches exist.'
       },
-      'device': {
-        email: 'returning@company.com', phone: '0400222333', name: 'Returning User',
-        deviceMatch: true, emailMatch: false, phoneMatch: false,
-        desc: 'Same device fingerprint detected by Firebase SDK'
+      'new_cross': {
+        email: 'cross.brand@company.com', phone: '0400222333', name: 'Cross Brand User',
+        brand: 'access-hire', visitType: 'new',
+        isReturn: false, deviceMatch: true, emailMatch: false, phoneMatch: false,
+        crossBrand: true, previousBrand: 'access-express',
+        desc: 'First visit to Access Hire, but same device previously visited Access Express. Firebase detects device match.'
       },
-      'email': {
-        email: 'existing@company.com', phone: '0400333444', name: 'Email Match',
-        deviceMatch: false, emailMatch: true, phoneMatch: false,
-        desc: 'Email already exists in NetSuite (detected by NS Adapter)'
+      'return_same': {
+        email: 'returning@company.com', phone: '0400333444', name: 'Returning User',
+        brand: 'access-hire', visitType: 'return',
+        isReturn: true, deviceMatch: true, emailMatch: true, phoneMatch: false,
+        crossBrand: false, previousBrand: null,
+        desc: 'Returning visitor on same device. Firebase recognizes device, NS Adapter finds existing email record.'
       },
-      'phone': {
-        email: 'phoneuser@company.com', phone: '0412345678', name: 'Phone Match',
-        deviceMatch: false, emailMatch: false, phoneMatch: true,
-        desc: 'Phone number already exists in NetSuite (detected by NS Adapter)'
+      'return_new_device': {
+        email: 'known.user@company.com', phone: '0412345678', name: 'Known User',
+        brand: 'access-hire', visitType: 'new',
+        isReturn: false, deviceMatch: false, emailMatch: true, phoneMatch: true,
+        crossBrand: false, previousBrand: null,
+        desc: 'User on new device (laptop at work). Firebase sees new device, but NS Adapter matches email and phone.'
       },
-      'crossbrand': {
-        email: 'crossbrand@company.com', phone: '0400555666', name: 'Cross Brand',
-        deviceMatch: true, emailMatch: true, phoneMatch: false,
-        desc: 'User from different brand site with same device and email'
+      'return_cross_device': {
+        email: 'multi.device@company.com', phone: '0400555666', name: 'Multi-Device User',
+        brand: 'access-hire', visitType: 'new',
+        isReturn: false, deviceMatch: false, emailMatch: true, phoneMatch: false,
+        crossBrand: true, previousBrand: 'access-express',
+        desc: 'User previously visited Access Express on phone, now on Access Hire on desktop. Different device, NS finds email match.'
       },
-      'duplicate': {
-        email: 'john.smith@existing.com', phone: '0412345678', name: 'John Smith',
-        deviceMatch: true, emailMatch: true, phoneMatch: true,
-        desc: 'Full duplicate: device, email, and phone all match existing records'
+      'ns_dupe': {
+        email: 'hidden.dupe@company.com', phone: '0412999888', name: 'Sneaky Duplicate',
+        brand: 'access-hire', visitType: 'new',
+        isReturn: false, deviceMatch: false, emailMatch: false, phoneMatch: true,
+        crossBrand: false, previousBrand: null,
+        desc: 'Appears completely new (new device, new email) but NS Adapter finds phone number already in system from previous submission.'
+      },
+      'custom': {
+        email: 'custom@company.com', phone: '0400000000', name: 'Custom Test',
+        brand: 'access-hire', visitType: 'new',
+        isReturn: false, deviceMatch: false, emailMatch: false, phoneMatch: false,
+        crossBrand: false, previousBrand: null,
+        desc: 'Configure your own scenario using the form fields below.'
       }
     };
 
     let mode = 'auto';
-    let currentStep = 0;
     let stepQueue = [];
-    let currentScenario = scenarios['new'];
+    let currentScenario = scenarios['new_first'];
 
     function generateUUID() {
       return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
@@ -712,7 +794,9 @@
       document.getElementById('email').value = s.email;
       document.getElementById('phone').value = s.phone;
       document.getElementById('name').value = s.name;
-      setAnnotation(`<strong>${el.querySelector('.preset-label').textContent}:</strong> ${s.desc}`, false);
+      document.getElementById('brand').value = s.brand;
+      document.getElementById('visitType').value = s.visitType;
+      setAnnotation(`<strong>${el.querySelector('.preset-label').textContent}:</strong><br>${s.desc}`, false);
     }
 
     function setMode(m) {
@@ -744,7 +828,7 @@
         box.classList.remove('active');
         box.classList.add('done');
         r();
-      }, mode === 'auto' ? 500 : 200));
+      }, mode === 'auto' ? 450 : 200));
     }
 
     function activateConnector(id) {
@@ -754,7 +838,7 @@
         setTimeout(() => {
           el.classList.remove('active');
           el.classList.add('done');
-        }, 200);
+        }, 150);
       }
     }
 
@@ -776,6 +860,9 @@
     async function runFlow() {
       const s = currentScenario;
       const brand = document.getElementById('brand').value;
+      const visitType = document.getElementById('visitType').value;
+      const email = document.getElementById('email').value;
+      const name = document.getElementById('name').value;
       const uid = generateUUID();
       const nsId = 'NS-' + Math.floor(Math.random() * 100000);
       const ampId = 'AMP-' + uid.substring(0, 8);
@@ -793,101 +880,144 @@
 
       // Build step queue
       stepQueue = [
-        // Step 1: Firebase
+        // Step 1: User Arrives
         {
           fn: async () => {
             activateStep(1);
-            setAnnotation(`<strong>Step 1: Firebase SDK initializes</strong><br>Generating unique identifier (UID) on the frontend using Firebase SDK. Also checking device fingerprint against known devices.`);
-            log('FIREBASE', 'SDK initialized on page load');
-            log('FIREBASE', `Generated UID: ${uid.substring(0, 8)}...`);
-            document.getElementById('displayUid').textContent = uid.substring(0, 18) + '...';
-            document.getElementById('displayUid').classList.add('set');
-
-            if (s.deviceMatch) {
-              log('FIREBASE', '⚠️ Device fingerprint MATCH detected');
-              setAnnotation(`<strong>Step 1: Firebase SDK</strong><br>⚠️ <span style="color:#f90">Device match detected!</span> This device has submitted leads before. Adding <code>duplicate_alert: device_match</code> to the payload.`);
-              await activateBox('box-firebase', true);
-              completeStep(1, true);
-            } else {
-              log('FIREBASE', 'Device fingerprint: no match');
-              await activateBox('box-firebase');
-              completeStep(1);
-            }
+            const visitDesc = s.isReturn ? 'returning to' : (s.crossBrand ? 'arriving at (first visit to this brand)' : 'arriving at (first visit ever)');
+            setAnnotation(`<strong>Step 1: User Arrives</strong><br>User ${visitDesc} <strong>${brand}</strong>. Browser loads the page and fires <code>page_view</code> event.${s.crossBrand ? `<br><em>Previously visited: ${s.previousBrand}</em>` : ''}`);
+            log('USER', `Navigating to ${brand}`);
+            log('DATALAYER', `Push: page_view { brand: "${brand}", url: "/" }`);
+            await activateBox('box-arrive');
+            completeStep(1);
             activateConnector('conn-1');
           }
         },
-        // Step 2: Form Submit
+        // Step 2: Firebase SDK
         {
           fn: async () => {
             activateStep(2);
-            setAnnotation(`<strong>Step 2: Form Submission</strong><br>User submits lead form. DataLayer receives <code>form_submit</code> event with UID, email, phone, and any duplicate alerts attached.`);
-            log('SITE', `Form submitted on ${brand}`);
-            log('DATALAYER', `Push: form_submit { uid: "${uid.substring(0, 8)}...", email, phone${s.deviceMatch ? ', duplicate_alert: "device"' : ''} }`);
-            await activateBox('box-form', s.deviceMatch);
-            completeStep(2, s.deviceMatch);
+            log('FIREBASE', 'SDK initializing...');
+
+            if (s.isReturn && s.deviceMatch) {
+              // Returning user, same device - retrieve existing UID
+              setAnnotation(`<strong>Step 2: Firebase SDK</strong><br>Firebase recognizes this device. Retrieving existing UID from local storage. User was here before.`);
+              log('FIREBASE', '✓ Existing device fingerprint found');
+              log('FIREBASE', `Retrieved existing UID: ${uid.substring(0, 8)}...`);
+              document.getElementById('displayUid').textContent = uid.substring(0, 18) + '...';
+              document.getElementById('displayUid').classList.add('set');
+              await activateBox('box-firebase');
+              completeStep(2);
+            } else if (s.deviceMatch && s.crossBrand) {
+              // Cross-brand: device seen on other brand
+              setAnnotation(`<strong>Step 2: Firebase SDK</strong><br>⚠️ <span style="color:#f90">Device recognized from ${s.previousBrand}!</span> This device submitted a lead on another brand. Generating new UID but flagging as <code>cross_brand_device</code>.`);
+              log('FIREBASE', `⚠️ Device fingerprint matches ${s.previousBrand}`);
+              log('FIREBASE', `Generated new UID: ${uid.substring(0, 8)}...`);
+              log('FIREBASE', 'Flag: cross_brand_device = true');
+              document.getElementById('displayUid').textContent = uid.substring(0, 18) + '...';
+              document.getElementById('displayUid').classList.add('set');
+              await activateBox('box-firebase', true);
+              completeStep(2, true);
+            } else if (s.deviceMatch) {
+              // Device match on same brand
+              setAnnotation(`<strong>Step 2: Firebase SDK</strong><br>⚠️ <span style="color:#f90">Device match!</span> This device has submitted leads before on this brand. Adding <code>duplicate_alert: device_match</code> to payload.`);
+              log('FIREBASE', '⚠️ Device fingerprint MATCH on this brand');
+              log('FIREBASE', `Generated UID: ${uid.substring(0, 8)}...`);
+              document.getElementById('displayUid').textContent = uid.substring(0, 18) + '...';
+              document.getElementById('displayUid').classList.add('set');
+              await activateBox('box-firebase', true);
+              completeStep(2, true);
+            } else {
+              // New device
+              setAnnotation(`<strong>Step 2: Firebase SDK</strong><br>New device detected. Generating fresh UID and storing device fingerprint for future recognition.`);
+              log('FIREBASE', 'New device - no fingerprint match');
+              log('FIREBASE', `Generated UID: ${uid.substring(0, 8)}...`);
+              log('FIREBASE', 'Storing device fingerprint');
+              document.getElementById('displayUid').textContent = uid.substring(0, 18) + '...';
+              document.getElementById('displayUid').classList.add('set');
+              await activateBox('box-firebase');
+              completeStep(2);
+            }
             activateConnector('conn-2');
           }
         },
-        // Step 3: NS Adapter
+        // Step 3: Form Submit
         {
           fn: async () => {
             activateStep(3);
-            setAnnotation(`<strong>Step 3: NS Adapter Processing</strong><br>Adapter receives lead data and checks for duplicates by email and phone against NetSuite records.`);
+            const hasDeviceFlag = s.deviceMatch;
+            setAnnotation(`<strong>Step 3: Form Submission</strong><br>User fills and submits lead form. DataLayer receives <code>form_submit</code> with UID${hasDeviceFlag ? ' and device duplicate flag' : ''}.`);
+            log('SITE', 'User completing form...');
+            log('SITE', `Form submitted on ${brand}`);
+            log('DATALAYER', `Push: form_submit { uid: "${uid.substring(0, 8)}...", email: "${email}"${hasDeviceFlag ? ', device_flag: true' : ''} }`);
+            await activateBox('box-form', hasDeviceFlag);
+            completeStep(3, hasDeviceFlag);
+            activateConnector('conn-3');
+          }
+        },
+        // Step 4: NS Adapter
+        {
+          fn: async () => {
+            activateStep(4);
+            setAnnotation(`<strong>Step 4: NS Adapter</strong><br>Adapter receives lead data and checks for duplicates by email and phone against existing NetSuite records.`);
             log('ADAPTER', 'Received lead data from site');
-            log('ADAPTER', 'Checking email against existing records...');
 
             const adapterWarning = s.emailMatch || s.phoneMatch;
 
+            log('ADAPTER', 'Checking email against NS records...');
             if (s.emailMatch) {
-              log('ADAPTER', '⚠️ Email MATCH found in NetSuite');
+              log('ADAPTER', '⚠️ EMAIL MATCH found in NetSuite');
             } else {
               log('ADAPTER', 'Email: no match');
             }
 
-            log('ADAPTER', 'Checking phone against existing records...');
+            log('ADAPTER', 'Checking phone against NS records...');
             if (s.phoneMatch) {
-              log('ADAPTER', '⚠️ Phone MATCH found in NetSuite');
+              log('ADAPTER', '⚠️ PHONE MATCH found in NetSuite');
             } else {
               log('ADAPTER', 'Phone: no match');
             }
 
             if (adapterWarning) {
-              setAnnotation(`<strong>Step 3: NS Adapter</strong><br>⚠️ <span style="color:#f90">Duplicate detected!</span> ${s.emailMatch ? 'Email' : ''}${s.emailMatch && s.phoneMatch ? ' and ' : ''}${s.phoneMatch ? 'Phone' : ''} match found. Lead will still be created but flagged for review.`);
+              const matchType = s.emailMatch && s.phoneMatch ? 'Email AND Phone' : (s.emailMatch ? 'Email' : 'Phone');
+              setAnnotation(`<strong>Step 4: NS Adapter</strong><br>⚠️ <span style="color:#f90">Duplicate detected!</span> ${matchType} match found in NetSuite. Lead will be created but flagged for sales review.`);
             }
 
             log('ADAPTER', 'Transforming payload for NetSuite API');
             await activateBox('box-adapter', adapterWarning);
-            completeStep(3, adapterWarning);
-            activateConnector('conn-3');
+            completeStep(4, adapterWarning);
+            activateConnector('conn-4');
           }
         },
-        // Step 4: NetSuite
+        // Step 5: NetSuite
         {
           fn: async () => {
-            activateStep(4);
-            setAnnotation(`<strong>Step 4: NetSuite Lead Creation</strong><br>Creating new lead record in NetSuite CRM. The UID ensures uniqueness even for duplicates. DataLayer receives <code>lead_created</code> event.`);
-            log('NETSUITE', 'API: Creating lead record');
-            await new Promise(r => setTimeout(r, 300));
+            activateStep(5);
+            setAnnotation(`<strong>Step 5: NetSuite Lead Creation</strong><br>Creating lead record in NetSuite. UID ensures uniqueness even if duplicate. DataLayer receives <code>lead_created</code>.`);
+            log('NETSUITE', 'API: Creating lead record...');
+            await new Promise(r => setTimeout(r, 250));
 
             document.getElementById('displayNsId').textContent = nsId;
             document.getElementById('displayNsId').classList.add('set');
             log('NETSUITE', `Lead created: ${nsId}`);
 
             if (hasDuplicate) {
-              log('NETSUITE', '⚠️ Lead created with duplicate flag');
-              if (s.deviceMatch) log('NETSUITE', `Alert in record: "Device previously seen"`);
+              log('NETSUITE', '⚠️ Lead flagged for duplicate review');
+              if (s.deviceMatch) log('NETSUITE', 'Alert: "Device previously seen"');
+              if (s.emailMatch) log('NETSUITE', 'Alert: "Email exists in system"');
+              if (s.phoneMatch) log('NETSUITE', 'Alert: "Phone exists in system"');
             }
 
-            log('DATALAYER', `Push: lead_created { nsId: "${nsId}", uid: "${uid.substring(0, 8)}..." }`);
+            log('DATALAYER', `Push: lead_created { nsId: "${nsId}" }`);
             await activateBox('box-netsuite', hasDuplicate);
-            completeStep(4, hasDuplicate);
-            activateConnector('conn-4');
+            completeStep(5, hasDuplicate);
+            activateConnector('conn-5');
           }
         },
-        // Step 5: Sync to Iterable + Amplitude
+        // Step 6: Sync to Iterable + Amplitude
         {
           fn: async () => {
-            setAnnotation(`<strong>Step 5: Platform Sync</strong><br>NetSuite sends lead data to both Iterable (for email marketing) and Amplitude (for analytics) simultaneously.`);
+            setAnnotation(`<strong>Step 6: Platform Sync</strong><br>NetSuite webhooks send lead data to Iterable (email) and Amplitude (analytics) simultaneously.`);
             log('NETSUITE', '→ Webhook: Sending to Iterable');
             log('NETSUITE', '→ Webhook: Sending to Amplitude');
 
@@ -900,19 +1030,19 @@
             await activateBox('box-amplitude');
             log('AMPLITUDE', `User profile created: ${ampId}`);
 
-            activateConnector('conn-5');
+            activateConnector('conn-6');
           }
         },
-        // Step 6: Enrichment
+        // Step 7: Enrichment
         {
           fn: async () => {
-            activateStep(6);
-            setAnnotation(`<strong>Step 6: Enrichment Webhook</strong><br>Amplitude computes user properties and sends enriched profile back to the site via webhook. DataLayer receives <code>lead_enriched</code> event for personalization.`);
-            log('AMPLITUDE', '→ Webhook: Sending enriched data to site');
+            activateStep(7);
+            setAnnotation(`<strong>Step 7: Enrichment Webhook</strong><br>Amplitude computes user properties and sends enriched profile back to site for personalization.`);
+            log('AMPLITUDE', '→ Webhook: Sending enriched data');
             log('SITE', 'Received enrichment webhook');
-            log('DATALAYER', 'Push: lead_enriched { segment, predicted_value, interests }');
+            log('DATALAYER', 'Push: lead_enriched { segment, value, interests }');
             await activateBox('box-enrich');
-            completeStep(6);
+            completeStep(7);
           }
         }
       ];
@@ -920,46 +1050,44 @@
       // Add duplicate alert steps if needed
       if (hasDuplicate) {
         stepQueue.push(
-          // Step 7: Amplitude Event
           {
             fn: async () => {
               document.getElementById('dup-section').classList.add('show');
-              activateStep(7);
-              const source = s.deviceMatch ? 'Firebase (device)' : s.emailMatch ? 'NS Adapter (email)' : 'NS Adapter (phone)';
-              setAnnotation(`<strong>Step 7: Duplicate Event</strong><br>Amplitude receives <code>duplicate_detected</code> event with source: ${source}. This triggers the sales alert workflow.`);
-              log('AMPLITUDE', `Event: duplicate_detected { source: "${source}" }`);
-              await activateBox('box-amp-event');
-              completeStep(7);
-              activateConnector('conn-7');
-            }
-          },
-          // Step 8: Iterable Journey
-          {
-            fn: async () => {
               activateStep(8);
-              setAnnotation(`<strong>Step 8: Iterable Journey</strong><br>Amplitude event triggers an Iterable journey that sends a notification to the sales team about the potential duplicate.`);
-              log('ITERABLE', 'Journey triggered: "Duplicate Lead Alert"');
-              log('ITERABLE', 'Building notification email...');
-              await activateBox('box-iterable-journey');
+              const sources = [];
+              if (s.deviceMatch) sources.push('Firebase (device)');
+              if (s.emailMatch) sources.push('NS Adapter (email)');
+              if (s.phoneMatch) sources.push('NS Adapter (phone)');
+              setAnnotation(`<strong>Step 8: Duplicate Event</strong><br>Amplitude receives <code>duplicate_detected</code> event.<br>Sources: ${sources.join(', ')}`);
+              log('AMPLITUDE', `Event: duplicate_detected`);
+              log('AMPLITUDE', `Sources: ${sources.join(', ')}`);
+              await activateBox('box-amp-event');
               completeStep(8);
               activateConnector('conn-8');
             }
           },
-          // Step 9: Sales Alert
           {
             fn: async () => {
               activateStep(9);
-              setAnnotation(`<strong>Step 9: Sales Alert</strong><br>Sales team receives email alert with duplicate information. They can review and merge records if needed.`);
-              log('SALES', 'Email sent: "Potential Duplicate Lead Detected"');
-              log('SALES', `New: ${document.getElementById('name').value} <${document.getElementById('email').value}>`);
-              if (s.emailMatch || s.phoneMatch) {
-                log('SALES', 'Matches existing NS record');
-              }
-              if (s.deviceMatch) {
-                log('SALES', 'Same device as previous submission');
-              }
-              await activateBox('box-sales');
+              setAnnotation(`<strong>Step 9: Iterable Journey</strong><br>Amplitude event triggers Iterable journey to notify sales team about potential duplicate.`);
+              log('ITERABLE', 'Journey triggered: "Duplicate Lead Alert"');
+              log('ITERABLE', 'Building notification...');
+              await activateBox('box-iterable-journey');
               completeStep(9);
+              activateConnector('conn-9');
+            }
+          },
+          {
+            fn: async () => {
+              activateStep(10);
+              setAnnotation(`<strong>Step 10: Sales Alert</strong><br>Sales team receives email with duplicate details. They can review and merge in NetSuite if needed.`);
+              log('SALES', 'Email: "Potential Duplicate Lead"');
+              log('SALES', `New: ${name} <${email}>`);
+              if (s.emailMatch || s.phoneMatch) log('SALES', 'Matches existing NS record');
+              if (s.deviceMatch && s.crossBrand) log('SALES', `Same device as ${s.previousBrand} lead`);
+              else if (s.deviceMatch) log('SALES', 'Same device as previous submission');
+              await activateBox('box-sales');
+              completeStep(10);
             }
           }
         );
@@ -970,18 +1098,18 @@
         fn: async () => {
           log('SITE', '✓ Flow complete');
           setAnnotation(hasDuplicate
-            ? `<strong>Flow Complete</strong><br>Lead created and sales team notified of potential duplicate. They can review and merge records in NetSuite.`
-            : `<strong>Flow Complete</strong><br>New lead successfully created and synced across all platforms. Ready for personalization.`
+            ? `<strong>Flow Complete</strong><br>Lead created and sales notified of duplicate. They can review and merge records in NetSuite.`
+            : `<strong>Flow Complete</strong><br>New lead created and synced across all platforms. Ready for personalization.`
           );
           document.getElementById('runBtn').disabled = false;
         }
       });
 
-      // Execute based on mode
+      // Execute
       if (mode === 'auto') {
         for (const step of stepQueue) {
           await step.fn();
-          await new Promise(r => setTimeout(r, 400));
+          await new Promise(r => setTimeout(r, 350));
         }
         stepQueue = [];
       } else {
