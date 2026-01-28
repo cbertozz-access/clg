@@ -524,6 +524,130 @@
     }
     .log-action-btn:hover { border-color: #555; color: #999; }
 
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+    .modal-overlay.show {
+      display: flex;
+    }
+    .modal {
+      background: #1a1a1a;
+      border: 2px solid #333;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #fff;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      color: #666;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+    .modal-close:hover {
+      color: #fff;
+    }
+    .modal-body {
+      padding: 24px;
+      overflow-y: auto;
+    }
+    .packet-section {
+      margin-bottom: 20px;
+    }
+    .packet-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    .packet-content {
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 14px;
+      font-size: 14px;
+      color: #ddd;
+      line-height: 1.6;
+    }
+    .packet-content.code {
+      font-family: 'SF Mono', Monaco, monospace;
+      font-size: 12px;
+      white-space: pre-wrap;
+      color: #0ff;
+    }
+    .packet-content ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+    .packet-content li {
+      margin-bottom: 6px;
+    }
+    .duplicate-badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .duplicate-badge.yes {
+      background: rgba(255, 153, 0, 0.2);
+      color: #f90;
+      border: 1px solid #f90;
+    }
+    .duplicate-badge.no {
+      background: rgba(0, 255, 136, 0.2);
+      color: #0f8;
+      border: 1px solid #0f8;
+    }
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid #333;
+      display: flex;
+      justify-content: flex-end;
+    }
+    .modal-btn {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      background: #fff;
+      color: #000;
+    }
+    .modal-btn:hover {
+      background: #ddd;
+    }
+
     /* IDs Section */
     .ids-section {
       padding: 16px 20px;
@@ -1170,6 +1294,35 @@
             setAnnotation(`<strong>Step 3: User Submits Form</strong><br>User submits lead form. <code>form_submit</code> event with UID attached.`);
             log('SITE', 'Form submitted');
             log('DATALAYER', `Push: form_submit { uid, email: "${email}" }`);
+
+            // Show packet modal
+            const packetData = {
+              message: "Hi, I'm interested in hiring equipment for a construction project in Sydney CBD. Need it for approximately 2 weeks starting next Monday. Please contact me to discuss availability and pricing.",
+              equipment: [
+                "19ft Electric Scissor Lift",
+                "26ft Electric Scissor Lift",
+                "45ft Articulating Boom Lift"
+              ],
+              isDuplicate: hasDuplicate,
+              payload: {
+                uid: uid,
+                email: email,
+                name: name,
+                phone: document.getElementById('phone').value,
+                brand: brand,
+                message: "Hi, I'm interested in hiring equipment...",
+                equipment: ["19ft Electric Scissor Lift", "26ft Electric Scissor Lift", "45ft Articulating Boom Lift"],
+                duplicate_flag: hasDuplicate,
+                duplicate_sources: hasDuplicate ? {
+                  device_match: s.deviceMatch,
+                  email_match: s.emailMatch,
+                  phone_match: s.phoneMatch
+                } : null,
+                timestamp: new Date().toISOString()
+              }
+            };
+            showPacketModal(packetData);
+
             await activateBox('box-form', s.deviceMatch);
             completeStep(3, s.deviceMatch);
             activateConnector('conn-3');
@@ -1354,6 +1507,63 @@
     window.onload = () => {
       log('SITE', 'System ready');
     };
+
+    function showPacketModal(data) {
+      document.getElementById('packetMessage').textContent = data.message || 'No message provided';
+
+      const equipmentList = document.getElementById('packetEquipment');
+      equipmentList.innerHTML = data.equipment.map(item => `<li>${item}</li>`).join('');
+
+      const dupBadge = document.getElementById('packetDuplicate');
+      if (data.isDuplicate) {
+        dupBadge.className = 'duplicate-badge yes';
+        dupBadge.textContent = 'DUPLICATE DETECTED - Flagged for review';
+      } else {
+        dupBadge.className = 'duplicate-badge no';
+        dupBadge.textContent = 'NEW LEAD - No duplicates found';
+      }
+
+      document.getElementById('packetJson').textContent = JSON.stringify(data.payload, null, 2);
+
+      document.getElementById('packetModal').classList.add('show');
+    }
+
+    function closePacketModal() {
+      document.getElementById('packetModal').classList.remove('show');
+    }
   </script>
+
+  <!-- Packet Modal -->
+  <div class="modal-overlay" id="packetModal" onclick="closePacketModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title">Form Submission Packet</div>
+        <button class="modal-close" onclick="closePacketModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="packet-section">
+          <div class="packet-label">Customer Message</div>
+          <div class="packet-content" id="packetMessage"></div>
+        </div>
+        <div class="packet-section">
+          <div class="packet-label">Equipment Interested In</div>
+          <div class="packet-content">
+            <ul id="packetEquipment"></ul>
+          </div>
+        </div>
+        <div class="packet-section">
+          <div class="packet-label">Duplicate Status</div>
+          <div id="packetDuplicate" class="duplicate-badge no"></div>
+        </div>
+        <div class="packet-section">
+          <div class="packet-label">Full JSON Payload</div>
+          <div class="packet-content code" id="packetJson"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn" onclick="closePacketModal()">Close</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
