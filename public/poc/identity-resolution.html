@@ -916,7 +916,7 @@
               <div class="step-icon adapter">⚡</div>
               <div class="step-content">
                 <div class="step-title">NS Adapter</div>
-                <div class="step-subtitle">Check dupes, fire activitySet if match</div>
+                <div class="step-subtitle">Check dupes, flag & forward to NS</div>
               </div>
             </div>
           </div>
@@ -930,7 +930,7 @@
               <div class="step-icon netsuite">🏢</div>
               <div class="step-content">
                 <div class="step-title">NetSuite</div>
-                <div class="step-subtitle">Create lead record</div>
+                <div class="step-subtitle">Create lead, send activitySet if dupe</div>
               </div>
               <div class="step-badge datalayer">lead_created</div>
             </div>
@@ -1441,12 +1441,9 @@
 
             if (adapterWarning) {
               const matchType = s.emailMatch && s.phoneMatch ? 'Email AND Phone' : (s.emailMatch ? 'Email' : 'Phone');
-              setAnnotation(`<strong>Step 4: NS Adapter</strong><br>⚠️ <span style="color:#f90">${matchType} match!</span> Firing Amplitude activitySet to merge user IDs.`);
-              log('ADAPTER', '→ Firing Amplitude activitySet event');
-              log('AMPLITUDE', 'activitySet: duplicate_detected');
-              log('AMPLITUDE', `Rolling up UID ${uid.substring(0, 8)}... under NS ID`);
-              log('AMPLITUDE', 'NS ID set as source of truth');
-              log('ADAPTER', '→ Triggering sales notification email');
+              setAnnotation(`<strong>Step 4: NS Adapter</strong><br>⚠️ <span style="color:#f90">${matchType} match!</span> Flagging as duplicate, forwarding to NetSuite.`);
+              log('ADAPTER', '→ DUPLICATE FLAG set');
+              log('ADAPTER', '→ Forwarding to NetSuite with duplicate data');
             }
 
             await activateBox('box-adapter', adapterWarning);
@@ -1457,15 +1454,26 @@
         {
           fn: async () => {
             activateStep(5);
-            setAnnotation(`<strong>Step 5: NetSuite</strong><br>Creating lead record. UID ensures uniqueness.`);
+            const adapterWarning = s.emailMatch || s.phoneMatch;
+
+            if (adapterWarning) {
+              setAnnotation(`<strong>Step 5: NetSuite</strong><br>Creating lead. Duplicate flag received → <span style="color:#ff8">sending activitySet to Amplitude</span>.`);
+            } else {
+              setAnnotation(`<strong>Step 5: NetSuite</strong><br>Creating lead record. UID ensures uniqueness.`);
+            }
+
             log('NETSUITE', 'Creating lead...');
             await new Promise(r => setTimeout(r, 200));
 
             setId('displayNsId', nsId);
             log('NETSUITE', `Lead created: ${nsId}`);
 
-            if (hasDuplicate) {
-              log('NETSUITE', '⚠️ Flagged for duplicate review');
+            if (adapterWarning) {
+              log('NETSUITE', '⚠️ Duplicate flag received from Adapter');
+              log('NETSUITE', '→ Sending activitySet to Amplitude...');
+              log('AMPLITUDE', 'activitySet received FROM NETSUITE');
+              log('AMPLITUDE', `Merging UID ${uid.substring(0, 8)}... with NS ID ${nsId}`);
+              log('AMPLITUDE', 'NS ID now source of truth for this user');
             }
 
             log('DATALAYER', `Push: lead_created { nsId: "${nsId}" }`);
