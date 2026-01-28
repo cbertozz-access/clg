@@ -3,565 +3,632 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lead Flow Architecture</title>
+  <title>CLG Identity Resolution - Lead Flow</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      background: #000;
+      background: #0a0a0a;
       color: #fff;
-      font-family: 'Courier New', monospace;
-      font-size: 13px;
-      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-size: 14px;
+      padding: 30px;
+      min-height: 100vh;
     }
-    .container { max-width: 1400px; margin: 0 auto; }
-    
+    .container { max-width: 1200px; margin: 0 auto; }
+
     header {
-      border: 1px solid #fff;
-      padding: 15px 20px;
-      margin-bottom: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      text-align: center;
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid #222;
     }
-    header h1 { font-size: 16px; font-weight: normal; }
-    
-    .main-layout {
+    header h1 {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    header p { color: #666; font-size: 14px; }
+
+    .layout {
       display: grid;
-      grid-template-columns: 260px 1fr;
-      gap: 20px;
+      grid-template-columns: 280px 1fr;
+      gap: 30px;
     }
-    
+
     .panel {
-      border: 1px solid #fff;
-      padding: 15px;
-      margin-bottom: 15px;
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
     }
     .panel-title {
-      font-size: 11px;
-      margin-bottom: 15px;
-      padding-bottom: 10px;
-      border-bottom: 1px solid #333;
+      font-size: 12px;
+      font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 1px;
+      color: #888;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #222;
     }
-    
-    /* Form styles */
-    .form-group { margin-bottom: 12px; }
+
+    /* Form */
+    .form-group { margin-bottom: 14px; }
     .form-group label {
       display: block;
-      margin-bottom: 4px;
       font-size: 11px;
-      color: #888;
+      color: #666;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     .form-group input, .form-group select {
       width: 100%;
-      background: #000;
-      border: 1px solid #fff;
+      background: #0a0a0a;
+      border: 1px solid #333;
+      border-radius: 4px;
       color: #fff;
-      padding: 8px;
-      font-family: inherit;
-      font-size: 12px;
+      padding: 10px 12px;
+      font-size: 13px;
+      transition: border-color 0.2s;
     }
+    .form-group input:focus, .form-group select:focus {
+      outline: none;
+      border-color: #fff;
+    }
+
     .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 8px;
+    }
+    .btn-primary {
       background: #fff;
       color: #000;
-      border: none;
-      padding: 12px;
-      font-family: inherit;
-      font-size: 13px;
-      cursor: pointer;
-      width: 100%;
-      margin-top: 10px;
     }
-    .btn:disabled { background: #333; color: #666; }
-    .btn-outline {
-      background: #000;
+    .btn-primary:hover { background: #ddd; }
+    .btn-primary:disabled { background: #333; color: #666; cursor: not-allowed; }
+    .btn-secondary {
+      background: transparent;
       color: #666;
       border: 1px solid #333;
     }
-    .btn-outline:hover { border-color: #fff; color: #fff; }
-    
-    /* Flow diagram */
-    .flow-container {
-      padding: 20px;
-    }
-    
-    .flow-row {
+    .btn-secondary:hover { border-color: #666; color: #999; }
+
+    /* Status */
+    .status-row {
       display: flex;
-      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #1a1a1a;
+      font-size: 13px;
+    }
+    .status-row:last-child { border-bottom: none; }
+    .status-label { color: #666; }
+    .status-value { color: #444; }
+    .status-value.ready { color: #fff; }
+    .status-value.active { color: #0f0; animation: pulse 1s infinite; }
+    .status-value.done { color: #0f0; }
+    .status-value.warning { color: #f90; }
+    @keyframes pulse { 50% { opacity: 0.5; } }
+
+    /* IDs */
+    .id-box {
+      background: #0a0a0a;
+      border: 1px solid #222;
+      border-radius: 4px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+    }
+    .id-label { font-size: 10px; color: #666; margin-bottom: 4px; text-transform: uppercase; }
+    .id-value { font-family: monospace; font-size: 12px; color: #888; word-break: break-all; }
+    .id-value.set { color: #fff; }
+
+    /* Flow Diagram */
+    .flow-section {
+      padding: 30px;
+    }
+
+    .flow-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #444;
+      text-align: center;
       margin-bottom: 30px;
     }
-    
-    .flow-stage {
-      text-align: center;
-      flex-shrink: 0;
+
+    /* Main Flow - Vertical */
+    .main-flow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
     }
-    
-    .flow-stage-label {
-      font-size: 9px;
-      color: #666;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 8px;
+
+    .flow-step {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      width: 100%;
+      max-width: 700px;
     }
-    
-    .flow-box {
+
+    .step-number {
+      width: 32px;
+      height: 32px;
       border: 2px solid #333;
-      padding: 15px 20px;
-      min-width: 140px;
-      text-align: center;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: #444;
+      flex-shrink: 0;
       transition: all 0.3s;
     }
-    .flow-box.active {
-      border-color: #fff;
-      background: #fff;
-      color: #000;
+    .step-number.active { border-color: #fff; color: #fff; background: #fff; color: #000; }
+    .step-number.done { border-color: #0f0; color: #0f0; }
+
+    .step-box {
+      flex: 1;
+      border: 2px solid #222;
+      border-radius: 8px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: all 0.3s;
     }
-    .flow-box.complete {
-      border-color: #fff;
-    }
-    .flow-box-title {
-      font-size: 12px;
-      font-weight: bold;
-      margin-bottom: 4px;
-    }
-    .flow-box-sub {
-      font-size: 10px;
-      color: #888;
-    }
-    .flow-box.active .flow-box-sub { color: #666; }
-    
-    .flow-arrow {
-      flex-grow: 1;
-      height: 2px;
-      background: #333;
-      margin: 0 10px;
-      position: relative;
-      min-width: 40px;
-    }
-    .flow-arrow.active { background: #fff; }
-    .flow-arrow::after {
-      content: '→';
-      position: absolute;
-      right: -5px;
-      top: -10px;
-      color: #333;
-    }
-    .flow-arrow.active::after { color: #fff; }
-    
-    .flow-arrow-down {
-      width: 2px;
+    .step-box.active { border-color: #fff; background: #1a1a1a; }
+    .step-box.done { border-color: #333; }
+
+    .step-icon {
+      width: 40px;
       height: 40px;
-      background: #333;
-      margin: 10px auto;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
     }
-    .flow-arrow-down.active { background: #fff; }
-    
+    .step-icon.site { background: #1a1a2e; }
+    .step-icon.adapter { background: #1a2e1a; }
+    .step-icon.netsuite { background: #2e1a1a; }
+    .step-icon.iterable { background: #2e1a2e; }
+    .step-icon.amplitude { background: #2e2e1a; }
+    .step-icon.sales { background: #2e2a1a; }
+    .step-icon.datalayer { background: #1a2e2e; }
+
+    .step-content { flex: 1; }
+    .step-name { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+    .step-desc { font-size: 12px; color: #666; }
+
+    .step-badge {
+      font-size: 10px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .step-badge.datalayer { background: #0ff2; color: #0ff; }
+    .step-badge.webhook { background: #f0f2; color: #f0f; }
+
+    .flow-connector {
+      width: 2px;
+      height: 24px;
+      background: #222;
+      margin-left: 15px;
+      transition: background 0.3s;
+    }
+    .flow-connector.active { background: #fff; }
+    .flow-connector.done { background: #333; }
+
+    /* Branch */
     .flow-branch {
       display: flex;
       justify-content: center;
-      gap: 60px;
-      margin-top: 20px;
-    }
-    
-    .flow-branch-line {
+      gap: 40px;
+      margin: 20px 0;
       position: relative;
     }
-    .flow-branch-line::before {
+    .flow-branch::before {
       content: '';
       position: absolute;
-      top: -20px;
+      top: 0;
       left: 50%;
-      width: 200px;
-      height: 2px;
-      background: #333;
       transform: translateX(-50%);
+      width: 300px;
+      height: 2px;
+      background: #222;
     }
-    
-    /* Manual action box */
-    .manual-action {
-      border: 2px dashed #666;
-      padding: 15px 20px;
+    .flow-branch.active::before { background: #333; }
+
+    .branch-item {
       text-align: center;
-      margin: 20px auto;
-      max-width: 300px;
     }
-    .manual-action.active {
-      border-color: #fff;
-      border-style: solid;
+    .branch-connector {
+      width: 2px;
+      height: 20px;
+      background: #222;
+      margin: 0 auto 10px;
     }
-    .manual-action-label {
-      font-size: 9px;
-      color: #f90;
-      margin-bottom: 5px;
+    .branch-connector.active { background: #333; }
+
+    .branch-box {
+      border: 2px solid #222;
+      border-radius: 8px;
+      padding: 14px 20px;
+      min-width: 140px;
+      transition: all 0.3s;
     }
-    
-    /* Info boxes */
-    .info-box {
+    .branch-box.active { border-color: #fff; background: #1a1a1a; }
+    .branch-box.done { border-color: #333; }
+    .branch-name { font-weight: 600; font-size: 13px; }
+    .branch-desc { font-size: 11px; color: #666; margin-top: 2px; }
+
+    /* Divider */
+    .section-divider {
+      margin: 40px 0;
+      text-align: center;
+      position: relative;
+    }
+    .section-divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(to right, transparent, #333, transparent);
+    }
+    .section-divider span {
       background: #111;
-      border: 1px solid #333;
-      padding: 10px;
-      margin-top: 10px;
+      padding: 0 20px;
+      position: relative;
       font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #f90;
     }
-    .info-box.highlight { border-color: #fff; }
-    .info-label {
-      font-size: 9px;
-      color: #666;
-      margin-bottom: 5px;
-    }
-    
-    /* Event log */
-    .event-log {
-      background: #111;
-      padding: 10px;
-      height: 250px;
+
+    /* Event Log */
+    .log-container {
+      background: #0a0a0a;
+      border-radius: 4px;
+      height: 200px;
       overflow-y: auto;
+      font-family: monospace;
       font-size: 11px;
     }
     .log-entry {
-      padding: 4px 0;
-      border-bottom: 1px solid #1a1a1a;
+      padding: 6px 10px;
+      border-bottom: 1px solid #111;
       display: flex;
       gap: 10px;
+      align-items: flex-start;
     }
-    .log-time { color: #444; width: 55px; flex-shrink: 0; }
+    .log-time { color: #333; width: 60px; flex-shrink: 0; }
     .log-source {
-      width: 80px;
+      width: 70px;
       flex-shrink: 0;
-      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 3px;
       text-align: center;
-      padding: 2px 4px;
-      border: 1px solid #333;
+      font-size: 9px;
+      font-weight: 600;
     }
-    .log-source.site { border-color: #fff; }
-    .log-source.adapter { border-color: #0af; color: #0af; }
-    .log-source.netsuite { border-color: #0f0; color: #0f0; }
-    .log-source.iterable { border-color: #f0f; color: #f0f; }
-    .log-source.amplitude { border-color: #ff0; color: #ff0; }
-    .log-source.sales { border-color: #f90; color: #f90; }
-    .log-source.datalayer { border-color: #0ff; color: #0ff; }
-    
+    .log-source.site { background: #1a1a2e; color: #88f; }
+    .log-source.adapter { background: #1a2e1a; color: #8f8; }
+    .log-source.netsuite { background: #2e1a1a; color: #f88; }
+    .log-source.iterable { background: #2e1a2e; color: #f8f; }
+    .log-source.amplitude { background: #2e2e1a; color: #ff8; }
+    .log-source.sales { background: #2e2a1a; color: #fa8; }
+    .log-source.datalayer { background: #1a2e2e; color: #8ff; }
+    .log-message { color: #888; flex: 1; }
+
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
     .clear-btn {
-      float: right;
       background: transparent;
       border: 1px solid #333;
       color: #666;
-      padding: 3px 8px;
-      font-size: 10px;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 11px;
       cursor: pointer;
     }
-    .clear-btn:hover { border-color: #fff; color: #fff; }
-    
-    /* Status panel */
-    .status-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 8px 0;
-      border-bottom: 1px solid #222;
-      font-size: 11px;
-    }
-    .status-label { color: #888; }
-    .status-value { color: #fff; }
-    .status-value.waiting { color: #444; }
-    .status-value.processing { color: #fff; animation: blink 0.5s infinite; }
-    @keyframes blink { 50% { opacity: 0.3; } }
-    
-    /* Duplicate indicator */
-    .dup-badge {
-      display: inline-block;
-      background: #f90;
-      color: #000;
-      padding: 2px 8px;
-      font-size: 10px;
-      margin-left: 10px;
-    }
-    
-    .section-divider {
-      border-top: 1px dashed #333;
-      margin: 30px 0;
-      position: relative;
-    }
-    .section-divider span {
-      position: absolute;
-      top: -10px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #000;
-      padding: 0 15px;
-      font-size: 10px;
-      color: #666;
-    }
+    .clear-btn:hover { border-color: #666; color: #999; }
   </style>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>■ LEAD FLOW ARCHITECTURE</h1>
-      <div style="font-size: 11px; color: #888;">
-        Site → Adapter → NetSuite → Iterable / Amplitude
-      </div>
+      <h1>Identity Resolution POC</h1>
+      <p>Lead Flow: Site → NS Adapter → NetSuite → Iterable + Amplitude</p>
     </header>
-    
-    <div class="main-layout">
-      <!-- Left Panel: Controls -->
-      <div class="left-panel">
+
+    <div class="layout">
+      <!-- Left Panel -->
+      <div class="sidebar">
         <div class="panel">
-          <div class="panel-title">■ Simulate Lead</div>
-          
+          <div class="panel-title">Simulate Lead</div>
+
           <div class="form-group">
             <label>Scenario</label>
             <select id="scenario" onchange="loadScenario()">
-              <option value="new">New Lead (no duplicate)</option>
-              <option value="duplicate">Duplicate Lead (needs merge)</option>
+              <option value="new">New Lead</option>
+              <option value="duplicate">Duplicate (needs merge)</option>
             </select>
           </div>
-          
+
           <div class="form-group">
-            <label>Brand/Site</label>
+            <label>Brand / Site</label>
             <select id="brand">
               <option value="access-hire">Access Hire</option>
               <option value="access-express">Access Express</option>
               <option value="clg">CLG Landing Page</option>
             </select>
           </div>
-          
+
           <div class="form-group">
             <label>Email</label>
             <input type="email" id="email" value="newlead@company.com">
           </div>
-          
+
           <div class="form-group">
             <label>Phone</label>
             <input type="tel" id="phone" value="0400111222">
           </div>
-          
+
           <div class="form-group">
             <label>Name</label>
             <input type="text" id="name" value="New Lead">
           </div>
-          
-          <button class="btn" id="submitBtn" onclick="runFlow()">
-            SUBMIT LEAD
+
+          <button class="btn btn-primary" id="submitBtn" onclick="runFlow()">
+            Submit Lead
           </button>
-          
-          <button class="btn btn-outline" onclick="resetDemo()">
-            RESET
+          <button class="btn btn-secondary" onclick="resetDemo()">
+            Reset Demo
           </button>
         </div>
-        
+
         <div class="panel">
-          <div class="panel-title">■ System Status</div>
-          <div class="status-item">
-            <span class="status-label">Website/Form</span>
-            <span class="status-value" id="stat-site">Ready</span>
+          <div class="panel-title">System Status</div>
+          <div class="status-row">
+            <span class="status-label">Site/Form</span>
+            <span class="status-value ready" id="stat-site">Ready</span>
           </div>
-          <div class="status-item">
+          <div class="status-row">
             <span class="status-label">NS Adapter</span>
-            <span class="status-value waiting" id="stat-adapter">Waiting</span>
+            <span class="status-value" id="stat-adapter">—</span>
           </div>
-          <div class="status-item">
+          <div class="status-row">
             <span class="status-label">NetSuite</span>
-            <span class="status-value waiting" id="stat-netsuite">Waiting</span>
+            <span class="status-value" id="stat-netsuite">—</span>
           </div>
-          <div class="status-item">
+          <div class="status-row">
             <span class="status-label">Iterable</span>
-            <span class="status-value waiting" id="stat-iterable">Waiting</span>
+            <span class="status-value" id="stat-iterable">—</span>
           </div>
-          <div class="status-item">
+          <div class="status-row">
             <span class="status-label">Amplitude</span>
-            <span class="status-value waiting" id="stat-amplitude">Waiting</span>
+            <span class="status-value" id="stat-amplitude">—</span>
           </div>
         </div>
-        
+
         <div class="panel">
-          <div class="panel-title">■ IDs Generated</div>
-          <div class="info-box">
-            <div class="info-label">Frontend UID (for NetSuite)</div>
-            <div id="displayUid">-</div>
+          <div class="panel-title">Generated IDs</div>
+          <div class="id-box">
+            <div class="id-label">Frontend UID</div>
+            <div class="id-value" id="displayUid">—</div>
           </div>
-          <div class="info-box">
-            <div class="info-label">Master Lead ID (Firebase)</div>
-            <div id="displayMaster">-</div>
+          <div class="id-box">
+            <div class="id-label">NetSuite Lead ID</div>
+            <div class="id-value" id="displayNsId">—</div>
           </div>
-          <div class="info-box">
-            <div class="info-label">NetSuite Lead ID</div>
-            <div id="displayNsId">-</div>
+          <div class="id-box">
+            <div class="id-label">Amplitude User ID</div>
+            <div class="id-value" id="displayAmpId">—</div>
           </div>
         </div>
       </div>
-      
-      <!-- Right Panel: Flow Diagram -->
-      <div class="right-panel">
+
+      <!-- Right Panel: Flow -->
+      <div class="main-panel">
         <div class="panel">
-          <div class="panel-title">■ Data Flow</div>
-          
-          <div class="flow-container">
-            <!-- Row 1: Form Submission -->
-            <div class="flow-row">
-              <div class="flow-stage">
-                <div class="flow-stage-label">1. User Action</div>
-                <div class="flow-box" id="box-form">
-                  <div class="flow-box-title">FORM</div>
-                  <div class="flow-box-sub">Website/CLG</div>
-                </div>
-              </div>
-              
-              <div class="flow-arrow" id="arrow-1"></div>
-              
-              <div class="flow-stage">
-                <div class="flow-stage-label">2. Generate UID</div>
-                <div class="flow-box" id="box-firebase">
-                  <div class="flow-box-title">FIREBASE</div>
-                  <div class="flow-box-sub">Dedupe + UID</div>
-                </div>
-              </div>
-              
-              <div class="flow-arrow" id="arrow-2"></div>
-              
-              <div class="flow-stage">
-                <div class="flow-stage-label">3. Transform</div>
-                <div class="flow-box" id="box-adapter">
-                  <div class="flow-box-title">NS ADAPTER</div>
-                  <div class="flow-box-sub">API Gateway</div>
-                </div>
-              </div>
-              
-              <div class="flow-arrow" id="arrow-3"></div>
-              
-              <div class="flow-stage">
-                <div class="flow-stage-label">4. Create Lead</div>
-                <div class="flow-box" id="box-netsuite">
-                  <div class="flow-box-title">NETSUITE</div>
-                  <div class="flow-box-sub">CRM</div>
-                </div>
-              </div>
-            </div>
-            
-            <!-- Branch to Iterable and Amplitude -->
-            <div style="text-align: center; margin: 20px 0;">
-              <div style="color: #666; font-size: 10px; margin-bottom: 10px;">NetSuite sends to both systems</div>
-              <div style="display: flex; justify-content: center; gap: 100px;">
-                <div>
-                  <div class="flow-arrow-down" id="arrow-4a"></div>
-                  <div class="flow-stage">
-                    <div class="flow-stage-label">5a. Marketing</div>
-                    <div class="flow-box" id="box-iterable">
-                      <div class="flow-box-title">ITERABLE</div>
-                      <div class="flow-box-sub">Email/SMS</div>
-                    </div>
+          <div class="panel-title">Data Flow</div>
+
+          <div class="flow-section">
+            <div class="flow-title">Primary Flow</div>
+
+            <div class="main-flow">
+              <!-- Step 1: Form -->
+              <div class="flow-step">
+                <div class="step-number" id="num-1">1</div>
+                <div class="step-box" id="box-form">
+                  <div class="step-icon site">📝</div>
+                  <div class="step-content">
+                    <div class="step-name">Form Submission</div>
+                    <div class="step-desc">User submits lead form on website</div>
                   </div>
+                  <div class="step-badge datalayer">dataLayer: form_submit</div>
                 </div>
-                <div>
-                  <div class="flow-arrow-down" id="arrow-4b"></div>
-                  <div class="flow-stage">
-                    <div class="flow-stage-label">5b. Analytics</div>
-                    <div class="flow-box" id="box-amplitude">
-                      <div class="flow-box-title">AMPLITUDE</div>
-                      <div class="flow-box-sub">CDP</div>
-                    </div>
+              </div>
+
+              <div class="flow-connector" id="conn-1"></div>
+
+              <!-- Step 2: NS Adapter -->
+              <div class="flow-step">
+                <div class="step-number" id="num-2">2</div>
+                <div class="step-box" id="box-adapter">
+                  <div class="step-icon adapter">⚡</div>
+                  <div class="step-content">
+                    <div class="step-name">NS Adapter</div>
+                    <div class="step-desc">Transform data, generate UID, check duplicates</div>
                   </div>
                 </div>
               </div>
-            </div>
-            
-            <!-- Duplicate handling section -->
-            <div class="section-divider">
-              <span>IF DUPLICATE DETECTED</span>
-            </div>
-            
-            <div style="display: flex; justify-content: center; gap: 30px; align-items: center; margin: 20px 0;">
-              <div class="flow-stage">
-                <div class="flow-stage-label">6. Manual Review</div>
-                <div class="manual-action" id="box-sales">
-                  <div class="manual-action-label">👤 SALES PERSON</div>
-                  <div class="flow-box-title">DE-DUPLICATE</div>
-                  <div class="flow-box-sub">in NetSuite</div>
+
+              <div class="flow-connector" id="conn-2"></div>
+
+              <!-- Step 3: NetSuite -->
+              <div class="flow-step">
+                <div class="step-number" id="num-3">3</div>
+                <div class="step-box" id="box-netsuite">
+                  <div class="step-icon netsuite">🏢</div>
+                  <div class="step-content">
+                    <div class="step-name">NetSuite</div>
+                    <div class="step-desc">Create Lead record in CRM</div>
+                  </div>
+                  <div class="step-badge datalayer">dataLayer: lead_created</div>
                 </div>
               </div>
-              
-              <div class="flow-arrow" id="arrow-5" style="max-width: 80px;"></div>
-              
-              <div class="flow-stage">
-                <div class="flow-stage-label">7. Update CRM</div>
-                <div class="flow-box" id="box-ns-update">
-                  <div class="flow-box-title">NETSUITE</div>
-                  <div class="flow-box-sub">Merge Records</div>
+
+              <div class="flow-connector" id="conn-3"></div>
+
+              <!-- Branch to Iterable + Amplitude -->
+              <div style="text-align: center; color: #666; font-size: 11px; margin: 10px 0;">
+                NetSuite sends to both systems simultaneously
+              </div>
+
+              <div class="flow-branch" id="branch-1">
+                <div class="branch-item">
+                  <div class="branch-connector" id="bconn-1"></div>
+                  <div class="branch-box" id="box-iterable">
+                    <div class="branch-name">📧 Iterable</div>
+                    <div class="branch-desc">Create contact, trigger welcome</div>
+                  </div>
+                </div>
+                <div class="branch-item">
+                  <div class="branch-connector" id="bconn-2"></div>
+                  <div class="branch-box" id="box-amplitude">
+                    <div class="branch-name">📊 Amplitude</div>
+                    <div class="branch-desc">Create user profile</div>
+                  </div>
                 </div>
               </div>
-              
-              <div class="flow-arrow" id="arrow-6" style="max-width: 80px;"></div>
-              
-              <div class="flow-stage">
-                <div class="flow-stage-label">8. Sync Profile</div>
-                <div class="flow-box" id="box-amp-enrich">
-                  <div class="flow-box-title">AMPLITUDE</div>
-                  <div class="flow-box-sub">Enrich Profile</div>
+
+              <div class="flow-connector" id="conn-4"></div>
+
+              <!-- Step 4: Webhooks back -->
+              <div class="flow-step">
+                <div class="step-number" id="num-4">4</div>
+                <div class="step-box" id="box-webhook">
+                  <div class="step-icon datalayer">🔔</div>
+                  <div class="step-content">
+                    <div class="step-name">Webhooks Return</div>
+                    <div class="step-desc">Amplitude sends enriched data back to site</div>
+                  </div>
+                  <div class="step-badge webhook">webhook</div>
+                </div>
+              </div>
+
+              <div class="flow-connector" id="conn-5"></div>
+
+              <!-- Step 5: DataLayer Enriched -->
+              <div class="flow-step">
+                <div class="step-number" id="num-5">5</div>
+                <div class="step-box" id="box-enriched">
+                  <div class="step-icon datalayer">✨</div>
+                  <div class="step-content">
+                    <div class="step-name">Site Personalization</div>
+                    <div class="step-desc">Update dataLayer with enriched profile for personalization</div>
+                  </div>
+                  <div class="step-badge datalayer">dataLayer: lead_enriched</div>
                 </div>
               </div>
             </div>
-            
-            <!-- DataLayer section -->
-            <div class="section-divider">
-              <span>DATALAYER UPDATES</span>
+
+            <!-- Duplicate Section -->
+            <div class="section-divider" id="dup-divider" style="display: none;">
+              <span>⚠️ Duplicate Detected</span>
             </div>
-            
-            <div style="display: flex; justify-content: center; gap: 40px; margin-top: 20px;">
-              <div class="flow-box" id="box-dl1">
-                <div class="flow-box-title">DATALAYER</div>
-                <div class="flow-box-sub">form_submit</div>
+
+            <div class="main-flow" id="dup-flow" style="display: none;">
+              <!-- Sales Review -->
+              <div class="flow-step">
+                <div class="step-number" id="num-6">6</div>
+                <div class="step-box" id="box-sales">
+                  <div class="step-icon sales">👤</div>
+                  <div class="step-content">
+                    <div class="step-name">Sales Review</div>
+                    <div class="step-desc">Email alert with duplicate info, sales person reviews</div>
+                  </div>
+                </div>
               </div>
-              <div class="flow-box" id="box-dl2">
-                <div class="flow-box-title">DATALAYER</div>
-                <div class="flow-box-sub">lead_created</div>
+
+              <div class="flow-connector" id="conn-6"></div>
+
+              <!-- NetSuite Merge -->
+              <div class="flow-step">
+                <div class="step-number" id="num-7">7</div>
+                <div class="step-box" id="box-merge">
+                  <div class="step-icon netsuite">🔗</div>
+                  <div class="step-content">
+                    <div class="step-name">NetSuite Merge</div>
+                    <div class="step-desc">Sales merges duplicate into master record</div>
+                  </div>
+                </div>
               </div>
-              <div class="flow-box" id="box-dl3">
-                <div class="flow-box-title">DATALAYER</div>
-                <div class="flow-box-sub">lead_enriched</div>
+
+              <div class="flow-connector" id="conn-7"></div>
+
+              <!-- Amplitude Update -->
+              <div class="flow-step">
+                <div class="step-number" id="num-8">8</div>
+                <div class="step-box" id="box-amp-update">
+                  <div class="step-icon amplitude">📊</div>
+                  <div class="step-content">
+                    <div class="step-name">Amplitude Enrichment</div>
+                    <div class="step-desc">Profile merged, behavioral data consolidated</div>
+                  </div>
+                  <div class="step-badge datalayer">dataLayer: profile_merged</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-        
+
         <!-- Event Log -->
         <div class="panel">
-          <div class="panel-title">
-            ■ Event Log
+          <div class="log-header">
+            <div class="panel-title" style="margin: 0; padding: 0; border: none;">Event Log</div>
             <button class="clear-btn" onclick="clearLog()">Clear</button>
           </div>
-          <div class="event-log" id="eventLog"></div>
+          <div class="log-container" id="eventLog"></div>
         </div>
       </div>
     </div>
   </div>
-  
+
   <script>
     const scenarios = {
-      'new': {
-        email: 'newlead@company.com',
-        phone: '0400111222',
-        name: 'New Lead',
-        isDuplicate: false
-      },
-      'duplicate': {
-        email: 'john.smith@existing.com',
-        phone: '0412345678',
-        name: 'John Smith',
-        isDuplicate: true
-      }
+      'new': { email: 'newlead@company.com', phone: '0400111222', name: 'New Lead', isDuplicate: false },
+      'duplicate': { email: 'john.smith@existing.com', phone: '0412345678', name: 'John Smith', isDuplicate: true }
     };
-    
+
     function generateUUID() {
       return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
         const r = Math.random() * 16 | 0;
         return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16).toUpperCase();
       });
     }
-    
-    function generateId(prefix) {
-      return prefix + '-' + Math.random().toString(36).substr(2, 6).toUpperCase();
-    }
-    
+
     function log(source, message) {
       const el = document.getElementById('eventLog');
       const time = new Date().toLocaleTimeString('en-AU', { hour12: false });
@@ -569,209 +636,254 @@
       entry.className = 'log-entry';
       entry.innerHTML = `
         <span class="log-time">${time}</span>
-        <span class="log-source ${source.toLowerCase()}">${source.toUpperCase()}</span>
-        <span>${message}</span>
+        <span class="log-source ${source.toLowerCase()}">${source}</span>
+        <span class="log-message">${message}</span>
       `;
       el.insertBefore(entry, el.firstChild);
     }
-    
+
     function clearLog() {
       document.getElementById('eventLog').innerHTML = '';
     }
-    
-    function setStatus(id, status, isProcessing = false) {
+
+    function setStatus(id, text, state = '') {
       const el = document.getElementById('stat-' + id);
-      el.textContent = status;
-      el.className = 'status-value' + (status === 'Waiting' ? ' waiting' : '') + (isProcessing ? ' processing' : '');
+      el.textContent = text;
+      el.className = 'status-value ' + state;
     }
-    
-    function activateBox(id) {
+
+    function activateStep(num) {
+      document.getElementById('num-' + num).classList.add('active');
+    }
+
+    function completeStep(num) {
+      document.getElementById('num-' + num).classList.remove('active');
+      document.getElementById('num-' + num).classList.add('done');
+    }
+
+    async function activateBox(id) {
       const box = document.getElementById(id);
       box.classList.add('active');
       return new Promise(r => setTimeout(() => {
         box.classList.remove('active');
-        box.classList.add('complete');
+        box.classList.add('done');
         r();
-      }, 500));
+      }, 600));
     }
-    
-    function activateArrow(id) {
-      document.getElementById(id).classList.add('active');
+
+    function activateConnector(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.add('active');
+        setTimeout(() => {
+          el.classList.remove('active');
+          el.classList.add('done');
+        }, 300);
+      }
     }
-    
+
     function loadScenario() {
       const s = scenarios[document.getElementById('scenario').value];
       document.getElementById('email').value = s.email;
       document.getElementById('phone').value = s.phone;
       document.getElementById('name').value = s.name;
     }
-    
+
     async function runFlow() {
       const email = document.getElementById('email').value;
-      const phone = document.getElementById('phone').value;
       const name = document.getElementById('name').value;
       const brand = document.getElementById('brand').value;
       const isDuplicate = document.getElementById('scenario').value === 'duplicate';
-      
+
       const btn = document.getElementById('submitBtn');
       btn.disabled = true;
-      btn.textContent = 'PROCESSING...';
-      
-      // Reset visuals
-      document.querySelectorAll('.flow-box, .manual-action').forEach(b => b.classList.remove('active', 'complete'));
-      document.querySelectorAll('.flow-arrow, .flow-arrow-down').forEach(a => a.classList.remove('active'));
-      
+      btn.textContent = 'Processing...';
+
+      // Reset
+      document.querySelectorAll('.step-number').forEach(el => el.classList.remove('active', 'done'));
+      document.querySelectorAll('.step-box, .branch-box').forEach(el => el.classList.remove('active', 'done'));
+      document.querySelectorAll('.flow-connector, .branch-connector').forEach(el => el.classList.remove('active', 'done'));
+      document.getElementById('dup-divider').style.display = 'none';
+      document.getElementById('dup-flow').style.display = 'none';
+
       // Generate IDs
       const uid = generateUUID();
-      const masterId = generateId('LEAD');
-      const nsLeadId = 'NS-' + Math.floor(Math.random() * 100000);
-      
-      document.getElementById('displayUid').textContent = uid;
-      document.getElementById('displayMaster').textContent = masterId;
-      
-      // ========== STEP 1: Form Submit ==========
+      const nsId = 'NS-' + Math.floor(Math.random() * 100000);
+      const ampId = 'AMP-' + uid.substring(0, 8);
+
+      // === STEP 1: Form Submit ===
+      activateStep(1);
+      setStatus('site', 'Submitting...', 'active');
       log('SITE', `Form submitted on ${brand}`);
-      log('DATALAYER', 'Push: form_submit');
-      setStatus('site', 'Submitted');
+      log('DATALAYER', 'Push: form_submit { email, phone, name, brand }');
       await activateBox('box-form');
-      await activateBox('box-dl1');
-      activateArrow('arrow-1');
-      
-      // ========== STEP 2: Firebase Dedupe ==========
-      log('SITE', 'Calling Firebase for dedupe...');
+      completeStep(1);
+      setStatus('site', 'Submitted', 'done');
+      activateConnector('conn-1');
+
+      // === STEP 2: NS Adapter ===
+      activateStep(2);
+      setStatus('adapter', 'Processing...', 'active');
+      log('ADAPTER', 'Received lead data from site');
       await new Promise(r => setTimeout(r, 300));
-      
+
+      document.getElementById('displayUid').textContent = uid;
+      document.getElementById('displayUid').classList.add('set');
+      log('ADAPTER', `Generated UID: ${uid.substring(0, 8)}...`);
+
       if (isDuplicate) {
-        log('SITE', '⚠ Potential duplicate detected (email/phone exists)');
-        log('SITE', 'Flagging for sales review');
+        log('ADAPTER', '⚠️ Duplicate check: potential match found');
+        log('ADAPTER', 'Flagging for sales review');
       } else {
-        log('SITE', 'No duplicate found - new lead');
+        log('ADAPTER', 'Duplicate check: no match found');
       }
-      log('SITE', `Generated UID: ${uid.substring(0, 8)}...`);
-      log('SITE', `Master Lead ID: ${masterId}`);
-      await activateBox('box-firebase');
-      activateArrow('arrow-2');
-      
-      // ========== STEP 3: NS Adapter ==========
-      setStatus('adapter', 'Processing...', true);
-      log('ADAPTER', 'Received lead data');
-      log('ADAPTER', 'Transforming for NetSuite API');
-      if (isDuplicate) {
-        log('ADAPTER', 'Including duplicate flag in payload');
-      }
+
+      log('ADAPTER', 'Transforming payload for NetSuite API');
       await activateBox('box-adapter');
-      setStatus('adapter', 'Sent');
-      activateArrow('arrow-3');
-      
-      // ========== STEP 4: NetSuite Create Lead ==========
-      setStatus('netsuite', 'Processing...', true);
-      log('NETSUITE', 'Creating lead record...');
+      completeStep(2);
+      setStatus('adapter', 'Sent', 'done');
+      activateConnector('conn-2');
+
+      // === STEP 3: NetSuite ===
+      activateStep(3);
+      setStatus('netsuite', 'Creating lead...', 'active');
+      log('NETSUITE', 'API: Creating lead record');
       await new Promise(r => setTimeout(r, 400));
-      log('NETSUITE', `Lead created: ${nsLeadId}`);
-      document.getElementById('displayNsId').textContent = nsLeadId;
+
+      document.getElementById('displayNsId').textContent = nsId;
+      document.getElementById('displayNsId').classList.add('set');
+      log('NETSUITE', `Lead created: ${nsId}`);
+
       if (isDuplicate) {
-        log('NETSUITE', '⚠ Duplicate flag set - pending sales review');
-      }
-      await activateBox('box-netsuite');
-      setStatus('netsuite', isDuplicate ? 'Created (Dup)' : 'Created');
-      log('DATALAYER', 'Push: lead_created');
-      await activateBox('box-dl2');
-      
-      // ========== STEP 5a: Iterable ==========
-      activateArrow('arrow-4a');
-      setStatus('iterable', 'Processing...', true);
-      log('NETSUITE', '→ Sending to Iterable');
-      await new Promise(r => setTimeout(r, 300));
-      log('ITERABLE', 'Contact created');
-      log('ITERABLE', 'Added to welcome sequence');
-      await activateBox('box-iterable');
-      setStatus('iterable', 'Synced');
-      
-      // ========== STEP 5b: Amplitude ==========
-      activateArrow('arrow-4b');
-      setStatus('amplitude', 'Processing...', true);
-      log('NETSUITE', '→ Sending to Amplitude');
-      await new Promise(r => setTimeout(r, 300));
-      log('AMPLITUDE', 'User profile created');
-      log('AMPLITUDE', `Identify: ${masterId}`);
-      await activateBox('box-amplitude');
-      setStatus('amplitude', 'Synced');
-      
-      // ========== DUPLICATE FLOW ==========
-      if (isDuplicate) {
-        log('SITE', '─────────────────────────────');
-        log('SITE', 'DUPLICATE RESOLUTION FLOW');
-        log('SITE', '─────────────────────────────');
-        
-        await new Promise(r => setTimeout(r, 800));
-        
-        // Sales review
-        log('SALES', 'Email received: "Potential duplicate lead"');
-        log('SALES', `New: ${name} <${email}>`);
-        log('SALES', 'Existing: John Smith <john@example.com>');
-        await activateBox('box-sales');
-        
-        await new Promise(r => setTimeout(r, 600));
-        
-        // Sales merges in NetSuite
-        log('SALES', '→ Merging records in NetSuite');
-        activateArrow('arrow-5');
-        log('NETSUITE', 'Merging duplicate into master record');
-        log('NETSUITE', 'Master record updated with new submission');
-        await activateBox('box-ns-update');
-        
-        await new Promise(r => setTimeout(r, 400));
-        
-        // Amplitude enrichment
-        activateArrow('arrow-6');
-        log('NETSUITE', '→ Updating Amplitude profile');
-        log('AMPLITUDE', 'Profile merged');
-        log('AMPLITUDE', 'Behavioral data consolidated');
-        log('AMPLITUDE', 'Computed properties updated:');
-        log('AMPLITUDE', '  - lifetime_value: increased');
-        log('AMPLITUDE', '  - engagement_score: recalculated');
-        log('AMPLITUDE', '  - submission_count: 2 → 3');
-        await activateBox('box-amp-enrich');
-        
-        log('DATALAYER', 'Push: lead_enriched (merged profile)');
-        await activateBox('box-dl3');
-        setStatus('amplitude', 'Enriched');
+        log('NETSUITE', '⚠️ Duplicate flag set on record');
+        setStatus('netsuite', 'Created (Dup)', 'warning');
       } else {
-        // Non-duplicate enrichment
-        await new Promise(r => setTimeout(r, 500));
-        log('AMPLITUDE', 'Computing initial properties...');
-        log('AMPLITUDE', '  - predicted_value: calculated');
-        log('AMPLITUDE', '  - segment: assigned');
-        log('DATALAYER', 'Push: lead_enriched');
-        await activateBox('box-dl3');
-        setStatus('amplitude', 'Enriched');
+        setStatus('netsuite', 'Created', 'done');
       }
-      
+
+      log('DATALAYER', `Push: lead_created { nsId: ${nsId}, uid: ${uid.substring(0, 8)}... }`);
+      await activateBox('box-netsuite');
+      completeStep(3);
+      activateConnector('conn-3');
+
+      // === STEP 3b: Branch to Iterable + Amplitude ===
+      document.getElementById('branch-1').classList.add('active');
+
+      // Iterable
+      activateConnector('bconn-1');
+      setStatus('iterable', 'Creating contact...', 'active');
+      log('NETSUITE', '→ Webhook: Sending to Iterable');
+      await new Promise(r => setTimeout(r, 200));
+      log('ITERABLE', 'Contact created');
+      log('ITERABLE', 'Added to welcome email sequence');
+      await activateBox('box-iterable');
+      setStatus('iterable', 'Synced', 'done');
+
+      // Amplitude
+      activateConnector('bconn-2');
+      setStatus('amplitude', 'Creating profile...', 'active');
+      log('NETSUITE', '→ Webhook: Sending to Amplitude');
+      await new Promise(r => setTimeout(r, 200));
+
+      document.getElementById('displayAmpId').textContent = ampId;
+      document.getElementById('displayAmpId').classList.add('set');
+      log('AMPLITUDE', `User profile created: ${ampId}`);
+      log('AMPLITUDE', 'Computing initial properties...');
+      await activateBox('box-amplitude');
+      setStatus('amplitude', 'Synced', 'done');
+
+      activateConnector('conn-4');
+
+      // === STEP 4: Webhook back ===
+      activateStep(4);
+      log('AMPLITUDE', '→ Webhook: Sending enriched data back to site');
+      log('SITE', 'Received webhook from Amplitude');
+      await activateBox('box-webhook');
+      completeStep(4);
+      activateConnector('conn-5');
+
+      // === STEP 5: Enriched ===
+      activateStep(5);
+      log('DATALAYER', 'Push: lead_enriched { predicted_value, segment, interests }');
+      log('SITE', 'DataLayer updated - ready for personalization');
+      await activateBox('box-enriched');
+      completeStep(5);
+
+      // === DUPLICATE FLOW ===
+      if (isDuplicate) {
+        await new Promise(r => setTimeout(r, 600));
+
+        document.getElementById('dup-divider').style.display = 'block';
+        document.getElementById('dup-flow').style.display = 'flex';
+
+        log('SITE', '────────────────────────────────');
+        log('SITE', 'DUPLICATE RESOLUTION FLOW');
+
+        // Step 6: Sales Review
+        activateStep(6);
+        log('NETSUITE', '→ Email: Sending duplicate alert to sales');
+        log('SALES', 'Email received: "Potential Duplicate Lead"');
+        log('SALES', `New submission: ${name} <${email}>`);
+        log('SALES', 'Existing record: John Smith <john@example.com>');
+        await activateBox('box-sales');
+        completeStep(6);
+        activateConnector('conn-6');
+
+        await new Promise(r => setTimeout(r, 400));
+
+        // Step 7: NetSuite Merge
+        activateStep(7);
+        log('SALES', '→ Action: Merging records in NetSuite');
+        log('NETSUITE', 'Merging duplicate into master record');
+        log('NETSUITE', 'Master record updated with latest contact info');
+        await activateBox('box-merge');
+        completeStep(7);
+        activateConnector('conn-7');
+
+        // Step 8: Amplitude Update
+        activateStep(8);
+        log('NETSUITE', '→ Webhook: Updating Amplitude profile');
+        log('AMPLITUDE', 'Profile merged with existing user');
+        log('AMPLITUDE', 'Behavioral data consolidated');
+        log('AMPLITUDE', 'Updated: lifetime_value, engagement_score');
+        log('DATALAYER', 'Push: profile_merged { masterId, mergedFrom }');
+        await activateBox('box-amp-update');
+        completeStep(8);
+        setStatus('amplitude', 'Enriched', 'done');
+      }
+
       log('SITE', '✓ Flow complete');
-      
+
       btn.disabled = false;
-      btn.textContent = 'SUBMIT LEAD';
+      btn.textContent = 'Submit Lead';
     }
-    
+
     function resetDemo() {
-      document.querySelectorAll('.flow-box, .manual-action').forEach(b => b.classList.remove('active', 'complete'));
-      document.querySelectorAll('.flow-arrow, .flow-arrow-down').forEach(a => a.classList.remove('active'));
-      
-      setStatus('site', 'Ready');
-      setStatus('adapter', 'Waiting');
-      setStatus('netsuite', 'Waiting');
-      setStatus('iterable', 'Waiting');
-      setStatus('amplitude', 'Waiting');
-      
-      document.getElementById('displayUid').textContent = '-';
-      document.getElementById('displayMaster').textContent = '-';
-      document.getElementById('displayNsId').textContent = '-';
-      
+      document.querySelectorAll('.step-number').forEach(el => el.classList.remove('active', 'done'));
+      document.querySelectorAll('.step-box, .branch-box').forEach(el => el.classList.remove('active', 'done'));
+      document.querySelectorAll('.flow-connector, .branch-connector').forEach(el => el.classList.remove('active', 'done'));
+      document.getElementById('dup-divider').style.display = 'none';
+      document.getElementById('dup-flow').style.display = 'none';
+      document.getElementById('branch-1').classList.remove('active');
+
+      setStatus('site', 'Ready', 'ready');
+      setStatus('adapter', '—', '');
+      setStatus('netsuite', '—', '');
+      setStatus('iterable', '—', '');
+      setStatus('amplitude', '—', '');
+
+      document.getElementById('displayUid').textContent = '—';
+      document.getElementById('displayUid').classList.remove('set');
+      document.getElementById('displayNsId').textContent = '—';
+      document.getElementById('displayNsId').classList.remove('set');
+      document.getElementById('displayAmpId').textContent = '—';
+      document.getElementById('displayAmpId').classList.remove('set');
+
       clearLog();
       loadScenario();
-      log('SITE', 'Demo reset');
+      log('SITE', 'Demo reset - ready');
     }
-    
+
     window.onload = () => {
       loadScenario();
       log('SITE', 'System ready');
