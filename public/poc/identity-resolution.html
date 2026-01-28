@@ -1379,11 +1379,21 @@
       log('SITE', 'System ready');
     };
 
+    // Track Marker.io ready state
+    let markerReady = false;
+    if (window.Marker) {
+      Marker.on('load', function() {
+        console.log('Marker.io widget loaded');
+        markerReady = true;
+      });
+    }
+
     function openFeedback() {
-      console.log('Feedback clicked, Marker:', window.Marker);
+      console.log('Feedback clicked, markerReady:', markerReady, 'Marker:', window.Marker);
       if (window.Marker) {
-        // Use show() to open the widget UI - more reliable than capture()
-        Marker.show();
+        // Try capture() which opens the screenshot tool
+        Marker.capture();
+        console.log('Marker.capture() called');
       } else {
         alert('Feedback widget is still loading. Please wait a moment and try again.');
       }
