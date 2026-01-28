@@ -743,7 +743,7 @@
             <div class="step-card" id="box-form">
               <div class="step-icon site">📝</div>
               <div class="step-content">
-                <div class="step-title">Form Submission</div>
+                <div class="step-title">User Submits Form</div>
                 <div class="step-subtitle">Lead form with UID attached</div>
               </div>
               <div class="step-badge datalayer">form_submit</div>
@@ -1165,7 +1165,7 @@
         {
           fn: async () => {
             activateStep(3);
-            setAnnotation(`<strong>Step 3: Form Submission</strong><br>User submits lead form. <code>form_submit</code> event with UID attached.`);
+            setAnnotation(`<strong>Step 3: User Submits Form</strong><br>User submits lead form. <code>form_submit</code> event with UID attached.`);
             log('SITE', 'Form submitted');
             log('DATALAYER', `Push: form_submit { uid, email: "${email}" }`);
             await activateBox('box-form', s.deviceMatch);
