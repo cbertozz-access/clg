@@ -1468,10 +1468,20 @@
     };
 
     function openFeedback() {
-      if (window.Marker) {
-        Marker.capture('fullscreen');
+      console.log('Feedback clicked, Marker:', window.Marker);
+      if (window.Marker && typeof Marker.capture === 'function') {
+        try {
+          Marker.capture();
+        } catch (e) {
+          console.error('Marker.capture error:', e);
+          // Fallback: try to show the widget
+          if (typeof Marker.show === 'function') {
+            Marker.show();
+          }
+        }
       } else {
-        alert('Feedback widget is loading, please try again.');
+        console.log('Marker not ready yet');
+        alert('Feedback widget is still loading. Please wait a moment and try again.');
       }
     }
   </script>
