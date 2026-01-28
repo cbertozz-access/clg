@@ -577,6 +577,34 @@
     }
     .log-action-btn:hover { border-color: #555; color: #999; }
 
+    /* Feedback Button */
+    .feedback-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 12px 20px;
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      border: none;
+      border-radius: 50px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+      transition: all 0.2s;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .feedback-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(99, 102, 241, 0.5);
+    }
+    .feedback-btn:active {
+      transform: translateY(0);
+    }
+
     /* IDs Section */
     .ids-section {
       padding: 16px 20px;
@@ -1438,6 +1466,22 @@
     window.onload = () => {
       log('SITE', 'System ready');
     };
+
+    function openFeedback() {
+      if (window.Marker) {
+        Marker.capture('fullscreen');
+      } else {
+        alert('Feedback widget is loading, please try again.');
+      }
+    }
   </script>
+
+  <!-- Feedback Button -->
+  <button class="feedback-btn" onclick="openFeedback()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    </svg>
+    Feedback
+  </button>
 </body>
 </html>
