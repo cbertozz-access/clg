@@ -850,20 +850,21 @@
             </div>
           </div>
 
-          <!-- Duplicate Section -->
+          <!-- Duplicate Detection Section -->
           <div class="section-divider" id="dup-divider" style="display: none;">
-            <span>⚠️ Duplicate Flow</span>
+            <span>⚠️ Potential Duplicate Detected</span>
           </div>
 
           <div class="main-flow" id="dup-flow" style="display: none;">
             <div class="flow-step">
               <div class="step-number" id="num-6">6</div>
-              <div class="step-box" id="box-sales">
-                <div class="step-icon sales">👤</div>
+              <div class="step-box" id="box-dup-event">
+                <div class="step-icon amplitude">📊</div>
                 <div class="step-content">
-                  <div class="step-name">Sales Review</div>
-                  <div class="step-desc">Email alert sent</div>
+                  <div class="step-name">Amplitude Event</div>
+                  <div class="step-desc">NS Adapter pushes duplicate_detected event</div>
                 </div>
+                <div class="step-badge datalayer">duplicate_detected</div>
               </div>
             </div>
 
@@ -871,12 +872,13 @@
 
             <div class="flow-step">
               <div class="step-number" id="num-7">7</div>
-              <div class="step-box" id="box-merge">
-                <div class="step-icon netsuite">🔗</div>
+              <div class="step-box" id="box-iterable-alert">
+                <div class="step-icon iterable">📧</div>
                 <div class="step-content">
-                  <div class="step-name">NetSuite Merge</div>
-                  <div class="step-desc">Records consolidated</div>
+                  <div class="step-name">Iterable Alert</div>
+                  <div class="step-desc">Triggered by Amplitude event</div>
                 </div>
+                <div class="step-badge webhook">journey</div>
               </div>
             </div>
 
@@ -884,13 +886,12 @@
 
             <div class="flow-step">
               <div class="step-number" id="num-8">8</div>
-              <div class="step-box" id="box-amp-update">
-                <div class="step-icon amplitude">📊</div>
+              <div class="step-box" id="box-sales">
+                <div class="step-icon sales">👤</div>
                 <div class="step-content">
-                  <div class="step-name">Profile Merge</div>
-                  <div class="step-desc">Data consolidated</div>
+                  <div class="step-name">Sales Notified</div>
+                  <div class="step-desc">Email with duplicate details for review</div>
                 </div>
-                <div class="step-badge datalayer">profile_merged</div>
               </div>
             </div>
           </div>
@@ -1133,33 +1134,38 @@
       log('SITE', 'Ready for personalization');
       await activateBox('box-enriched'); completeStep(5);
 
-      // Duplicate flow
+      // Duplicate detection flow - NS Adapter detected email/phone match
       if (isDuplicate) {
         if (playbackMode === 'auto') await new Promise(r => setTimeout(r, 400));
         document.getElementById('dup-divider').style.display = 'block';
         document.getElementById('dup-flow').style.display = 'flex';
-        log('SITE', '─── DUPLICATE FLOW ───');
+        log('SITE', '─── DUPLICATE DETECTION ───');
+        log('ADAPTER', 'Email/phone match found in existing records');
 
+        // Step 6: NS Adapter pushes duplicate_detected event to Amplitude
         currentStepIndex = 6; updateStepIndicator(6, totalSteps); await waitForNextStep();
         activateStep(6);
-        log('NETSUITE', '→ Email to sales');
-        log('SALES', 'Alert received');
-        await activateBox('box-sales'); completeStep(6); activateConnector('conn-6');
+        log('ADAPTER', '→ Pushing duplicate_detected to Amplitude');
+        log('AMPLITUDE', `Event: duplicate_detected { newUid: ${uid.substring(0,8)}..., matchedEmail: true }`);
+        await activateBox('box-dup-event'); completeStep(6); activateConnector('conn-6');
         if (playbackMode === 'auto') await new Promise(r => setTimeout(r, 300));
 
+        // Step 7: Amplitude triggers Iterable journey
         currentStepIndex = 7; updateStepIndicator(7, totalSteps); await waitForNextStep();
         activateStep(7);
-        log('SALES', '→ Merge action');
-        log('NETSUITE', 'Records merged');
-        await activateBox('box-merge'); completeStep(7); activateConnector('conn-7');
+        log('AMPLITUDE', '→ Triggering Iterable journey');
+        log('ITERABLE', 'Journey triggered: Sales Duplicate Alert');
+        log('ITERABLE', 'Building email with duplicate details...');
+        await activateBox('box-iterable-alert'); completeStep(7); activateConnector('conn-7');
 
+        // Step 8: Sales gets notified
         currentStepIndex = 8; updateStepIndicator(8, totalSteps); await waitForNextStep();
         activateStep(8);
-        log('NETSUITE', '→ Update Amplitude');
-        log('AMPLITUDE', 'Profile merged');
-        log('DATALAYER', 'profile_merged');
-        await activateBox('box-amp-update'); completeStep(8);
-        setStatus('amplitude', 'Merged', 'done');
+        log('ITERABLE', '→ Sending alert email');
+        log('SALES', '📧 Email received: "Potential Duplicate Lead"');
+        log('SALES', `New: ${name} <${email}>`);
+        log('SALES', `Match: ${existingCustomer.name} <${existingCustomer.email}>`);
+        await activateBox('box-sales'); completeStep(8);
       }
 
       log('SITE', '✓ Complete');
