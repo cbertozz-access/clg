@@ -1396,6 +1396,8 @@
       Marker.on('load', function() {
         console.log('Marker.io widget loaded');
         markerReady = true;
+        // Hide the default Marker.io button - we use our own
+        Marker.hide();
       });
     }
 
