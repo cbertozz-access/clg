@@ -902,7 +902,7 @@
               <div class="step-icon adapter">⚡</div>
               <div class="step-content">
                 <div class="step-title">NS Adapter</div>
-                <div class="step-subtitle">Check email/phone duplicates</div>
+                <div class="step-subtitle">Check dupes, fire activitySet if match</div>
               </div>
             </div>
           </div>
@@ -1353,6 +1353,7 @@
             activateStep(4);
             setAnnotation(`<strong>Step 4: NS Adapter</strong><br>Checking email and phone against NetSuite records.`);
             log('ADAPTER', 'Received lead data');
+            log('ADAPTER', `UID received: ${uid.substring(0, 8)}...`);
 
             const adapterWarning = s.emailMatch || s.phoneMatch;
 
@@ -1370,7 +1371,12 @@
 
             if (adapterWarning) {
               const matchType = s.emailMatch && s.phoneMatch ? 'Email AND Phone' : (s.emailMatch ? 'Email' : 'Phone');
-              setAnnotation(`<strong>Step 4: NS Adapter</strong><br>⚠️ <span style="color:#f90">${matchType} match!</span> Lead flagged for review.`);
+              setAnnotation(`<strong>Step 4: NS Adapter</strong><br>⚠️ <span style="color:#f90">${matchType} match!</span> Firing Amplitude activitySet to merge user IDs.`);
+              log('ADAPTER', '→ Firing Amplitude activitySet event');
+              log('AMPLITUDE', 'activitySet: duplicate_detected');
+              log('AMPLITUDE', `Rolling up UID ${uid.substring(0, 8)}... under NS ID`);
+              log('AMPLITUDE', 'NS ID set as source of truth');
+              log('ADAPTER', '→ Triggering sales notification email');
             }
 
             await activateBox('box-adapter', adapterWarning);
