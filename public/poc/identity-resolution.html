@@ -1117,7 +1117,7 @@
           fn: async () => {
             activateStep(1);
             log('USER', `Navigating to ${brand}`);
-            log('FIREBASE', 'SDK initializing on page load...');
+            log('FIREBASE', 'Push UID to Datalayer');
 
             if (s.isReturn && s.deviceMatch) {
               setAnnotation(`<strong>Step 1: Page Load - SDK Init</strong><br>Firebase recognizes this device. Retrieving existing UID from storage.`);
