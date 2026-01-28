@@ -196,8 +196,15 @@
     .btn-run:hover { background: #e0e0e0; }
     .btn-run:disabled { background: #333; color: #666; cursor: not-allowed; }
 
-    .btn-next {
-      width: 100%;
+    .step-nav {
+      display: none;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .step-nav.show { display: flex; }
+
+    .btn-step {
+      flex: 1;
       padding: 14px;
       border: 2px solid #333;
       border-radius: 10px;
@@ -207,11 +214,15 @@
       font-weight: 600;
       cursor: pointer;
       transition: all 0.2s;
-      display: none;
     }
-    .btn-next:hover:not(:disabled) { border-color: #666; color: #fff; }
-    .btn-next:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn-next.show { display: block; }
+    .btn-step:hover:not(:disabled) { border-color: #666; color: #fff; }
+    .btn-step:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-step.primary {
+      background: #fff;
+      color: #000;
+      border-color: #fff;
+    }
+    .btn-step.primary:hover:not(:disabled) { background: #ddd; border-color: #ddd; }
 
     .btn-reset {
       width: 100%;
@@ -837,7 +848,10 @@
         </div>
 
         <button class="btn-run" id="runBtn" onclick="runFlow()">Run Flow</button>
-        <button class="btn-next" id="nextBtn" onclick="nextStep()">Next Step →</button>
+        <div class="step-nav" id="stepNav">
+          <button class="btn-step" id="prevBtn" onclick="prevStep()">← Back</button>
+          <button class="btn-step primary" id="nextBtn" onclick="nextStep()">Next →</button>
+        </div>
         <button class="btn-reset" onclick="resetDemo()">Reset Demo</button>
       </div>
     </div>
@@ -1091,6 +1105,7 @@
     let mode = 'auto';
     let speed = 1;
     let stepQueue = [];
+    let stepHistory = [];
     let totalSteps = 7;
     let currentStepNum = 0;
     let currentScenario = scenarios['new_first'];
@@ -1159,7 +1174,7 @@
       document.getElementById('autoBtn').classList.toggle('active', m === 'auto');
       document.getElementById('manualBtn').classList.toggle('active', m === 'manual');
       document.getElementById('speedControl').style.display = m === 'auto' ? 'flex' : 'none';
-      document.getElementById('nextBtn').classList.toggle('show', m === 'manual');
+      document.getElementById('stepNav').classList.toggle('show', m === 'manual');
     }
 
     function setSpeed(s) {
@@ -1221,9 +1236,62 @@
     function nextStep() {
       if (stepQueue.length > 0) {
         document.getElementById('nextBtn').disabled = true;
+        document.getElementById('prevBtn').disabled = true;
         const step = stepQueue.shift();
+        stepHistory.push(step);
         executeStep(step);
+        updateStepButtons();
       }
+    }
+
+    function prevStep() {
+      if (stepHistory.length > 1) {
+        // Put current step back in queue
+        const currentStep = stepHistory.pop();
+        stepQueue.unshift(currentStep);
+
+        // Also put the step before that back so we can re-execute it
+        if (stepHistory.length > 0) {
+          const prevStepToReplay = stepHistory.pop();
+          stepQueue.unshift(prevStepToReplay);
+        }
+
+        // Reset visuals
+        document.querySelectorAll('.step-number').forEach(el => el.classList.remove('active', 'done', 'warning'));
+        document.querySelectorAll('.step-card, .branch-card').forEach(el => el.classList.remove('active', 'done', 'warning'));
+        document.querySelectorAll('.connector').forEach(el => el.classList.remove('active', 'done'));
+        document.getElementById('dup-section').classList.remove('show');
+        updateProgress(0, totalSteps);
+
+        // Reset IDs
+        ['displayUid', 'displayNsId', 'displayAmpId'].forEach(id => {
+          const el = document.getElementById(id);
+          el.querySelector('.id-text').textContent = 'Awaiting...';
+          el.classList.remove('set');
+        });
+
+        // Clear log and replay executed steps
+        clearLog();
+        log('SITE', 'Rewinding...');
+
+        // Temporarily use fast speed to replay
+        const origSpeed = speed;
+        speed = 100;
+
+        (async () => {
+          for (const step of stepHistory) {
+            await step.fn();
+          }
+          speed = origSpeed;
+          updateStepButtons();
+          setAnnotation('Stepped back. Click <strong>Next</strong> to continue.', true);
+        })();
+      }
+    }
+
+    function updateStepButtons() {
+      document.getElementById('prevBtn').disabled = stepHistory.length <= 1;
+      document.getElementById('nextBtn').disabled = false;
     }
 
     async function runFlow() {
@@ -1240,6 +1308,8 @@
 
       document.getElementById('runBtn').disabled = true;
       document.getElementById('nextBtn').disabled = true;
+      document.getElementById('prevBtn').disabled = true;
+      stepHistory = [];
       updateProgress(0, totalSteps);
 
       // Reset UI
@@ -1498,6 +1568,7 @@
 
     function resetDemo() {
       stepQueue = [];
+      stepHistory = [];
       currentStepNum = 0;
       updateProgress(0, 7);
 
@@ -1514,6 +1585,7 @@
 
       document.getElementById('runBtn').disabled = false;
       document.getElementById('nextBtn').disabled = true;
+      document.getElementById('prevBtn').disabled = true;
 
       clearLog();
       setAnnotation('Select a scenario and click <strong>Run Flow</strong> to see the identity resolution process.', false);
