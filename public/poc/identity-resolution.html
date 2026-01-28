@@ -102,6 +102,53 @@
     }
     .btn-secondary:hover { border-color: #666; color: #999; }
 
+    /* Preset buttons */
+    .presets {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+    .preset-btn {
+      background: #0a0a0a;
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 10px 12px;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .preset-btn:hover {
+      border-color: #666;
+      background: #151515;
+    }
+    .preset-btn.active {
+      border-color: #fff;
+      background: #1a1a1a;
+    }
+    .preset-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+    .preset-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .preset-tag {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .preset-tag.new { background: #1a2e1a; color: #8f8; }
+    .preset-tag.same { background: #2e2e1a; color: #ff8; }
+    .preset-tag.diff { background: #2e1a1a; color: #f88; }
+    .preset-tag.match { background: #1a1a2e; color: #88f; }
+
     /* Status */
     .status-row {
       display: flex;
@@ -365,15 +412,67 @@
       <!-- Left Panel -->
       <div class="sidebar">
         <div class="panel">
-          <div class="panel-title">Simulate Lead</div>
+          <div class="panel-title">Test Scenarios</div>
 
-          <div class="form-group">
-            <label>Scenario</label>
-            <select id="scenario" onchange="loadScenario()">
-              <option value="new">New Lead</option>
-              <option value="duplicate">Duplicate (needs merge)</option>
-            </select>
+          <div class="presets">
+            <button class="preset-btn active" onclick="loadPreset('new-user')" id="preset-new-user">
+              <div class="preset-title">1. Brand New User</div>
+              <div class="preset-tags">
+                <span class="preset-tag new">New Email</span>
+                <span class="preset-tag new">New Phone</span>
+                <span class="preset-tag new">New Device</span>
+              </div>
+            </button>
+
+            <button class="preset-btn" onclick="loadPreset('same-device')" id="preset-same-device">
+              <div class="preset-title">2. Return Visit, Same Device</div>
+              <div class="preset-tags">
+                <span class="preset-tag diff">Diff Email</span>
+                <span class="preset-tag diff">Diff Phone</span>
+                <span class="preset-tag match">Same Device</span>
+              </div>
+            </button>
+
+            <button class="preset-btn" onclick="loadPreset('same-email')" id="preset-same-email">
+              <div class="preset-title">3. Known Email, New Device</div>
+              <div class="preset-tags">
+                <span class="preset-tag match">Same Email</span>
+                <span class="preset-tag diff">Diff Phone</span>
+                <span class="preset-tag new">New Device</span>
+              </div>
+            </button>
+
+            <button class="preset-btn" onclick="loadPreset('same-phone')" id="preset-same-phone">
+              <div class="preset-title">4. Known Phone, New Device</div>
+              <div class="preset-tags">
+                <span class="preset-tag diff">Diff Email</span>
+                <span class="preset-tag match">Same Phone</span>
+                <span class="preset-tag new">New Device</span>
+              </div>
+            </button>
+
+            <button class="preset-btn" onclick="loadPreset('cross-brand')" id="preset-cross-brand">
+              <div class="preset-title">5. Cross-Brand (Existing Customer)</div>
+              <div class="preset-tags">
+                <span class="preset-tag match">Same Email</span>
+                <span class="preset-tag match">Same Phone</span>
+                <span class="preset-tag diff">Diff Site</span>
+              </div>
+            </button>
+
+            <button class="preset-btn" onclick="loadPreset('full-match')" id="preset-full-match">
+              <div class="preset-title">6. Full Match (Duplicate)</div>
+              <div class="preset-tags">
+                <span class="preset-tag match">Same Email</span>
+                <span class="preset-tag match">Same Phone</span>
+                <span class="preset-tag match">Same Device</span>
+              </div>
+            </button>
           </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">Lead Details</div>
 
           <div class="form-group">
             <label>Brand / Site</label>
@@ -397,6 +496,11 @@
           <div class="form-group">
             <label>Name</label>
             <input type="text" id="name" value="New Lead">
+          </div>
+
+          <div class="form-group">
+            <label>Device ID</label>
+            <input type="text" id="deviceId" value="" readonly style="color: #666; font-family: monospace; font-size: 11px;">
           </div>
 
           <button class="btn btn-primary" id="submitBtn" onclick="runFlow()">
@@ -617,16 +721,113 @@
   </div>
 
   <script>
-    const scenarios = {
-      'new': { email: 'newlead@company.com', phone: '0400111222', name: 'New Lead', isDuplicate: false },
-      'duplicate': { email: 'john.smith@existing.com', phone: '0412345678', name: 'John Smith', isDuplicate: true }
+    // Simulated "existing" customer database
+    const existingCustomer = {
+      email: 'john.smith@acme.com.au',
+      phone: '0412 345 678',
+      name: 'John Smith',
+      deviceId: 'DEV-EXISTING-ABC123',
+      brands: ['access-hire'],
+      masterId: 'MASTER-JS-001'
     };
+
+    // Preset scenarios
+    const presets = {
+      'new-user': {
+        email: 'sarah.jones@newco.com',
+        phone: '0498 765 432',
+        name: 'Sarah Jones',
+        brand: 'clg',
+        deviceId: () => 'DEV-' + generateShortId(),
+        matchType: 'none',
+        description: 'Completely new user - no matches'
+      },
+      'same-device': {
+        email: 'different.email@other.com',
+        phone: '0411 222 333',
+        name: 'Mystery Visitor',
+        brand: 'access-hire',
+        deviceId: () => existingCustomer.deviceId,
+        matchType: 'device',
+        description: 'Different contact info but same device as John Smith'
+      },
+      'same-email': {
+        email: existingCustomer.email,
+        phone: '0499 888 777',
+        name: 'John S',
+        brand: 'access-express',
+        deviceId: () => 'DEV-' + generateShortId(),
+        matchType: 'email',
+        description: 'Same email as existing customer, new device'
+      },
+      'same-phone': {
+        email: 'j.smith.work@company.com',
+        phone: existingCustomer.phone,
+        name: 'J Smith',
+        brand: 'clg',
+        deviceId: () => 'DEV-' + generateShortId(),
+        matchType: 'phone',
+        description: 'Same phone as existing customer, different email'
+      },
+      'cross-brand': {
+        email: existingCustomer.email,
+        phone: existingCustomer.phone,
+        name: existingCustomer.name,
+        brand: 'access-express',
+        deviceId: () => 'DEV-' + generateShortId(),
+        matchType: 'cross-brand',
+        description: 'Existing Access Hire customer visiting Access Express'
+      },
+      'full-match': {
+        email: existingCustomer.email,
+        phone: existingCustomer.phone,
+        name: existingCustomer.name,
+        brand: 'access-hire',
+        deviceId: () => existingCustomer.deviceId,
+        matchType: 'duplicate',
+        description: 'Full match - likely duplicate submission'
+      }
+    };
+
+    let currentPreset = 'new-user';
+    let currentDeviceId = '';
+
+    function generateShortId() {
+      return Math.random().toString(36).substr(2, 8).toUpperCase();
+    }
 
     function generateUUID() {
       return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
         const r = Math.random() * 16 | 0;
         return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16).toUpperCase();
       });
+    }
+
+    function loadPreset(presetId) {
+      currentPreset = presetId;
+      const preset = presets[presetId];
+
+      // Update form
+      document.getElementById('email').value = preset.email;
+      document.getElementById('phone').value = preset.phone;
+      document.getElementById('name').value = preset.name;
+      document.getElementById('brand').value = preset.brand;
+
+      // Generate/get device ID
+      currentDeviceId = typeof preset.deviceId === 'function' ? preset.deviceId() : preset.deviceId;
+      document.getElementById('deviceId').value = currentDeviceId;
+
+      // Update active state
+      document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById('preset-' + presetId).classList.add('active');
+
+      // Log the scenario
+      clearLog();
+      log('SITE', `Scenario: ${preset.description}`);
+      if (preset.matchType !== 'none') {
+        log('SITE', `Expected match: ${preset.matchType.toUpperCase()}`);
+      }
+      log('SITE', 'Ready to submit');
     }
 
     function log(source, message) {
@@ -682,18 +883,15 @@
       }
     }
 
-    function loadScenario() {
-      const s = scenarios[document.getElementById('scenario').value];
-      document.getElementById('email').value = s.email;
-      document.getElementById('phone').value = s.phone;
-      document.getElementById('name').value = s.name;
-    }
-
     async function runFlow() {
       const email = document.getElementById('email').value;
       const name = document.getElementById('name').value;
       const brand = document.getElementById('brand').value;
-      const isDuplicate = document.getElementById('scenario').value === 'duplicate';
+      const phone = document.getElementById('phone').value;
+      const deviceId = currentDeviceId || document.getElementById('deviceId').value;
+      const preset = presets[currentPreset];
+      const matchType = preset ? preset.matchType : 'none';
+      const isDuplicate = matchType === 'duplicate';
 
       const btn = document.getElementById('submitBtn');
       btn.disabled = true;
@@ -730,12 +928,32 @@
       document.getElementById('displayUid').textContent = uid;
       document.getElementById('displayUid').classList.add('set');
       log('ADAPTER', `Generated UID: ${uid.substring(0, 8)}...`);
+      log('ADAPTER', `Device ID: ${deviceId}`);
 
-      if (isDuplicate) {
-        log('ADAPTER', '⚠️ Duplicate check: potential match found');
+      // Identity resolution logic based on match type
+      if (matchType === 'none') {
+        log('ADAPTER', '✓ No existing matches found');
+        log('ADAPTER', 'Creating new master record');
+      } else if (matchType === 'device') {
+        log('ADAPTER', `🔗 Device match: ${deviceId}`);
+        log('ADAPTER', `Linked to existing: ${existingCustomer.name}`);
+        log('ADAPTER', 'Merging device graph - same person, new contact info');
+      } else if (matchType === 'email') {
+        log('ADAPTER', `🔗 Email match: ${email}`);
+        log('ADAPTER', `Linked to master: ${existingCustomer.masterId}`);
+        log('ADAPTER', 'Adding new device to identity graph');
+      } else if (matchType === 'phone') {
+        log('ADAPTER', `🔗 Phone match: ${phone}`);
+        log('ADAPTER', `Linked to master: ${existingCustomer.masterId}`);
+        log('ADAPTER', 'Adding alternate email to profile');
+      } else if (matchType === 'cross-brand') {
+        log('ADAPTER', `🔗 Cross-brand match: ${existingCustomer.name}`);
+        log('ADAPTER', `Existing brands: ${existingCustomer.brands.join(', ')}`);
+        log('ADAPTER', `Adding new brand: ${brand}`);
+      } else if (matchType === 'duplicate') {
+        log('ADAPTER', '⚠️ DUPLICATE DETECTED');
+        log('ADAPTER', `Full match on email + phone + device`);
         log('ADAPTER', 'Flagging for sales review');
-      } else {
-        log('ADAPTER', 'Duplicate check: no match found');
       }
 
       log('ADAPTER', 'Transforming payload for NetSuite API');
@@ -880,13 +1098,11 @@
       document.getElementById('displayAmpId').classList.remove('set');
 
       clearLog();
-      loadScenario();
-      log('SITE', 'Demo reset - ready');
+      loadPreset(currentPreset);
     }
 
     window.onload = () => {
-      loadScenario();
-      log('SITE', 'System ready');
+      loadPreset('new-user');
     };
   </script>
 </body>
