@@ -1068,40 +1068,61 @@
       const ampId = 'AMP-' + uid.substring(0, 8);
 
       // Step 1 - Form submission with UID generated on frontend
+      // Firebase can detect device match and include flag in payload
+      const firebaseDeviceMatch = (matchType === 'device' || matchType === 'duplicate');
       currentStepIndex = 1; updateStepIndicator(1, totalSteps); await waitForNextStep();
       activateStep(1); setStatus('site', 'Send', 'active');
       log('SDK', `Generating UID via Firebase`);
       document.getElementById('displayUid').textContent = uid.substring(0, 13) + '...';
       document.getElementById('displayUid').classList.add('set');
       log('SDK', `UID: ${uid.substring(0, 8)}...`);
+      if (firebaseDeviceMatch) {
+        log('SDK', `⚠️ Device match detected: ${deviceId}`);
+        log('SDK', `Adding duplicate_alert flag to payload`);
+      }
       log('SITE', `Form submitted on ${brand}`);
-      log('DATALAYER', `form_submit { uid, email, phone, brand }`);
+      const payloadFields = firebaseDeviceMatch
+        ? 'uid, email, phone, brand, duplicate_alert: true, matched_device'
+        : 'uid, email, phone, brand';
+      log('DATALAYER', `form_submit { ${payloadFields} }`);
       await activateBox('box-form'); completeStep(1); setStatus('site', '✓', 'done'); activateConnector('conn-1');
 
-      // Step 2 - NS Adapter receives UID + data
+      // Step 2 - NS Adapter receives UID + data, checks email/phone
       currentStepIndex = 2; updateStepIndicator(2, totalSteps); await waitForNextStep();
       activateStep(2); setStatus('adapter', 'Proc', 'active');
       log('ADAPTER', `Received UID: ${uid.substring(0, 8)}...`);
+      if (firebaseDeviceMatch) {
+        log('ADAPTER', `📋 Firebase flagged: duplicate_alert=true`);
+      }
       if (playbackMode === 'auto') await new Promise(r => setTimeout(r, 250));
-      log('ADAPTER', 'Checking for duplicates...');
+      log('ADAPTER', 'Checking email/phone for duplicates...');
       if (matchType === 'none') { log('ADAPTER', '✓ No match'); }
-      else if (matchType === 'device') { log('ADAPTER', `🔗 Device: ${deviceId}`); }
-      else if (matchType === 'email') { log('ADAPTER', `🔗 Email match`); }
-      else if (matchType === 'phone') { log('ADAPTER', `🔗 Phone match`); }
-      else if (matchType === 'cross-brand') { log('ADAPTER', `🔗 Cross-brand`); }
-      else if (matchType === 'duplicate') { log('ADAPTER', '⚠️ DUPLICATE'); }
+      else if (matchType === 'device') { log('ADAPTER', `✓ No email/phone match (device only)`); }
+      else if (matchType === 'email') { log('ADAPTER', `🔗 Email match found`); }
+      else if (matchType === 'phone') { log('ADAPTER', `🔗 Phone match found`); }
+      else if (matchType === 'cross-brand') { log('ADAPTER', `🔗 Cross-brand match`); }
+      else if (matchType === 'duplicate') { log('ADAPTER', '⚠️ Email + Phone match (full duplicate)'); }
       await activateBox('box-adapter'); completeStep(2); setStatus('adapter', '✓', 'done'); activateConnector('conn-2');
 
-      // Step 3
+      // Step 3 - NetSuite creates lead (includes Firebase duplicate alert if present)
+      const anyDuplicateFlag = firebaseDeviceMatch || matchType === 'email' || matchType === 'phone' || matchType === 'cross-brand' || isDuplicate;
       currentStepIndex = 3; updateStepIndicator(3, totalSteps); await waitForNextStep();
       activateStep(3); setStatus('netsuite', 'Create', 'active');
-      log('NETSUITE', 'Creating lead');
+      log('NETSUITE', 'Creating lead record...');
       if (playbackMode === 'auto') await new Promise(r => setTimeout(r, 300));
       document.getElementById('displayNsId').textContent = nsId;
       document.getElementById('displayNsId').classList.add('set');
-      log('NETSUITE', `Created: ${nsId}`);
-      if (isDuplicate) { log('NETSUITE', '⚠️ Dup flag set'); setStatus('netsuite', 'Dup', 'warning'); }
-      else { setStatus('netsuite', '✓', 'done'); }
+      log('NETSUITE', `Lead created: ${nsId}`);
+      if (firebaseDeviceMatch) {
+        log('NETSUITE', `📋 Lead includes: "Duplicate Alert: Device match detected"`);
+        log('NETSUITE', `📋 Matched device: ${deviceId}`);
+      }
+      if (anyDuplicateFlag) {
+        setStatus('netsuite', 'Alert', 'warning');
+        log('NETSUITE', `⚠️ Duplicate indicator visible to sales in lead record`);
+      } else {
+        setStatus('netsuite', '✓', 'done');
+      }
       log('DATALAYER', 'lead_created');
       await activateBox('box-netsuite'); completeStep(3); activateConnector('conn-3');
 
