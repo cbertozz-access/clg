@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CLG Identity System - Smoke Test</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 { color: #1a1a1a; margin-bottom: 10px; }
+    .subtitle { color: #666; margin-bottom: 30px; }
+    .test-card {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 15px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .test-card h3 {
+      margin: 0 0 10px 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .status {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .status.pending { background: #f0f0f0; color: #666; }
+    .status.running { background: #fff3cd; color: #856404; }
+    .status.pass { background: #d4edda; color: #155724; }
+    .status.fail { background: #f8d7da; color: #721c24; }
+    .test-result {
+      font-family: monospace;
+      font-size: 13px;
+      background: #f8f9fa;
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 10px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      display: none;
+    }
+    .test-card.expanded .test-result { display: block; }
+    button {
+      background: #E63229;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+    button:hover { background: #c42920; }
+    button:disabled { background: #ccc; cursor: not-allowed; }
+    .summary {
+      background: white;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+      text-align: center;
+    }
+    .summary.all-pass { border: 2px solid #28a745; }
+    .summary.has-fail { border: 2px solid #dc3545; }
+    .visitor-info {
+      background: #e8f4f8;
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      font-family: monospace;
+      font-size: 13px;
+    }
+    .visitor-info strong { color: #0066cc; }
+  </style>
+</head>
+<body>
+  <h1>CLG Identity System - Smoke Test</h1>
+  <p class="subtitle">Tests the SDK and Cloud Functions end-to-end</p>
+
+  <div class="visitor-info" id="visitorInfo">
+    Loading SDK...
+  </div>
+
+  <button id="runTests" disabled>Run All Tests</button>
+
+  <div id="tests">
+    <div class="test-card" id="test1">
+      <h3>
+        <span class="status pending">PENDING</span>
+        1. SDK Initialization
+      </h3>
+      <p>Verify SDK loads and gets a visitor ID from Firebase</p>
+      <div class="test-result"></div>
+    </div>
+
+    <div class="test-card" id="test2">
+      <h3>
+        <span class="status pending">PENDING</span>
+        2. Check Identity (Page Load)
+      </h3>
+      <p>Verify checkIdentity is called and responds</p>
+      <div class="test-result"></div>
+    </div>
+
+    <div class="test-card" id="test3">
+      <h3>
+        <span class="status pending">PENDING</span>
+        3. Link Identity (New User)
+      </h3>
+      <p>Create a new identity with email/phone hash</p>
+      <div class="test-result"></div>
+    </div>
+
+    <div class="test-card" id="test4">
+      <h3>
+        <span class="status pending">PENDING</span>
+        4. Link Identity (Duplicate Detection)
+      </h3>
+      <p>Submit same email hash, verify duplicate is detected</p>
+      <div class="test-result"></div>
+    </div>
+
+    <div class="test-card" id="test5">
+      <h3>
+        <span class="status pending">PENDING</span>
+        5. Track Form Submit
+      </h3>
+      <p>Test trackFormSubmit with email/phone data</p>
+      <div class="test-result"></div>
+    </div>
+
+    <div class="test-card" id="test6">
+      <h3>
+        <span class="status pending">PENDING</span>
+        6. DataLayer Events
+      </h3>
+      <p>Verify dataLayer receives identity events</p>
+      <div class="test-result"></div>
+    </div>
+  </div>
+
+  <div class="summary" id="summary" style="display:none;">
+    <h2 id="summaryTitle">Test Results</h2>
+    <p id="summaryText"></p>
+  </div>
+
+  <!-- Load the SDK -->
+  <script src="/clg-visitor.js"></script>
+
+  <script>
+    const IDENTITY_LINK_ENDPOINT = 'https://australia-southeast1-composable-lg.cloudfunctions.net/linkIdentity';
+
+    let testResults = {};
+    let visitorId = null;
+    let dataLayerEvents = [];
+
+    // Capture dataLayer pushes
+    const originalPush = window.dataLayer.push.bind(window.dataLayer);
+    window.dataLayer.push = function(data) {
+      dataLayerEvents.push(data);
+      return originalPush(data);
+    };
+
+    function updateTest(testId, status, result) {
+      const card = document.getElementById(testId);
+      const statusEl = card.querySelector('.status');
+      const resultEl = card.querySelector('.test-result');
+
+      statusEl.className = 'status ' + status;
+      statusEl.textContent = status.toUpperCase();
+
+      if (result) {
+        resultEl.textContent = typeof result === 'object' ? JSON.stringify(result, null, 2) : result;
+        card.classList.add('expanded');
+      }
+
+      testResults[testId] = status;
+    }
+
+    function updateVisitorInfo() {
+      const info = document.getElementById('visitorInfo');
+      if (window.CLGVisitor && window.CLGVisitor.visitorId) {
+        visitorId = window.CLGVisitor.visitorId;
+        info.innerHTML = `
+          <strong>Visitor ID:</strong> ${visitorId}<br>
+          <strong>Session ID:</strong> ${window.CLGVisitor.sessionId || 'N/A'}<br>
+          <strong>Device ID:</strong> ${window.CLGVisitor.getDeviceId ? window.CLGVisitor.getDeviceId() : 'N/A'}<br>
+          <strong>Brand:</strong> ${window.CLGVisitor.getBrand ? window.CLGVisitor.getBrand() : 'N/A'}
+        `;
+        document.getElementById('runTests').disabled = false;
+      } else {
+        info.innerHTML = '<strong>Error:</strong> SDK not loaded or initialized';
+      }
+    }
+
+    // Wait for SDK to initialize
+    window.addEventListener('clg:visitor:ready', updateVisitorInfo);
+    setTimeout(updateVisitorInfo, 2000); // Fallback
+
+    async function runTests() {
+      const btn = document.getElementById('runTests');
+      btn.disabled = true;
+      btn.textContent = 'Running...';
+
+      const testEmail = `smoke-test-${Date.now()}@test.com`;
+      const testPhone = `0400${Date.now().toString().slice(-6)}`;
+
+      // Test 1: SDK Initialization
+      updateTest('test1', 'running');
+      if (window.CLGVisitor && window.CLGVisitor.visitorId) {
+        updateTest('test1', 'pass', {
+          visitor_id: window.CLGVisitor.visitorId,
+          session_id: window.CLGVisitor.sessionId,
+          initialized: window.CLGVisitor.initialized
+        });
+      } else {
+        updateTest('test1', 'fail', 'SDK not initialized');
+      }
+
+      // Test 2: Check Identity
+      updateTest('test2', 'running');
+      try {
+        const checkResult = await window.CLGVisitor.checkIdentity();
+        updateTest('test2', 'pass', checkResult);
+      } catch (e) {
+        updateTest('test2', 'fail', e.message);
+      }
+
+      // Test 3: Link Identity (New)
+      updateTest('test3', 'running');
+      try {
+        const linkResult = await window.CLGVisitor.linkIdentity(testEmail, testPhone);
+        if (linkResult.master_uid) {
+          updateTest('test3', 'pass', linkResult);
+        } else {
+          updateTest('test3', 'fail', linkResult);
+        }
+      } catch (e) {
+        updateTest('test3', 'fail', e.message);
+      }
+
+      // Test 4: Link Identity (Duplicate)
+      updateTest('test4', 'running');
+      try {
+        // Use same email, different UID to simulate another visitor
+        const emailHash = await window.CLGVisitor.hashPII(testEmail);
+        const response = await fetch(IDENTITY_LINK_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            uid: 'different-visitor-' + Date.now(),
+            device_id: 'DV-TEST-DIFFERENT',
+            brand: 'smoke-test',
+            email_hash: emailHash,
+            phone_hash: 'different_phone_hash'
+          })
+        });
+        const dupResult = await response.json();
+
+        if (dupResult.is_duplicate && dupResult.match_sources.includes('email')) {
+          updateTest('test4', 'pass', dupResult);
+        } else {
+          updateTest('test4', 'fail', dupResult);
+        }
+      } catch (e) {
+        updateTest('test4', 'fail', e.message);
+      }
+
+      // Test 5: Track Form Submit
+      updateTest('test5', 'running');
+      try {
+        const formResult = await window.CLGVisitor.trackFormSubmit('smoke_test_form', {
+          email: testEmail,
+          phone: testPhone,
+          contactType: 'Smoke Test'
+        });
+        updateTest('test5', 'pass', formResult);
+      } catch (e) {
+        updateTest('test5', 'fail', e.message);
+      }
+
+      // Test 6: DataLayer Events
+      updateTest('test6', 'running');
+      const identityEvents = dataLayerEvents.filter(e =>
+        e.event && (e.event.includes('clg_') || e.event.includes('visitor'))
+      );
+      if (identityEvents.length > 0) {
+        updateTest('test6', 'pass', {
+          events_captured: identityEvents.length,
+          events: identityEvents.map(e => e.event)
+        });
+      } else {
+        updateTest('test6', 'fail', 'No identity events in dataLayer');
+      }
+
+      // Summary
+      const passed = Object.values(testResults).filter(r => r === 'pass').length;
+      const failed = Object.values(testResults).filter(r => r === 'fail').length;
+      const total = Object.keys(testResults).length;
+
+      const summary = document.getElementById('summary');
+      const title = document.getElementById('summaryTitle');
+      const text = document.getElementById('summaryText');
+
+      summary.style.display = 'block';
+      summary.className = failed === 0 ? 'summary all-pass' : 'summary has-fail';
+      title.textContent = failed === 0 ? '✅ All Tests Passed!' : `⚠️ ${failed} Test(s) Failed`;
+      text.textContent = `${passed}/${total} tests passed`;
+
+      btn.textContent = 'Run Again';
+      btn.disabled = false;
+    }
+
+    document.getElementById('runTests').addEventListener('click', runTests);
+  </script>
+</body>
+</html>
