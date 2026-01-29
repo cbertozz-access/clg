@@ -251,8 +251,11 @@ export async function submitContactRequest(
     };
 
     // Track form submission via SDK if available
+    // Include email and phone for identity graph linkIdentity
     if (typeof window !== 'undefined' && window.CLGVisitor?.trackFormSubmit) {
       window.CLGVisitor.trackFormSubmit('contact_request', {
+        email: data.contactEmail,
+        phone: data.contactPhone,
         contactType: data.contactType,
         sourceDepot: data.sourceDepot,
       });
