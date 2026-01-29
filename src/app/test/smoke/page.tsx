@@ -414,6 +414,15 @@ export default function SmokeTestPage() {
               {isRunning ? 'Launch New Test' : 'Launch Test'}
             </button>
           </div>
+          <p className="mt-2 text-sm text-gray-500">
+            Example: <button
+              type="button"
+              onClick={() => setTargetUrl('https://clg-ten.vercel.app/demo-form')}
+              className="text-red-600 hover:text-red-800 underline"
+            >
+              https://clg-ten.vercel.app/demo-form
+            </button>
+          </p>
 
           {debugSessionId && (
             <div className="mt-4 flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
