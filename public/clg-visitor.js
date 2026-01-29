@@ -25,6 +25,10 @@
   // Firebase endpoint for visitor profiles
   const FIREBASE_ENDPOINT = 'https://australia-southeast1-composable-lg.cloudfunctions.net/visitorId';
 
+  // Identity Graph endpoints
+  const IDENTITY_CHECK_ENDPOINT = 'https://australia-southeast1-composable-lg.cloudfunctions.net/checkIdentity';
+  const IDENTITY_LINK_ENDPOINT = 'https://australia-southeast1-composable-lg.cloudfunctions.net/linkIdentity';
+
   // Server-side GTM endpoint (GCP App Engine)
   const SGTM_ENDPOINT = 'https://composable-lg.ts.r.appspot.com';
   const SGTM_PATH = '/clg/collect'; // Custom client path
@@ -102,6 +106,143 @@
         }
       }
       return result;
+    },
+
+    // ========================================================================
+    // IDENTITY GRAPH METHODS
+    // ========================================================================
+
+    /**
+     * Check identity on page load
+     * Looks up device fingerprint in identity graph
+     */
+    async checkIdentity() {
+      try {
+        const response = await fetch(IDENTITY_CHECK_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            uid: this.visitorId,
+            device_id: this.getDeviceId(),
+            brand: this.getBrand()
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.is_known && result.master_uid && result.master_uid !== this.visitorId) {
+          // Visitor recognized from identity graph
+          window.dataLayer.push({
+            event: 'clg_identity_matched',
+            clg_uid: this.visitorId,
+            clg_master_uid: result.master_uid,
+            clg_match_type: result.match_type,
+            clg_is_known: true
+          });
+
+          console.log('[CLG] Identity matched:', result.match_type);
+        }
+
+        return result;
+      } catch (error) {
+        console.warn('[CLG] checkIdentity failed:', error);
+        return { is_known: false, master_uid: null, match_type: null };
+      }
+    },
+
+    /**
+     * Link identity on form submission
+     * Stores hashed email/phone and links UIDs if duplicates found
+     */
+    async linkIdentity(email, phone) {
+      try {
+        const emailHash = email ? await this.hashPII(email) : null;
+        const phoneHash = phone ? await this.hashPII(phone) : null;
+
+        const response = await fetch(IDENTITY_LINK_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            uid: this.visitorId,
+            device_id: this.getDeviceId(),
+            brand: this.getBrand(),
+            email_hash: emailHash,
+            phone_hash: phoneHash
+          })
+        });
+
+        const result = await response.json();
+
+        // Push to dataLayer
+        window.dataLayer.push({
+          event: 'clg_identity_linked',
+          clg_uid: this.visitorId,
+          clg_is_duplicate: result.is_duplicate,
+          clg_match_sources: result.match_sources || [],
+          clg_master_uid: result.master_uid,
+          clg_ns_lead_id: result.ns_lead_id,
+          clg_action: result.action
+        });
+
+        if (result.is_duplicate) {
+          console.log('[CLG] Duplicate detected:', result.match_sources);
+        } else {
+          console.log('[CLG] Identity linked:', result.action);
+        }
+
+        return result;
+      } catch (error) {
+        console.warn('[CLG] linkIdentity failed:', error);
+        return { is_duplicate: false, match_sources: [], master_uid: this.visitorId };
+      }
+    },
+
+    /**
+     * Get device fingerprint ID
+     */
+    getDeviceId() {
+      let deviceId = localStorage.getItem('clg_device_id');
+      if (!deviceId) {
+        deviceId = this.generateDeviceFingerprint();
+        localStorage.setItem('clg_device_id', deviceId);
+      }
+      return deviceId;
+    },
+
+    /**
+     * Generate device fingerprint from browser characteristics
+     */
+    generateDeviceFingerprint() {
+      const components = [
+        navigator.userAgent,
+        navigator.language,
+        screen.width + 'x' + screen.height,
+        screen.colorDepth,
+        new Date().getTimezoneOffset(),
+        navigator.hardwareConcurrency || 'unknown',
+        navigator.platform
+      ];
+
+      // Simple hash
+      let hash = 0;
+      const str = components.join('|');
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+      }
+      return 'DV' + Math.abs(hash).toString(36).toUpperCase();
+    },
+
+    /**
+     * Get current brand from URL or config
+     */
+    getBrand() {
+      const hostname = window.location.hostname;
+      if (hostname.includes('access-express')) return 'access-express';
+      if (hostname.includes('access-hire') || hostname.includes('accesshire')) return 'access-hire';
+      if (hostname.includes('clg')) return 'clg-dev';
+      return 'unknown';
     },
 
     /**
@@ -495,9 +636,17 @@
 
         console.log('[CLG] Visitor initialized:', this.visitorId, 'Session:', this.sessionId);
 
+        // Check identity graph for existing matches
+        const identityResult = await this.checkIdentity();
+        if (identityResult.is_known) {
+          console.log('[CLG] Recognized from identity graph:', identityResult.match_type);
+        }
+
         // Send to server-side GTM
         this.sendToSGTM(session.page_views === 1 ? 'session_start' : 'page_view', {
-          is_new_visitor: !existingId
+          is_new_visitor: !existingId,
+          is_known: identityResult.is_known,
+          master_uid: identityResult.master_uid
         });
 
         return data;
@@ -630,14 +779,25 @@
 
     /**
      * Track form submission with full context
+     * Automatically links identity if email/phone provided
      */
     async trackFormSubmit(formName, formData = {}) {
       const firstTouchUtm = this.getFirstTouchUtm();
       const lastTouchUtm = this.getLastTouchUtm();
 
+      // Link identity if email or phone provided
+      let identityResult = null;
+      if (formData.email || formData.phone) {
+        identityResult = await this.linkIdentity(formData.email, formData.phone);
+      }
+
       const formEventData = {
         form_name: formName,
         form_data: formData,
+        // Identity graph result
+        is_duplicate: identityResult?.is_duplicate || false,
+        match_sources: identityResult?.match_sources || [],
+        master_uid: identityResult?.master_uid || this.visitorId,
         // Attribution data
         first_touch_source: firstTouchUtm?.utm_source,
         first_touch_medium: firstTouchUtm?.utm_medium,
@@ -658,6 +818,10 @@
       return this.track('form_submit', {
         form_name: formName,
         form_data: formData,
+        // Identity graph result
+        is_duplicate: identityResult?.is_duplicate || false,
+        match_sources: identityResult?.match_sources || [],
+        master_uid: identityResult?.master_uid || this.visitorId,
         // Attribution data
         first_touch_source: firstTouchUtm?.utm_source,
         first_touch_medium: firstTouchUtm?.utm_medium,
