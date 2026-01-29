@@ -514,6 +514,12 @@ Builder.registerComponent(EquipmentSelector, {
   name: "EquipmentSelector",
   friendlyName: "Equipment - Selector Wizard",
   description: "6-step questionnaire wizard that guides users to recommended equipment based on their needs",
+  image: "https://cdn.builder.io/api/v1/image/assets%2Fpwgjf0RoYWbdnJSbpBAjXNRMe9F2%2F1f1c1a3c5c3b4b3b8b3b3b3b3b3b3b3b",
+  canHaveChildren: false,
+  defaultStyles: {
+    minHeight: "500px",
+    width: "100%",
+  },
   inputs: [
     { name: "title", type: "string", defaultValue: "Equipment Selector", friendlyName: "Title" },
     { name: "subtitle", type: "string", defaultValue: "Answer a few questions to find the right equipment for your project", friendlyName: "Subtitle" },
