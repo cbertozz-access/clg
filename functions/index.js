@@ -9,6 +9,7 @@ const firestore = new Firestore({
 
 const COLLECTION = 'visitors';
 const IDENTITY_GRAPH = 'identity_graph';
+const DEBUG_EVENTS = 'debug_events';
 const COOKIE_NAME = 'clg_vid';
 const COOKIE_MAX_AGE = 365 * 24 * 60 * 60; // 1 year in seconds
 
@@ -548,3 +549,74 @@ async function handlePost(req, res) {
     }
   });
 }
+
+// ============================================================================
+// DEBUG EVENTS - For real-time smoke testing
+// ============================================================================
+
+/**
+ * Debug Events - Store and retrieve debug events for smoke testing
+ *
+ * GET /debugEvents?session=xxx - Get events for a session
+ * POST /debugEvents - Store a debug event
+ */
+exports.debugEvents = async (req, res) => {
+  setCorsHeaders(req, res);
+
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
+
+  try {
+    if (req.method === 'GET') {
+      const sessionId = req.query.session;
+      if (!sessionId) {
+        res.status(400).json({ error: 'session parameter is required' });
+        return;
+      }
+
+      // Get events for this session (last 5 minutes)
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+      const snapshot = await firestore
+        .collection(DEBUG_EVENTS)
+        .where('session_id', '==', sessionId)
+        .where('timestamp', '>', fiveMinutesAgo)
+        .orderBy('timestamp', 'asc')
+        .limit(100)
+        .get();
+
+      const events = [];
+      snapshot.forEach(doc => {
+        events.push({ id: doc.id, ...doc.data() });
+      });
+
+      res.status(200).json({ events });
+
+    } else if (req.method === 'POST') {
+      const { session_id, type, data } = req.body;
+
+      if (!session_id || !type) {
+        res.status(400).json({ error: 'session_id and type are required' });
+        return;
+      }
+
+      const event = {
+        session_id,
+        type,
+        data: data || {},
+        timestamp: new Date().toISOString()
+      };
+
+      const docRef = await firestore.collection(DEBUG_EVENTS).add(event);
+
+      res.status(200).json({ success: true, event_id: docRef.id });
+
+    } else {
+      res.status(405).json({ error: 'Method not allowed' });
+    }
+  } catch (error) {
+    console.error('debugEvents error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};

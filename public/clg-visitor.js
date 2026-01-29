@@ -28,6 +28,7 @@
   // Identity Graph endpoints
   const IDENTITY_CHECK_ENDPOINT = 'https://australia-southeast1-composable-lg.cloudfunctions.net/checkIdentity';
   const IDENTITY_LINK_ENDPOINT = 'https://australia-southeast1-composable-lg.cloudfunctions.net/linkIdentity';
+  const DEBUG_EVENTS_ENDPOINT = 'https://australia-southeast1-composable-lg.cloudfunctions.net/debugEvents';
 
   // Server-side GTM endpoint (GCP App Engine)
   const SGTM_ENDPOINT = 'https://composable-lg.ts.r.appspot.com';
@@ -58,6 +59,8 @@
     session: null,
     initialized: false,
     sgtmEnabled: true, // Enable/disable server-side GTM
+    debugMode: false,  // Debug mode for smoke testing
+    debugSessionId: null, // Debug session ID from URL param
 
     /**
      * Generate a unique ID
@@ -109,6 +112,72 @@
     },
 
     // ========================================================================
+    // DEBUG MODE - For real-time smoke testing
+    // ========================================================================
+
+    /**
+     * Check and enable debug mode from URL parameter
+     */
+    initDebugMode() {
+      const params = new URLSearchParams(window.location.search);
+      const debugSession = params.get('clg_debug');
+
+      if (debugSession) {
+        this.debugMode = true;
+        this.debugSessionId = debugSession;
+        console.log('[CLG] Debug mode enabled, session:', debugSession);
+
+        // Also try BroadcastChannel for same-origin debugging
+        try {
+          this.debugChannel = new BroadcastChannel('clg_debug');
+        } catch (e) {
+          // BroadcastChannel not supported
+        }
+      }
+    },
+
+    /**
+     * Send debug event to smoke test page
+     */
+    async sendDebugEvent(type, data) {
+      if (!this.debugMode || !this.debugSessionId) return;
+
+      const event = {
+        session_id: this.debugSessionId,
+        type,
+        data: {
+          ...data,
+          visitor_id: this.visitorId,
+          timestamp: new Date().toISOString()
+        }
+      };
+
+      // Send via BroadcastChannel (same-origin)
+      if (this.debugChannel) {
+        try {
+          this.debugChannel.postMessage({
+            type,
+            data: event.data,
+            timestamp: new Date().toISOString()
+          });
+        } catch (e) {
+          // Ignore broadcast errors
+        }
+      }
+
+      // Send to Cloud Function (cross-origin)
+      try {
+        await fetch(DEBUG_EVENTS_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(event)
+        });
+      } catch (e) {
+        console.warn('[CLG] Debug event send failed:', e);
+      }
+    },
+
+    // ========================================================================
     // IDENTITY GRAPH METHODS
     // ========================================================================
 
@@ -130,6 +199,13 @@
 
         const result = await response.json();
 
+        // Send debug event
+        this.sendDebugEvent('check_identity', {
+          device_id: this.getDeviceId(),
+          brand: this.getBrand(),
+          result
+        });
+
         if (result.is_known && result.master_uid && result.master_uid !== this.visitorId) {
           // Visitor recognized from identity graph
           window.dataLayer.push({
@@ -146,6 +222,7 @@
         return result;
       } catch (error) {
         console.warn('[CLG] checkIdentity failed:', error);
+        this.sendDebugEvent('check_identity_error', { error: error.message });
         return { is_known: false, master_uid: null, match_type: null };
       }
     },
@@ -173,6 +250,15 @@
 
         const result = await response.json();
 
+        // Send debug event
+        this.sendDebugEvent('link_identity', {
+          has_email: !!email,
+          has_phone: !!phone,
+          device_id: this.getDeviceId(),
+          brand: this.getBrand(),
+          result
+        });
+
         // Push to dataLayer
         window.dataLayer.push({
           event: 'clg_identity_linked',
@@ -193,6 +279,7 @@
         return result;
       } catch (error) {
         console.warn('[CLG] linkIdentity failed:', error);
+        this.sendDebugEvent('link_identity_error', { error: error.message });
         return { is_duplicate: false, match_sources: [], master_uid: this.visitorId };
       }
     },
@@ -506,6 +593,9 @@
     async init() {
       if (this.initialized) return this.profile;
 
+      // Check for debug mode
+      this.initDebugMode();
+
       try {
         // Get or create session first
         const session = this.getOrCreateSession();
@@ -635,6 +725,14 @@
         }));
 
         console.log('[CLG] Visitor initialized:', this.visitorId, 'Session:', this.sessionId);
+
+        // Send debug event for SDK init
+        this.sendDebugEvent('sdk_init', {
+          session_id: this.sessionId,
+          is_new_visitor: !existingId,
+          is_new_session: session.page_views === 1,
+          page_url: window.location.href
+        });
 
         // Check identity graph for existing matches
         const identityResult = await this.checkIdentity();
@@ -790,6 +888,14 @@
       if (formData.email || formData.phone) {
         identityResult = await this.linkIdentity(formData.email, formData.phone);
       }
+
+      // Send debug event
+      this.sendDebugEvent('form_submit', {
+        form_name: formName,
+        has_email: !!formData.email,
+        has_phone: !!formData.phone,
+        identity_result: identityResult
+      });
 
       const formEventData = {
         form_name: formName,
