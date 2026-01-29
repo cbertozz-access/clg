@@ -15,8 +15,10 @@ const COOKIE_MAX_AGE = 365 * 24 * 60 * 60; // 1 year in seconds
 // ============================================================================
 // CORS HELPER
 // ============================================================================
-function setCorsHeaders(res) {
-  res.set('Access-Control-Allow-Origin', '*');
+function setCorsHeaders(req, res) {
+  // When credentials are included, can't use wildcard - must echo the origin
+  const origin = req.get('Origin') || '*';
+  res.set('Access-Control-Allow-Origin', origin);
   res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.set('Access-Control-Allow-Headers', 'Content-Type');
   res.set('Access-Control-Allow-Credentials', 'true');
@@ -31,7 +33,7 @@ function setCorsHeaders(res) {
  * Checks if device fingerprint matches any existing visitor
  */
 exports.checkIdentity = async (req, res) => {
-  setCorsHeaders(res);
+  setCorsHeaders(req, res);
   if (req.method === 'OPTIONS') {
     res.status(204).send('');
     return;
@@ -99,7 +101,7 @@ exports.checkIdentity = async (req, res) => {
  * Stores hashed PII and links UIDs if matches found
  */
 exports.linkIdentity = async (req, res) => {
-  setCorsHeaders(res);
+  setCorsHeaders(req, res);
   if (req.method === 'OPTIONS') {
     res.status(204).send('');
     return;
@@ -276,7 +278,7 @@ exports.linkIdentity = async (req, res) => {
  * Merges two UIDs after manual de-duplication in NetSuite
  */
 exports.mergeIdentity = async (req, res) => {
-  setCorsHeaders(res);
+  setCorsHeaders(req, res);
   if (req.method === 'OPTIONS') {
     res.status(204).send('');
     return;
@@ -382,7 +384,7 @@ exports.mergeIdentity = async (req, res) => {
  * Returns visitor ID and profile data for GTM dataLayer
  */
 exports.visitorId = async (req, res) => {
-  setCorsHeaders(res);
+  setCorsHeaders(req, res);
 
   if (req.method === 'OPTIONS') {
     res.status(204).send('');
