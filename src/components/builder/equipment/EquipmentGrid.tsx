@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { EquipmentCard } from "./EquipmentCard";
 import { QuickViewModal, type QuickViewEquipment } from "./QuickViewModal";
@@ -82,7 +82,21 @@ export interface EquipmentGridProps {
   useQuickView?: boolean;
 }
 
-export function EquipmentGrid({
+// Loading fallback component
+function EquipmentGridLoading() {
+  return (
+    <div className="py-8 md:py-12 px-4">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-center items-center py-16">
+          <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-[var(--color-primary,#e31937)]" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Inner component that uses useSearchParams
+function EquipmentGridInner({
   title = "Equipment",
   subtitle,
   apiEndpoint = "https://acccessproducts.netlify.app/api/products",
@@ -423,6 +437,15 @@ export function EquipmentGrid({
         equipment={quickViewEquipment}
       />
     </section>
+  );
+}
+
+// Main component wrapped in Suspense for useSearchParams
+export function EquipmentGrid(props: EquipmentGridProps) {
+  return (
+    <Suspense fallback={<EquipmentGridLoading />}>
+      <EquipmentGridInner {...props} />
+    </Suspense>
   );
 }
 

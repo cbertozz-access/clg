@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { EquipmentCard } from "./EquipmentCard";
 import type { QuickViewEquipment } from "./QuickViewModal";
@@ -183,7 +183,21 @@ function FilterSection({
   );
 }
 
-export function EquipmentSearch({
+// Loading fallback component
+function EquipmentSearchLoading() {
+  return (
+    <section className="bg-white min-h-[400px]">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex justify-center items-center py-16">
+          <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-200 border-t-[var(--color-primary,#e31937)]" />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Inner component that uses useSearchParams
+function EquipmentSearchInner({
   title = "Browse Equipment",
   subtitle = "Find the right equipment for your project",
   showHeader = true,
@@ -1129,6 +1143,15 @@ export function EquipmentSearch({
         equipment={quickViewEquipment}
       />
     </section>
+  );
+}
+
+// Main component wrapped in Suspense for useSearchParams
+export function EquipmentSearch(props: EquipmentSearchProps) {
+  return (
+    <Suspense fallback={<EquipmentSearchLoading />}>
+      <EquipmentSearchInner {...props} />
+    </Suspense>
   );
 }
 
