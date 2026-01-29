@@ -1005,6 +1005,45 @@
                 </div>
               </div>
             </div>
+
+            <div class="connector" id="conn-10"></div>
+
+            <div class="flow-step">
+              <div class="step-number" id="num-11">11</div>
+              <div class="step-card" id="box-sales-merge">
+                <div class="step-icon sales">🔍</div>
+                <div class="step-content">
+                  <div class="step-title">Sales Merge</div>
+                  <div class="step-subtitle">Manual de-duplication in NS</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="connector" id="conn-11"></div>
+
+            <div class="flow-step">
+              <div class="step-number" id="num-12">12</div>
+              <div class="step-card" id="box-ns-merge">
+                <div class="step-icon netsuite">🔄</div>
+                <div class="step-content">
+                  <div class="step-title">NS Merge Webhook</div>
+                  <div class="step-subtitle">Send merge instruction to Firestore</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="connector" id="conn-12"></div>
+
+            <div class="flow-step">
+              <div class="step-number" id="num-13">13</div>
+              <div class="step-card" id="box-firestore-sync">
+                <div class="step-icon firebase">🔥</div>
+                <div class="step-content">
+                  <div class="step-title">Firestore Sync</div>
+                  <div class="step-subtitle">Identity graph updated, UIDs merged</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1304,7 +1343,7 @@
       const ampId = 'AMP-' + uid.substring(0, 8);
 
       const hasDuplicate = s.deviceMatch || s.emailMatch || s.phoneMatch;
-      totalSteps = hasDuplicate ? 10 : 7;
+      totalSteps = hasDuplicate ? 13 : 7;
 
       document.getElementById('runBtn').disabled = true;
       document.getElementById('nextBtn').disabled = true;
@@ -1545,6 +1584,43 @@
               log('SALES', `New: ${name} <${email}>`);
               await activateBox('box-sales');
               completeStep(10);
+              activateConnector('conn-10');
+            }
+          },
+          {
+            fn: async () => {
+              activateStep(11);
+              setAnnotation(`<strong>Step 11: Sales Merge</strong><br>Sales person reviews records and performs manual de-duplication in NetSuite.`);
+              log('SALES', 'Reviewing duplicate records...');
+              log('SALES', `Found existing customer: NS-${Math.floor(Math.random() * 50000)}`);
+              log('NETSUITE', 'Merge operation initiated');
+              log('NETSUITE', `Merging UID ${uid.substring(0, 8)}... into master record`);
+              await activateBox('box-sales-merge');
+              completeStep(11);
+              activateConnector('conn-11');
+            }
+          },
+          {
+            fn: async () => {
+              activateStep(12);
+              setAnnotation(`<strong>Step 12: NS Merge Webhook</strong><br>NetSuite sends merge instruction back to Firestore to update identity graph.`);
+              log('NETSUITE', '→ Sending merge webhook to Firestore');
+              log('NETSUITE', `Payload: { merged_uid: "${uid.substring(0, 8)}...", master_uid: "..." }`);
+              await activateBox('box-ns-merge');
+              completeStep(12);
+              activateConnector('conn-12');
+            }
+          },
+          {
+            fn: async () => {
+              activateStep(13);
+              setAnnotation(`<strong>Step 13: Firestore Sync</strong><br>Identity graph updated. All UIDs merged under master record. Future visits will resolve correctly.`);
+              log('FIREBASE', 'Merge instruction received');
+              log('FIREBASE', `UID ${uid.substring(0, 8)}... marked as alias`);
+              log('FIREBASE', 'Identity graph updated');
+              log('FIREBASE', '✓ All devices now linked to master profile');
+              await activateBox('box-firestore-sync');
+              completeStep(13);
             }
           }
         );
@@ -1555,7 +1631,7 @@
           updateProgress(totalSteps, totalSteps);
           log('SITE', '✓ Flow complete');
           setAnnotation(hasDuplicate
-            ? `<strong>Complete</strong><br>Lead created and sales notified of duplicate.`
+            ? `<strong>Complete</strong><br>Lead merged. Identity graph synced. Future visits will auto-resolve.`
             : `<strong>Complete</strong><br>New lead created and synced across all platforms.`
           );
           document.getElementById('runBtn').disabled = false;
