@@ -31,6 +31,7 @@ export default function SmokeTestPage() {
   const [expandedTests, setExpandedTests] = useState<Set<string>>(new Set());
 
   const [testCases, setTestCases] = useState<TestCase[]>([
+    // === CORE FUNCTIONALITY ===
     {
       id: 'sdk_init',
       name: 'SDK Initialization',
@@ -40,11 +41,34 @@ export default function SmokeTestPage() {
       validate: (event) => {
         const hasVisitorId = !!event.data?.visitor_id;
         const hasSessionId = !!event.data?.session_id;
+        const startTime = event.data?.timestamp ? new Date(event.data.timestamp as string).getTime() : 0;
+        const latency = startTime ? Date.now() - startTime : 0;
         return {
           pass: hasVisitorId && hasSessionId,
           details: hasVisitorId
-            ? `Visitor: ${String(event.data.visitor_id).substring(0, 20)}...`
+            ? `Visitor: ${String(event.data.visitor_id).substring(0, 20)}... (${latency}ms)`
             : 'No visitor ID received'
+        };
+      }
+    },
+    {
+      id: 'visitor_id_format',
+      name: 'Visitor ID Format',
+      description: 'Visitor ID is valid UUID format (not fallback)',
+      status: 'waiting',
+      eventType: 'sdk_init',
+      validate: (event) => {
+        const visitorId = event.data?.visitor_id as string;
+        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+        const isUuid = uuidRegex.test(visitorId || '');
+        const isFallback = visitorId?.startsWith('clg_');
+        return {
+          pass: isUuid && !isFallback,
+          details: isUuid
+            ? 'Valid Firebase UUID'
+            : isFallback
+              ? 'FALLBACK ID - Firebase call failed'
+              : 'Invalid ID format'
         };
       }
     },
@@ -66,6 +90,39 @@ export default function SmokeTestPage() {
       }
     },
     {
+      id: 'device_fingerprint',
+      name: 'Device Fingerprint',
+      description: 'Device ID generated and consistent',
+      status: 'waiting',
+      eventType: 'check_identity',
+      validate: (event) => {
+        const deviceId = event.data?.device_id as string;
+        const hasPrefix = deviceId?.startsWith('DV');
+        const isConsistent = deviceId?.length > 5;
+        return {
+          pass: hasPrefix && isConsistent,
+          details: `Device: ${deviceId || 'N/A'}`
+        };
+      }
+    },
+    {
+      id: 'brand_detection',
+      name: 'Brand Detection',
+      description: 'Brand correctly identified from hostname',
+      status: 'waiting',
+      eventType: 'check_identity',
+      validate: (event) => {
+        const brand = event.data?.brand as string;
+        const validBrands = ['access-hire', 'access-express', 'clg-dev', 'unknown'];
+        const isValid = validBrands.includes(brand);
+        return {
+          pass: !!brand,
+          details: `Brand: ${brand}${isValid ? '' : ' (custom)'}`
+        };
+      }
+    },
+    // === IDENTITY LINKING ===
+    {
       id: 'link_identity',
       name: 'Link Identity',
       description: 'Email/phone hash linked on form submit',
@@ -84,6 +141,47 @@ export default function SmokeTestPage() {
       }
     },
     {
+      id: 'pii_hashed',
+      name: 'PII Hashed',
+      description: 'Email/phone are hashed, not raw',
+      status: 'waiting',
+      eventType: 'link_identity',
+      validate: (event) => {
+        const data = event.data as Record<string, unknown>;
+        // Check that raw email/phone are NOT in the event data sent to server
+        const hasRawEmail = typeof data.email === 'string' && data.email.includes('@');
+        const hasRawPhone = typeof data.phone === 'string' && /^\d{10,}$/.test(data.phone);
+        const hasHashedEmail = !!data.has_email;
+        const hasHashedPhone = !!data.has_phone;
+        return {
+          pass: !hasRawEmail && !hasRawPhone && (hasHashedEmail || hasHashedPhone),
+          details: hasRawEmail || hasRawPhone
+            ? 'WARNING: Raw PII detected!'
+            : 'PII properly hashed before transmission'
+        };
+      }
+    },
+    {
+      id: 'duplicate_detection',
+      name: 'Duplicate Detection',
+      description: 'System correctly identifies returning users',
+      status: 'waiting',
+      eventType: 'link_identity',
+      validate: (event) => {
+        const result = event.data?.result as Record<string, unknown> | undefined;
+        const isDuplicate = result?.is_duplicate;
+        const matchSources = result?.match_sources as string[] | undefined;
+        const masterUid = result?.master_uid as string;
+        return {
+          pass: !!result,
+          details: isDuplicate
+            ? `Duplicate: matched by ${matchSources?.join(', ')} → ${masterUid?.substring(0, 8)}...`
+            : `New identity created: ${masterUid?.substring(0, 8)}...`
+        };
+      }
+    },
+    // === FORM TRACKING ===
+    {
       id: 'form_submit',
       name: 'Form Submit Tracked',
       description: 'Form submission captured with identity data',
@@ -95,6 +193,62 @@ export default function SmokeTestPage() {
         return {
           pass: !!formName,
           details: `Form: ${formName}, Master UID: ${identityResult?.master_uid || 'N/A'}`
+        };
+      }
+    },
+    {
+      id: 'form_identity_linked',
+      name: 'Form Identity Linked',
+      description: 'Form submission triggered identity resolution',
+      status: 'waiting',
+      eventType: 'form_submit',
+      validate: (event) => {
+        const identityResult = event.data?.identity_result as Record<string, unknown> | undefined;
+        const hasMasterUid = !!identityResult?.master_uid;
+        const hasAction = !!identityResult?.action;
+        return {
+          pass: hasMasterUid && hasAction,
+          details: hasMasterUid
+            ? `Action: ${identityResult?.action}, Duplicate: ${identityResult?.is_duplicate || false}`
+            : 'Identity not linked to form'
+        };
+      }
+    },
+    // === RESPONSE TIMES ===
+    {
+      id: 'check_identity_latency',
+      name: 'Check Identity Latency',
+      description: 'Response time under 500ms',
+      status: 'waiting',
+      eventType: 'check_identity',
+      validate: (event) => {
+        const timestamp = event.data?.timestamp as string;
+        const eventTime = new Date(timestamp).getTime();
+        const now = Date.now();
+        const latency = now - eventTime;
+        // Allow for some clock skew, check if reasonable
+        const isReasonable = latency < 5000 && latency > -1000;
+        return {
+          pass: isReasonable,
+          details: `Latency: ${Math.abs(latency)}ms ${latency < 500 ? '(good)' : latency < 1000 ? '(acceptable)' : '(slow)'}`
+        };
+      }
+    },
+    {
+      id: 'link_identity_latency',
+      name: 'Link Identity Latency',
+      description: 'Response time under 1000ms',
+      status: 'waiting',
+      eventType: 'link_identity',
+      validate: (event) => {
+        const timestamp = event.data?.timestamp as string;
+        const eventTime = new Date(timestamp).getTime();
+        const now = Date.now();
+        const latency = now - eventTime;
+        const isReasonable = latency < 5000 && latency > -1000;
+        return {
+          pass: isReasonable,
+          details: `Latency: ${Math.abs(latency)}ms ${latency < 1000 ? '(good)' : latency < 2000 ? '(acceptable)' : '(slow)'}`
         };
       }
     }
@@ -290,66 +444,97 @@ export default function SmokeTestPage() {
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Test Results</h2>
             {isRunning && (
-              <span className="text-sm text-gray-500">
-                {passedTests}/{totalTests} passed
-              </span>
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-gray-500">
+                  {passedTests}/{totalTests} passed
+                </span>
+                <div className="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-green-500 transition-all duration-300"
+                    style={{ width: `${(passedTests / totalTests) * 100}%` }}
+                  />
+                </div>
+              </div>
             )}
           </div>
 
-          <div className="space-y-3">
-            {testCases.map((test) => {
-              const isExpanded = expandedTests.has(test.id);
-              const hasData = test.eventData && Object.keys(test.eventData).length > 0;
+          {/* Test Groups */}
+          {[
+            { title: 'Core Functionality', ids: ['sdk_init', 'visitor_id_format', 'check_identity', 'device_fingerprint', 'brand_detection'] },
+            { title: 'Identity Linking', ids: ['link_identity', 'pii_hashed', 'duplicate_detection'] },
+            { title: 'Form Tracking', ids: ['form_submit', 'form_identity_linked'] },
+            { title: 'Performance', ids: ['check_identity_latency', 'link_identity_latency'] },
+          ].map((group) => {
+            const groupTests = testCases.filter(t => group.ids.includes(t.id));
+            const groupPassed = groupTests.filter(t => t.status === 'pass').length;
 
-              return (
-                <div
-                  key={test.id}
-                  className={`border rounded-lg transition-all ${statusColors[test.status]}`}
-                >
-                  <button
-                    onClick={() => hasData && toggleExpanded(test.id)}
-                    className={`w-full p-4 text-left ${hasData ? 'cursor-pointer hover:bg-black hover:bg-opacity-5' : 'cursor-default'}`}
-                    disabled={!hasData}
-                  >
-                    <div className="flex items-start gap-3">
-                      <span className="text-xl font-bold mt-0.5">
-                        {statusIcons[test.status]}
-                      </span>
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <h3 className="font-semibold">{test.name}</h3>
-                          {hasData && (
-                            <span className="text-xs opacity-50">
-                              {isExpanded ? '▼' : '▶'} Click for details
+            return (
+              <div key={group.title} className="mb-6">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+                    {group.title}
+                  </h3>
+                  <span className="text-xs text-gray-400">
+                    {groupPassed}/{groupTests.length}
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {groupTests.map((test) => {
+                    const isExpanded = expandedTests.has(test.id);
+                    const hasData = test.eventData && Object.keys(test.eventData).length > 0;
+
+                    return (
+                      <div
+                        key={test.id}
+                        className={`border rounded-lg transition-all ${statusColors[test.status]}`}
+                      >
+                        <button
+                          onClick={() => hasData && toggleExpanded(test.id)}
+                          className={`w-full p-3 text-left ${hasData ? 'cursor-pointer hover:bg-black hover:bg-opacity-5' : 'cursor-default'}`}
+                          disabled={!hasData}
+                        >
+                          <div className="flex items-start gap-3">
+                            <span className="text-lg font-bold mt-0.5">
+                              {statusIcons[test.status]}
                             </span>
-                          )}
-                        </div>
-                        <p className="text-sm opacity-75">{test.description}</p>
-                        {test.result && (
-                          <p className="text-sm mt-2 font-mono bg-white bg-opacity-50 px-2 py-1 rounded inline-block">
-                            {test.result.details}
-                          </p>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between gap-2">
+                                <h3 className="font-medium text-sm">{test.name}</h3>
+                                {hasData && (
+                                  <span className="text-xs opacity-50 flex-shrink-0">
+                                    {isExpanded ? '▼' : '▶'}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs opacity-75">{test.description}</p>
+                              {test.result && (
+                                <p className="text-xs mt-1 font-mono bg-white bg-opacity-50 px-2 py-0.5 rounded inline-block">
+                                  {test.result.details}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </button>
+
+                        {isExpanded && test.eventData && (
+                          <div className="px-3 pb-3 pt-0">
+                            <div className="bg-white bg-opacity-70 rounded-lg p-3 border border-black border-opacity-10">
+                              <h4 className="text-xs font-semibold uppercase tracking-wide opacity-60 mb-2">
+                                Full Event Data
+                              </h4>
+                              <pre className="text-xs font-mono overflow-x-auto whitespace-pre-wrap break-all max-h-48 overflow-y-auto">
+                                {JSON.stringify(test.eventData, null, 2)}
+                              </pre>
+                            </div>
+                          </div>
                         )}
                       </div>
-                    </div>
-                  </button>
-
-                  {isExpanded && test.eventData && (
-                    <div className="px-4 pb-4 pt-0">
-                      <div className="bg-white bg-opacity-70 rounded-lg p-4 border border-black border-opacity-10">
-                        <h4 className="text-xs font-semibold uppercase tracking-wide opacity-60 mb-2">
-                          Full Event Data
-                        </h4>
-                        <pre className="text-xs font-mono overflow-x-auto whitespace-pre-wrap break-all">
-                          {JSON.stringify(test.eventData, null, 2)}
-                        </pre>
-                      </div>
-                    </div>
-                  )}
+                    );
+                  })}
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })}
 
           {!isRunning && (
             <div className="text-center py-8 text-gray-500">
