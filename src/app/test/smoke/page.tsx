@@ -418,63 +418,77 @@ Brand: ${sdk.getBrand?.() || 'N/A'}
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Target URL
                     </label>
-                    <input
-                      type="url"
-                      value={targetUrl}
-                      onChange={(e) => setTargetUrl(e.target.value)}
-                      placeholder="https://your-site.com/page"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                    />
-                  </div>
-
-                  <div className="flex gap-3">
-                    <button
-                      onClick={generateDebugUrl}
-                      disabled={!targetUrl}
-                      className="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-400 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-                    >
-                      Generate Debug URL
-                    </button>
-                    <button
-                      onClick={startListening}
-                      disabled={isListening}
-                      className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-                    >
-                      {isListening ? 'Listening...' : 'Start Listening'}
-                    </button>
-                  </div>
-
-                  {debugUrl && (
-                    <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Debug URL (copy and open in new tab)
-                      </label>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={debugUrl}
-                          readOnly
-                          className="flex-1 px-3 py-2 bg-white border border-gray-300 rounded font-mono text-sm"
-                        />
-                        <button
-                          onClick={() => navigator.clipboard.writeText(debugUrl)}
-                          className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded transition-colors"
-                        >
-                          Copy
-                        </button>
-                        <button
-                          onClick={() => window.open(debugUrl, '_blank')}
-                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded transition-colors"
-                        >
-                          Open
-                        </button>
-                      </div>
+                    <div className="flex gap-3">
+                      <input
+                        type="url"
+                        value={targetUrl}
+                        onChange={(e) => setTargetUrl(e.target.value)}
+                        placeholder="https://your-site.com/page"
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && targetUrl) {
+                            // Launch on Enter key
+                            const session = debugSessionId || generateDebugSession();
+                            const url = new URL(targetUrl);
+                            url.searchParams.set('clg_debug', session);
+                            const finalUrl = url.toString();
+                            setDebugUrl(finalUrl);
+                            setIsListening(true);
+                            setLiveEvents([]);
+                            // Open minimal popup window
+                            window.open(
+                              finalUrl,
+                              'clg_debug_window',
+                              'width=1200,height=800,menubar=no,toolbar=no,location=yes,status=no,scrollbars=yes,resizable=yes'
+                            );
+                          }
+                        }}
+                      />
+                      <button
+                        onClick={() => {
+                          if (!targetUrl) return;
+                          const session = debugSessionId || generateDebugSession();
+                          const url = new URL(targetUrl);
+                          url.searchParams.set('clg_debug', session);
+                          const finalUrl = url.toString();
+                          setDebugUrl(finalUrl);
+                          setIsListening(true);
+                          setLiveEvents([]);
+                          // Open minimal popup window
+                          window.open(
+                            finalUrl,
+                            'clg_debug_window',
+                            'width=1200,height=800,menubar=no,toolbar=no,location=yes,status=no,scrollbars=yes,resizable=yes'
+                          );
+                        }}
+                        disabled={!targetUrl}
+                        className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-semibold py-2 px-6 rounded-lg transition-colors whitespace-nowrap"
+                      >
+                        Launch Debug Session
+                      </button>
                     </div>
-                  )}
+                  </div>
 
                   {debugSessionId && (
-                    <div className="text-sm text-gray-500">
-                      Debug Session: <code className="bg-gray-100 px-2 py-1 rounded">{debugSessionId}</code>
+                    <div className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="text-sm text-green-800">
+                        <span className="font-medium">Debug Session Active:</span>{' '}
+                        <code className="bg-green-100 px-2 py-0.5 rounded">{debugSessionId}</code>
+                      </div>
+                      {debugUrl && (
+                        <button
+                          onClick={() => {
+                            window.open(
+                              debugUrl,
+                              'clg_debug_window',
+                              'width=1200,height=800,menubar=no,toolbar=no,location=yes,status=no,scrollbars=yes,resizable=yes'
+                            );
+                          }}
+                          className="text-sm text-green-700 hover:text-green-900 underline"
+                        >
+                          Re-open window
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
@@ -534,11 +548,10 @@ Brand: ${sdk.getBrand?.() || 'N/A'}
                 <h3 className="font-semibold text-yellow-800 mb-2">How it works</h3>
                 <ol className="list-decimal list-inside text-sm text-yellow-700 space-y-1">
                   <li>Enter the URL of the page you want to test</li>
-                  <li>Click &quot;Generate Debug URL&quot; to add the debug parameter</li>
-                  <li>Click &quot;Start Listening&quot; to begin capturing events</li>
-                  <li>Open the debug URL in a new tab</li>
-                  <li>Interact with the page (load, submit forms, etc.)</li>
-                  <li>Watch events appear here in real-time</li>
+                  <li>Click &quot;Launch Debug Session&quot; (or press Enter)</li>
+                  <li>A popup window opens with the target page</li>
+                  <li>Browse the site, submit forms, etc.</li>
+                  <li>Watch identity events appear here in real-time</li>
                 </ol>
               </div>
             </div>
