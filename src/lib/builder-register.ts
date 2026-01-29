@@ -39,6 +39,7 @@ import {
   EquipmentCard,
   EquipmentGrid,
   EquipmentSearch,
+  EquipmentSelector,
 } from "../components/builder/equipment";
 import { ContactForm } from "../components/builder/ContactForm";
 import { TextBlock } from "../components/builder/TextBlock";
@@ -506,6 +507,23 @@ Builder.registerComponent(EquipmentSearch, {
     { name: "isSale", type: "boolean", friendlyName: "Filter: Only Sale Equipment", advanced: true },
     { name: "inStockOnly", type: "boolean", friendlyName: "Filter: In Stock Only", advanced: true },
     { name: "selectorUrl", type: "string", defaultValue: "/selector", friendlyName: "Equipment Selector URL", advanced: true },
+  ],
+});
+
+Builder.registerComponent(EquipmentSelector, {
+  name: "EquipmentSelector",
+  friendlyName: "Equipment - Selector Wizard",
+  description: "6-step questionnaire wizard that guides users to recommended equipment based on their needs",
+  inputs: [
+    { name: "title", type: "string", defaultValue: "Equipment Selector", friendlyName: "Title" },
+    { name: "subtitle", type: "string", defaultValue: "Answer a few questions to find the right equipment for your project", friendlyName: "Subtitle" },
+    { name: "resultsUrl", type: "string", defaultValue: "/equipment", friendlyName: "Results Page URL", helperText: "Where to link for full results" },
+    { name: "showInlineResults", type: "boolean", defaultValue: true, friendlyName: "Show Inline Results", helperText: "Display results on this page" },
+    { name: "inlineResultsCount", type: "number", defaultValue: 6, friendlyName: "Inline Results Count" },
+    { name: "viewAllText", type: "string", defaultValue: "View All Matches", friendlyName: "View All Button Text" },
+    { name: "background", type: "enum", enum: ["white", "gray"], defaultValue: "white", friendlyName: "Background Color" },
+    { name: "showSkip", type: "boolean", defaultValue: true, friendlyName: "Show Skip Link" },
+    { name: "skipUrl", type: "string", defaultValue: "/equipment", friendlyName: "Skip Link URL" },
   ],
 });
 

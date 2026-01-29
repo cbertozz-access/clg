@@ -13,3 +13,6 @@ export type { EquipmentGridProps } from "./EquipmentGrid";
 
 export { EquipmentSearch } from "./EquipmentSearch";
 export type { EquipmentSearchProps } from "./EquipmentSearch";
+
+export { EquipmentSelector } from "./EquipmentSelector";
+export type { EquipmentSelectorProps } from "./EquipmentSelector";
