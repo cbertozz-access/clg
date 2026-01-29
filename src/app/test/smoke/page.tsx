@@ -19,6 +19,7 @@ interface TestCase {
   eventType: string;
   validate: (event: DebugEvent) => { pass: boolean; details: string };
   result?: { pass: boolean; details: string };
+  eventData?: Record<string, unknown>;
 }
 
 export default function SmokeTestPage() {
@@ -27,6 +28,7 @@ export default function SmokeTestPage() {
   const [debugUrl, setDebugUrl] = useState<string>('');
   const [isRunning, setIsRunning] = useState(false);
   const [liveEvents, setLiveEvents] = useState<DebugEvent[]>([]);
+  const [expandedTests, setExpandedTests] = useState<Set<string>>(new Set());
 
   const [testCases, setTestCases] = useState<TestCase[]>([
     {
@@ -188,13 +190,26 @@ export default function SmokeTestPage() {
         return {
           ...testCase,
           status: result.pass ? 'pass' as const : 'fail' as const,
-          result
+          result,
+          eventData: matchingEvent.data
         };
       }
 
       return testCase;
     }));
   }, [liveEvents]);
+
+  const toggleExpanded = (testId: string) => {
+    setExpandedTests(prev => {
+      const next = new Set(prev);
+      if (next.has(testId)) {
+        next.delete(testId);
+      } else {
+        next.add(testId);
+      }
+      return next;
+    });
+  };
 
   const passedTests = testCases.filter(t => t.status === 'pass').length;
   const totalTests = testCases.length;
@@ -282,27 +297,58 @@ export default function SmokeTestPage() {
           </div>
 
           <div className="space-y-3">
-            {testCases.map((test) => (
-              <div
-                key={test.id}
-                className={`border rounded-lg p-4 transition-all ${statusColors[test.status]}`}
-              >
-                <div className="flex items-start gap-3">
-                  <span className="text-xl font-bold mt-0.5">
-                    {statusIcons[test.status]}
-                  </span>
-                  <div className="flex-1">
-                    <h3 className="font-semibold">{test.name}</h3>
-                    <p className="text-sm opacity-75">{test.description}</p>
-                    {test.result && (
-                      <p className="text-sm mt-2 font-mono bg-white bg-opacity-50 px-2 py-1 rounded">
-                        {test.result.details}
-                      </p>
-                    )}
-                  </div>
+            {testCases.map((test) => {
+              const isExpanded = expandedTests.has(test.id);
+              const hasData = test.eventData && Object.keys(test.eventData).length > 0;
+
+              return (
+                <div
+                  key={test.id}
+                  className={`border rounded-lg transition-all ${statusColors[test.status]}`}
+                >
+                  <button
+                    onClick={() => hasData && toggleExpanded(test.id)}
+                    className={`w-full p-4 text-left ${hasData ? 'cursor-pointer hover:bg-black hover:bg-opacity-5' : 'cursor-default'}`}
+                    disabled={!hasData}
+                  >
+                    <div className="flex items-start gap-3">
+                      <span className="text-xl font-bold mt-0.5">
+                        {statusIcons[test.status]}
+                      </span>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <h3 className="font-semibold">{test.name}</h3>
+                          {hasData && (
+                            <span className="text-xs opacity-50">
+                              {isExpanded ? '▼' : '▶'} Click for details
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm opacity-75">{test.description}</p>
+                        {test.result && (
+                          <p className="text-sm mt-2 font-mono bg-white bg-opacity-50 px-2 py-1 rounded inline-block">
+                            {test.result.details}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+
+                  {isExpanded && test.eventData && (
+                    <div className="px-4 pb-4 pt-0">
+                      <div className="bg-white bg-opacity-70 rounded-lg p-4 border border-black border-opacity-10">
+                        <h4 className="text-xs font-semibold uppercase tracking-wide opacity-60 mb-2">
+                          Full Event Data
+                        </h4>
+                        <pre className="text-xs font-mono overflow-x-auto whitespace-pre-wrap break-all">
+                          {JSON.stringify(test.eventData, null, 2)}
+                        </pre>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {!isRunning && (
