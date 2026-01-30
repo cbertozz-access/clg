@@ -449,6 +449,7 @@ export function EquipmentSelector({
               ) : null;
             })}
             <button
+              type="button"
               onClick={() => {
                 setIsComplete(false);
                 setCurrentStep(0);
@@ -503,6 +504,7 @@ export function EquipmentSelector({
               <div className="text-center space-y-3">
                 {hasMore && (
                   <button
+                    type="button"
                     onClick={loadMore}
                     className="px-6 py-2.5 font-medium border-2 border-[var(--color-primary,#e31937)] text-[var(--color-primary,#e31937)] rounded-lg hover:bg-[var(--color-primary,#e31937)] hover:text-white transition-colors"
                   >
@@ -595,6 +597,7 @@ export function EquipmentSelector({
               const isSelected = answers[step.id as keyof Answers] === option.id;
               return (
                 <button
+                  type="button"
                   key={option.id}
                   onClick={() => handleSelect(option.id)}
                   className={`p-3 sm:p-4 rounded-lg border-2 text-left transition-all ${
@@ -635,6 +638,7 @@ export function EquipmentSelector({
         {/* Navigation - Back button only, selection auto-advances */}
         <div className="flex items-center justify-between">
           <button
+            type="button"
             onClick={handleBack}
             disabled={currentStep === 0}
             className={`flex items-center gap-1 sm:gap-2 px-4 sm:px-6 py-2.5 sm:py-3 font-medium rounded-lg transition-colors text-sm sm:text-base ${
