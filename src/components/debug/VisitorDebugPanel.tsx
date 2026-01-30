@@ -107,7 +107,7 @@ export function VisitorDebugPanel() {
   const [sdkStatus, setSdkStatus] = useState<"loading" | "ready" | "not-loaded">("loading");
   const [dataLayer, setDataLayer] = useState<Record<string, unknown>[] | null>(null);
   const [shouldShow, setShouldShow] = useState(false);
-  const [activeTab, setActiveTab] = useState<"visitor" | "session" | "utm" | "datalayer">("visitor");
+  const [activeTab, setActiveTab] = useState<"visitor" | "session" | "events" | "utm" | "datalayer">("visitor");
 
   // Track if we've ever achieved "ready" status to prevent regression
   const hasBeenReadyRef = useRef(false);
@@ -297,7 +297,7 @@ export function VisitorDebugPanel() {
 
           {/* Tabs */}
           <div className="flex border-b border-gray-700">
-            {(["visitor", "session", "utm", "datalayer"] as const).map((tab) => (
+            {(["visitor", "session", "events", "utm", "datalayer"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -494,6 +494,41 @@ export function VisitorDebugPanel() {
                       : "{}"}
                   </pre>
                 </div>
+              </>
+            )}
+
+            {/* Events Tab */}
+            {activeTab === "events" && (
+              <>
+                <div className="text-gray-400 mb-2 font-semibold">Tracked Events</div>
+                {session?.events && session.events.length > 0 ? (
+                  <div className="space-y-2">
+                    {session.events.slice().reverse().map((evt, i) => (
+                      <div key={i} className="bg-gray-800 rounded p-2">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="font-semibold text-blue-400">{evt.event}</span>
+                          <span className="text-[10px] text-gray-500">
+                            {new Date(evt.timestamp).toLocaleTimeString()}
+                          </span>
+                        </div>
+                        <pre className="text-[10px] text-gray-300 overflow-x-auto whitespace-pre-wrap">
+                          {JSON.stringify(
+                            Object.fromEntries(
+                              Object.entries(evt).filter(([k]) => k !== 'event' && k !== 'timestamp')
+                            ),
+                            null,
+                            2
+                          )}
+                        </pre>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-gray-500 text-center py-4">No events tracked yet</div>
+                )}
+                <p className="text-[10px] text-gray-500 mt-2">
+                  Events are stored in session and sent to Firebase
+                </p>
               </>
             )}
 

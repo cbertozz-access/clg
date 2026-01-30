@@ -214,6 +214,51 @@ export default function SmokeTestPage() {
         };
       }
     },
+    // === PRODUCT SELECTOR ===
+    {
+      id: 'product_selector_complete',
+      name: 'Product Selector Tracked',
+      description: 'Selector completion captured with answers',
+      status: 'waiting',
+      eventType: 'track_event',
+      validate: (event) => {
+        const eventName = event.data?.event_name;
+        const props = event.data?.properties as Record<string, unknown> | undefined;
+        if (eventName !== 'product_selector_complete') {
+          return { pass: false, details: `Event: ${eventName} (not selector)` };
+        }
+        const hasIndustry = !!props?.industry;
+        const hasTask = !!props?.task;
+        const categories = props?.recommended_categories as string[] | undefined;
+        return {
+          pass: hasIndustry || hasTask,
+          details: `Industry: ${props?.industry || 'N/A'}, Task: ${props?.task || 'N/A'}, Categories: ${categories?.join(', ') || 'N/A'}`
+        };
+      }
+    },
+    {
+      id: 'selector_categories',
+      name: 'Selector Categories Captured',
+      description: 'Recommended categories stored for personalization',
+      status: 'waiting',
+      eventType: 'track_event',
+      validate: (event) => {
+        const eventName = event.data?.event_name;
+        const props = event.data?.properties as Record<string, unknown> | undefined;
+        if (eventName !== 'product_selector_complete') {
+          return { pass: false, details: 'Waiting for selector event' };
+        }
+        const categories = props?.recommended_categories as string[] | undefined;
+        const matchCount = props?.match_count as number | undefined;
+        const hasCategories = !!(categories && categories.length > 0);
+        return {
+          pass: hasCategories,
+          details: hasCategories
+            ? `${categories.length} categories, ${matchCount || 0} matches`
+            : 'No categories captured'
+        };
+      }
+    },
     // === RESPONSE TIMES ===
     {
       id: 'check_identity_latency',
@@ -472,6 +517,7 @@ export default function SmokeTestPage() {
             { title: 'Core Functionality', ids: ['sdk_init', 'visitor_id_format', 'check_identity', 'device_fingerprint', 'brand_detection'] },
             { title: 'Identity Linking', ids: ['link_identity', 'pii_hashed', 'duplicate_detection'] },
             { title: 'Form Tracking', ids: ['form_submit', 'form_identity_linked'] },
+            { title: 'Product Selector', ids: ['product_selector_complete', 'selector_categories'] },
             { title: 'Performance', ids: ['check_identity_latency', 'link_identity_latency'] },
           ].map((group) => {
             const groupTests = testCases.filter(t => group.ids.includes(t.id));

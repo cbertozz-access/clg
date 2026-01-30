@@ -809,6 +809,12 @@
         await this.init();
       }
 
+      // Send debug event for smoke testing
+      this.sendDebugEvent('track_event', {
+        event_name: event,
+        properties: properties
+      });
+
       // Add event to session
       if (this.session) {
         if (!this.session.events) {
