@@ -1658,17 +1658,17 @@ export const customComponents: RegisteredComponent[] = [
     ],
   },
 
-  // Equipment Selector Wizard
+  // Product Selector Wizard
   {
     component: EquipmentSelector,
-    name: "EquipmentSelector",
-    friendlyName: "Equipment - Selector Wizard",
-    description: "6-step questionnaire wizard that guides users to recommended equipment based on their industry, task, and preferences.",
+    name: "ProductSelector",
+    friendlyName: "Product Selector",
+    description: "6-step questionnaire wizard that guides users to recommended products based on their industry, task, and preferences.",
     inputs: [
       {
         name: "title",
         type: "string",
-        defaultValue: "Equipment Selector",
+        defaultValue: "Product Selector",
         friendlyName: "Title",
       },
       {

@@ -3,7 +3,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 
 export const metadata = {
-  title: "Equipment Selector | Find the Right Equipment",
+  title: "Product Selector | Find the Right Equipment",
   description: "Answer a few questions to find the perfect equipment for your project. We'll recommend the best options based on your industry, task, and requirements.",
 };
 
@@ -13,7 +13,7 @@ export default function SelectorPage() {
       <Header />
       <main>
         <EquipmentSelector
-          title="Equipment Selector"
+          title="Product Selector"
           subtitle="Answer a few questions to find the right equipment for your project"
           resultsUrl="/equipment"
           showInlineResults={true}

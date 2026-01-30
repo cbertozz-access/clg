@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { EquipmentCard } from "./EquipmentCard";
 import { searchProducts, mapAlgoliaToEquipment } from "@/lib/api/algolia";
 
 /**
- * Equipment Selector Wizard
+ * Product Selector Wizard
  *
- * A 6-step questionnaire that guides users to recommended equipment
+ * A 6-step questionnaire that guides users to recommended products
  * based on their industry, task, environment, and preferences.
  */
 
@@ -189,6 +189,8 @@ export interface EquipmentSelectorProps {
   title?: string;
   /** Subtitle/description */
   subtitle?: string;
+  /** @deprecated Use title instead */
+  heading?: string;
   /** URL to redirect after completion (with query params) */
   resultsUrl?: string;
   /** Show results inline instead of redirecting */
@@ -206,7 +208,7 @@ export interface EquipmentSelectorProps {
 }
 
 export function EquipmentSelector({
-  title = "Equipment Selector",
+  title = "Product Selector",
   subtitle = "Answer a few questions to find the right equipment for your project",
   resultsUrl = "/equipment",
   showInlineResults = true,
@@ -318,7 +320,7 @@ export function EquipmentSelector({
 
   // Icon component
   const Icon = ({ name }: { name: string }) => {
-    const icons: Record<string, JSX.Element> = {
+    const icons: Record<string, React.ReactNode> = {
       building: (
         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />

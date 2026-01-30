@@ -511,17 +511,12 @@ Builder.registerComponent(EquipmentSearch, {
 });
 
 Builder.registerComponent(EquipmentSelector, {
-  name: "EquipmentSelector",
-  friendlyName: "Equipment - Selector Wizard",
-  description: "6-step questionnaire wizard that guides users to recommended equipment based on their needs",
-  image: "https://cdn.builder.io/api/v1/image/assets%2Fpwgjf0RoYWbdnJSbpBAjXNRMe9F2%2F1f1c1a3c5c3b4b3b8b3b3b3b3b3b3b3b",
+  name: "ProductSelector",
+  friendlyName: "Product Selector",
+  description: "6-step questionnaire wizard that guides users to recommended products based on their needs",
   canHaveChildren: false,
-  defaultStyles: {
-    minHeight: "500px",
-    width: "100%",
-  },
   inputs: [
-    { name: "title", type: "string", defaultValue: "Equipment Selector", friendlyName: "Title" },
+    { name: "title", type: "string", defaultValue: "Product Selector", friendlyName: "Title" },
     { name: "subtitle", type: "string", defaultValue: "Answer a few questions to find the right equipment for your project", friendlyName: "Subtitle" },
     { name: "resultsUrl", type: "string", defaultValue: "/equipment", friendlyName: "Results Page URL", helperText: "Where to link for full results" },
     { name: "showInlineResults", type: "boolean", defaultValue: true, friendlyName: "Show Inline Results", helperText: "Display results on this page" },
