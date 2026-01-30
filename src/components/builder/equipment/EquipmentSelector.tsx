@@ -232,10 +232,20 @@ export function EquipmentSelector({
   const progress = ((currentStep + 1) / STEPS.length) * 100;
 
   const handleSelect = (optionId: string) => {
-    setAnswers((prev) => ({
-      ...prev,
+    const newAnswers = {
+      ...answers,
       [step.id]: optionId,
-    }));
+    };
+    setAnswers(newAnswers);
+
+    // Auto-advance to next step or complete on final step
+    setTimeout(() => {
+      if (currentStep < STEPS.length - 1) {
+        setCurrentStep((prev) => prev + 1);
+      } else {
+        setIsComplete(true);
+      }
+    }, 300); // Small delay for visual feedback
   };
 
   const handleContinue = () => {
@@ -612,7 +622,7 @@ export function EquipmentSelector({
           </div>
         </div>
 
-        {/* Navigation */}
+        {/* Navigation - Back button only, selection auto-advances */}
         <div className="flex items-center justify-between">
           <button
             onClick={handleBack}
@@ -629,20 +639,9 @@ export function EquipmentSelector({
             Back
           </button>
 
-          <button
-            onClick={handleContinue}
-            disabled={!answers[step.id as keyof Answers]}
-            className={`flex items-center gap-1 sm:gap-2 px-6 sm:px-8 py-2.5 sm:py-3 font-semibold rounded-lg transition-colors text-sm sm:text-base ${
-              answers[step.id as keyof Answers]
-                ? "bg-[var(--color-primary,#e31937)] text-white hover:bg-[var(--color-primary-hover,#c42920)]"
-                : "bg-gray-200 text-gray-400 cursor-not-allowed"
-            }`}
-          >
-            {currentStep === STEPS.length - 1 ? "See Results" : "Continue"}
-            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
+          <span className="text-xs sm:text-sm text-gray-400">
+            Select an option to continue
+          </span>
         </div>
       </div>
     </section>
