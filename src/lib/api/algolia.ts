@@ -5,15 +5,23 @@
  * Uses Algolia v5 API.
  */
 
-import { algoliasearch } from 'algoliasearch';
+import { algoliasearch, type SearchClient } from 'algoliasearch';
 
 // Algolia configuration
 const ALGOLIA_APP_ID = process.env.NEXT_PUBLIC_ALGOLIA_APP_ID || 'ZVMLPBZ3YI';
 const ALGOLIA_SEARCH_KEY = process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_KEY || 'e4a2311272ac551d3ad467d1fc6a984b';
 const ALGOLIA_INDEX_NAME = process.env.NEXT_PUBLIC_ALGOLIA_INDEX_NAME || 'all-products';
 
-// Initialize Algolia client (v5 API)
-const searchClient = algoliasearch(ALGOLIA_APP_ID, ALGOLIA_SEARCH_KEY);
+// Lazy-initialize Algolia client to ensure it's created in the right context
+let searchClient: SearchClient | null = null;
+
+function getSearchClient(): SearchClient {
+  if (!searchClient) {
+    console.log('[Algolia] Initializing client with App ID:', ALGOLIA_APP_ID);
+    searchClient = algoliasearch(ALGOLIA_APP_ID, ALGOLIA_SEARCH_KEY);
+  }
+  return searchClient;
+}
 
 // Types matching Algolia index structure
 export interface AlgoliaProduct {
@@ -146,7 +154,7 @@ export async function searchProducts(options: SearchOptions = {}): Promise<Searc
     const filterString = buildFilterString(filters);
     console.log("[Algolia] Filter string:", filterString || "(none)");
 
-    const result = await searchClient.searchSingleIndex<AlgoliaProduct>({
+    const result = await getSearchClient().searchSingleIndex<AlgoliaProduct>({
       indexName: ALGOLIA_INDEX_NAME,
       searchParams: {
         query: filters.query || '',
@@ -200,7 +208,7 @@ export async function searchProducts(options: SearchOptions = {}): Promise<Searc
  */
 export async function getCategories(): Promise<{ name: string; count: number }[]> {
   try {
-    const result = await searchClient.searchSingleIndex<AlgoliaProduct>({
+    const result = await getSearchClient().searchSingleIndex<AlgoliaProduct>({
       indexName: ALGOLIA_INDEX_NAME,
       searchParams: {
         query: '',
@@ -227,7 +235,7 @@ export async function getCategories(): Promise<{ name: string; count: number }[]
  */
 export async function getBrands(): Promise<{ name: string; count: number }[]> {
   try {
-    const result = await searchClient.searchSingleIndex<AlgoliaProduct>({
+    const result = await getSearchClient().searchSingleIndex<AlgoliaProduct>({
       indexName: ALGOLIA_INDEX_NAME,
       searchParams: {
         query: '',
@@ -252,7 +260,7 @@ export async function getBrands(): Promise<{ name: string; count: number }[]> {
  */
 export async function getProductById(productId: string): Promise<AlgoliaProduct | null> {
   try {
-    const result = await searchClient.searchSingleIndex<AlgoliaProduct>({
+    const result = await getSearchClient().searchSingleIndex<AlgoliaProduct>({
       indexName: ALGOLIA_INDEX_NAME,
       searchParams: {
         query: '',
@@ -273,7 +281,7 @@ export async function getProductById(productId: string): Promise<AlgoliaProduct 
  */
 export async function getProductBySlug(slug: string): Promise<AlgoliaProduct | null> {
   try {
-    const result = await searchClient.searchSingleIndex<AlgoliaProduct>({
+    const result = await getSearchClient().searchSingleIndex<AlgoliaProduct>({
       indexName: ALGOLIA_INDEX_NAME,
       searchParams: {
         query: '',
@@ -320,5 +328,5 @@ export function mapAlgoliaToEquipment(product: AlgoliaProduct) {
   };
 }
 
-// Export the search client for advanced usage (e.g., InstantSearch)
-export { searchClient, ALGOLIA_APP_ID, ALGOLIA_INDEX_NAME };
+// Export the search client getter for advanced usage (e.g., InstantSearch)
+export { getSearchClient, ALGOLIA_APP_ID, ALGOLIA_INDEX_NAME };
