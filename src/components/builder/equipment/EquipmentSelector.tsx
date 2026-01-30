@@ -243,10 +243,17 @@ export function EquipmentSelector({
       if (currentStep < STEPS.length - 1) {
         setCurrentStep((prev) => prev + 1);
       } else {
+        // Pass answers directly to avoid state timing issues
         setIsComplete(true);
       }
-    }, 300); // Small delay for visual feedback
+    }, 400); // Delay for visual feedback and state update
   };
+
+  // Store latest answers in ref for use in async operations
+  const answersRef = React.useRef(answers);
+  React.useEffect(() => {
+    answersRef.current = answers;
+  }, [answers]);
 
   const handleContinue = () => {
     if (currentStep < STEPS.length - 1) {
@@ -269,11 +276,14 @@ export function EquipmentSelector({
     const fetchRecommendations = async () => {
       setLoading(true);
       try {
-        const categories = getRecommendedCategories(answers);
-        const powerFilter = getPowerFilter(answers);
+        // Use ref to get most current answers
+        const currentAnswers = answersRef.current;
+        const categories = getRecommendedCategories(currentAnswers);
+        const powerFilter = getPowerFilter(currentAnswers);
 
         console.log("[ProductSelector] Filtering for categories:", categories);
-        console.log("[ProductSelector] Answers:", answers);
+        console.log("[ProductSelector] Answers:", currentAnswers);
+        console.log("[ProductSelector] Task selected:", currentAnswers.task);
 
         // Search Algolia with category filter
         const result = await searchProducts({
@@ -308,7 +318,7 @@ export function EquipmentSelector({
         }
 
         // Filter by environment for indoor
-        if (answers.environment === "indoor") {
+        if (currentAnswers.environment === "indoor") {
           const indoorFiltered = filtered.filter(
             (item) =>
               item.energySource?.toLowerCase() === "electric" ||
