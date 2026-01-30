@@ -512,17 +512,18 @@ export function EquipmentSelector({
                   </button>
                 )}
 
-                {totalMatches > 0 && (
+                {totalMatches > displayCount && (
                   <div>
-                    <a
-                      href={buildResultsUrl()}
+                    <button
+                      type="button"
+                      onClick={() => setDisplayCount(recommendations.length)}
                       className="inline-flex items-center gap-2 text-[var(--color-primary,#e31937)] hover:underline font-medium text-sm"
                     >
-                      {viewAllText}
+                      {viewAllText} ({recommendations.length - displayCount} more)
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                       </svg>
-                    </a>
+                    </button>
                   </div>
                 )}
               </div>
@@ -532,16 +533,22 @@ export function EquipmentSelector({
           {/* No Results */}
           {!loading && recommendations.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-600 mb-4">No exact matches found. Try browsing all equipment.</p>
-              <a
-                href={resultsUrl}
+              <p className="text-gray-600 mb-4">No exact matches found. Try adjusting your selections.</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsComplete(false);
+                  setCurrentStep(0);
+                  setAnswers({});
+                  setDisplayCount(6);
+                }}
                 className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--color-primary,#e31937)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-hover,#c42920)] transition-colors"
               >
-                Browse All Equipment
+                Start Over
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
-              </a>
+              </button>
             </div>
           )}
         </div>
