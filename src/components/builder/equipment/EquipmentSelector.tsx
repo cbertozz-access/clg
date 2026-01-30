@@ -251,6 +251,7 @@ export function EquipmentSelector({
   const [loading, setLoading] = useState(false);
   const [totalMatches, setTotalMatches] = useState(0);
   const [displayCount, setDisplayCount] = useState(6);
+  const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
 
   // Get relevant steps based on current answers (filters out irrelevant questions)
   const steps = getRelevantSteps(answers);
@@ -555,7 +556,7 @@ export function EquipmentSelector({
                         : ""
                     }
                     ctaText="View Details"
-                    ctaLink={`/equipment/${item.slug}`}
+                    onQuickView={() => setSelectedEquipment(item)}
                   />
                 ))}
               </div>
@@ -612,6 +613,129 @@ export function EquipmentSelector({
             </div>
           )}
         </div>
+
+        {/* Quick View Modal */}
+        {selectedEquipment && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50"
+            onClick={() => setSelectedEquipment(null)}
+          >
+            <div
+              className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-4 border-b">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {selectedEquipment.name}
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setSelectedEquipment(null)}
+                  className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Modal Content */}
+              <div className="p-6">
+                {/* Image */}
+                <div className="aspect-video bg-gray-100 rounded-lg overflow-hidden mb-6">
+                  {selectedEquipment.imageUrl ? (
+                    <img
+                      src={selectedEquipment.imageUrl}
+                      alt={selectedEquipment.name}
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400">
+                      <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+
+                {/* Details */}
+                <div className="space-y-4">
+                  <div className="flex flex-wrap gap-2">
+                    {selectedEquipment.brand && (
+                      <span className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm font-medium">
+                        {selectedEquipment.brand}
+                      </span>
+                    )}
+                    {selectedEquipment.category && (
+                      <span className="px-3 py-1 bg-[var(--color-primary,#e31937)]/10 text-[var(--color-primary,#e31937)] rounded-full text-sm font-medium">
+                        {selectedEquipment.category}
+                      </span>
+                    )}
+                    {selectedEquipment.energySource && (
+                      <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                        {selectedEquipment.energySource}
+                      </span>
+                    )}
+                  </div>
+
+                  {selectedEquipment.model && (
+                    <p className="text-gray-600">
+                      <span className="font-medium">Model:</span> {selectedEquipment.model}
+                    </p>
+                  )}
+
+                  {/* Specs */}
+                  <div className="grid grid-cols-2 gap-4 py-4 border-t border-b">
+                    {selectedEquipment.specs.workingHeight && (
+                      <div>
+                        <p className="text-sm text-gray-500">Working Height</p>
+                        <p className="font-semibold text-gray-900">{selectedEquipment.specs.workingHeight}</p>
+                      </div>
+                    )}
+                    {selectedEquipment.specs.horizontalReach && (
+                      <div>
+                        <p className="text-sm text-gray-500">Horizontal Reach</p>
+                        <p className="font-semibold text-gray-900">{selectedEquipment.specs.horizontalReach}</p>
+                      </div>
+                    )}
+                    {selectedEquipment.specs.capacity && (
+                      <div>
+                        <p className="text-sm text-gray-500">Capacity</p>
+                        <p className="font-semibold text-gray-900">{selectedEquipment.specs.capacity}</p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Availability */}
+                  <div className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${selectedEquipment.isInStock ? 'bg-green-500' : 'bg-gray-300'}`} />
+                    <span className="text-sm text-gray-600">
+                      {selectedEquipment.isInStock ? 'Available for hire' : 'Check availability'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-3 mt-6">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedEquipment(null)}
+                    className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Close
+                  </button>
+                  <a
+                    href="/contact"
+                    className="flex-1 px-4 py-3 bg-[var(--color-primary,#e31937)] text-white font-medium rounded-lg hover:bg-[var(--color-primary-hover,#c42920)] transition-colors text-center"
+                  >
+                    Enquire Now
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
     );
   }
