@@ -486,6 +486,7 @@ function EquipmentSearchInner({
   // Fetch all products once on mount
   useEffect(() => {
     const fetchAllProducts = async () => {
+      console.log("[EquipmentSearch] Starting to fetch products...");
       try {
         setLoading(true);
         const filters: SearchFilters = {};
@@ -493,17 +494,25 @@ function EquipmentSearchInner({
         if (isSale !== undefined) filters.isSale = isSale;
         if (inStockOnly) filters.inStock = true;
 
+        console.log("[EquipmentSearch] Calling searchProducts with filters:", filters);
         const result = await searchProducts({
           page: 0,
           hitsPerPage: 500, // Get all products
           filters,
         });
 
+        console.log("[EquipmentSearch] Search result:", {
+          hitsCount: result.hits?.length || 0,
+          nbHits: result.nbHits,
+          query: result.query,
+        });
+
         const mapped = result.hits.map(mapAlgoliaToEquipment);
+        console.log("[EquipmentSearch] Mapped products:", mapped.length);
         setAllProducts(mapped);
         setTotalHits(mapped.length);
       } catch (err) {
-        console.error("Failed to fetch products:", err);
+        console.error("[EquipmentSearch] Failed to fetch products:", err);
         setError(err instanceof Error ? err.message : "Failed to load equipment");
       } finally {
         setLoading(false);

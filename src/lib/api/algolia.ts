@@ -138,8 +138,13 @@ export async function searchProducts(options: SearchOptions = {}): Promise<Searc
     filters = {},
   } = options;
 
+  console.log("[Algolia] searchProducts called with:", { page, hitsPerPage, filters });
+  console.log("[Algolia] Using App ID:", ALGOLIA_APP_ID);
+  console.log("[Algolia] Using Index:", ALGOLIA_INDEX_NAME);
+
   try {
     const filterString = buildFilterString(filters);
+    console.log("[Algolia] Filter string:", filterString || "(none)");
 
     const result = await searchClient.searchSingleIndex<AlgoliaProduct>({
       indexName: ALGOLIA_INDEX_NAME,
@@ -166,6 +171,7 @@ export async function searchProducts(options: SearchOptions = {}): Promise<Searc
       },
     });
 
+    console.log("[Algolia] Search successful, hits:", result.hits?.length || 0);
     return {
       hits: result.hits,
       nbHits: result.nbHits ?? 0,
@@ -176,7 +182,8 @@ export async function searchProducts(options: SearchOptions = {}): Promise<Searc
       facets: result.facets as Record<string, Record<string, number>>,
     };
   } catch (error) {
-    console.error('Algolia search error:', error);
+    console.error('[Algolia] Search error:', error);
+    console.error('[Algolia] Error details:', JSON.stringify(error, null, 2));
     return {
       hits: [],
       nbHits: 0,
