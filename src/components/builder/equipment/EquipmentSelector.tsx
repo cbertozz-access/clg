@@ -52,7 +52,7 @@ interface Equipment {
   isInStock: boolean;
 }
 
-const STEPS: Step[] = [
+const ALL_STEPS: Step[] = [
   {
     id: "industry",
     question: "What industry are you in?",
@@ -91,7 +91,6 @@ const STEPS: Step[] = [
       { id: "12-20m", label: "12-20m", description: "Multi-story access" },
       { id: "20-30m", label: "20-30m", description: "High-rise work" },
       { id: "over-30m", label: "Over 30m", description: "Extreme height access" },
-      { id: "not-applicable", label: "Not Applicable", description: "Height not relevant" },
     ],
   },
   {
@@ -129,6 +128,31 @@ const STEPS: Step[] = [
     ],
   },
 ];
+
+// Determine which steps are relevant based on current answers
+function getRelevantSteps(answers: Answers): Step[] {
+  return ALL_STEPS.filter((step) => {
+    // Height question: only relevant for tasks involving elevation
+    if (step.id === "height") {
+      const heightRelevantTasks = ["elevate-people", "lift-materials", "reach-high"];
+      return !answers.task || heightRelevantTasks.includes(answers.task);
+    }
+
+    // Environment question: skip for generators and lighting (they work anywhere)
+    if (step.id === "environment") {
+      const skipEnvironmentTasks = ["generate-power", "site-lighting"];
+      return !answers.task || !skipEnvironmentTasks.includes(answers.task);
+    }
+
+    // Power preference: skip for generators/lighting (they ARE the power source)
+    if (step.id === "power") {
+      const skipPowerTasks = ["generate-power", "site-lighting"];
+      return !answers.task || !skipPowerTasks.includes(answers.task);
+    }
+
+    return true;
+  });
+}
 
 // Map answers to Algolia category keys (matching actual index values)
 function getRecommendedCategories(answers: Answers): string[] {
@@ -228,8 +252,10 @@ export function EquipmentSelector({
   const [totalMatches, setTotalMatches] = useState(0);
   const [displayCount, setDisplayCount] = useState(6);
 
-  const step = STEPS[currentStep];
-  const progress = ((currentStep + 1) / STEPS.length) * 100;
+  // Get relevant steps based on current answers (filters out irrelevant questions)
+  const steps = getRelevantSteps(answers);
+  const step = steps[currentStep];
+  const progress = ((currentStep + 1) / steps.length) * 100;
 
   const handleSelect = (optionId: string) => {
     const newAnswers = {
@@ -238,12 +264,16 @@ export function EquipmentSelector({
     };
     setAnswers(newAnswers);
 
+    // Calculate relevant steps with new answers to determine next step
+    const newRelevantSteps = getRelevantSteps(newAnswers);
+    const currentStepIndex = newRelevantSteps.findIndex((s) => s.id === step.id);
+
     // Auto-advance to next step or complete on final step
     setTimeout(() => {
-      if (currentStep < STEPS.length - 1) {
-        setCurrentStep((prev) => prev + 1);
+      if (currentStepIndex < newRelevantSteps.length - 1) {
+        setCurrentStep(currentStepIndex + 1);
       } else {
-        // Pass answers directly to avoid state timing issues
+        // Final step reached
         setIsComplete(true);
       }
     }, 400); // Delay for visual feedback and state update
@@ -256,7 +286,7 @@ export function EquipmentSelector({
   }, [answers]);
 
   const handleContinue = () => {
-    if (currentStep < STEPS.length - 1) {
+    if (currentStep < steps.length - 1) {
       setCurrentStep((prev) => prev + 1);
     } else {
       setIsComplete(true);
@@ -437,7 +467,7 @@ export function EquipmentSelector({
           {/* Summary of selections */}
           <div className="flex flex-wrap justify-center gap-2 mb-6 md:mb-8">
             {Object.entries(answers).map(([key, value]) => {
-              const stepDef = STEPS.find((s) => s.id === key);
+              const stepDef = ALL_STEPS.find((s) => s.id === key);
               const option = stepDef?.options.find((o) => o.id === value);
               return option ? (
                 <span
@@ -572,7 +602,7 @@ export function EquipmentSelector({
         <div className="mb-6 md:mb-8">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs sm:text-sm font-medium text-gray-600">
-              Step {currentStep + 1} of {STEPS.length}
+              Step {currentStep + 1} of {steps.length}
             </span>
             {showSkip && (
               <a
