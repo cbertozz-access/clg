@@ -299,6 +299,33 @@ export function EquipmentSelector({
     }
   };
 
+  // Track selector completion to Firebase/Firestore for personalization
+  const trackSelectorCompletion = (
+    selectorAnswers: Answers,
+    recommendedCategories: string[],
+    matchCount: number
+  ) => {
+    // Use CLGVisitor SDK if available (loaded via clg-visitor.js)
+    if (typeof window !== "undefined" && (window as unknown as { CLGVisitor?: { track: (event: string, data: Record<string, unknown>) => void } }).CLGVisitor) {
+      const CLGVisitor = (window as unknown as { CLGVisitor: { track: (event: string, data: Record<string, unknown>) => void } }).CLGVisitor;
+      CLGVisitor.track("product_selector_complete", {
+        // Selector answers
+        industry: selectorAnswers.industry,
+        task: selectorAnswers.task,
+        height: selectorAnswers.height,
+        environment: selectorAnswers.environment,
+        power: selectorAnswers.power,
+        duration: selectorAnswers.duration,
+        // Derived data
+        recommended_categories: recommendedCategories,
+        match_count: matchCount,
+        // Metadata
+        completed_at: new Date().toISOString(),
+      });
+      console.log("[ProductSelector] Tracked completion to Firebase:", selectorAnswers);
+    }
+  };
+
   // Fetch recommendations when complete
   useEffect(() => {
     if (!isComplete) return;
@@ -362,6 +389,9 @@ export function EquipmentSelector({
 
         setTotalMatches(filtered.length);
         setRecommendations(filtered);
+
+        // Track selector completion to Firebase for personalization
+        trackSelectorCompletion(currentAnswers, categories, filtered.length);
       } catch (error) {
         console.error("Failed to fetch recommendations:", error);
       } finally {
