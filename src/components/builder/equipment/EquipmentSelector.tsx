@@ -7,8 +7,9 @@ import { searchProducts, mapAlgoliaToEquipment } from "@/lib/api/algolia";
 /**
  * Product Selector Wizard
  *
- * A 6-step questionnaire that guides users to recommended products
+ * A multi-step questionnaire that guides users to recommended products
  * based on their industry, task, environment, and preferences.
+ * Results load dynamically as users progress through steps.
  */
 
 interface Step {
@@ -129,7 +130,7 @@ const STEPS: Step[] = [
   },
 ];
 
-// Map answers to equipment categories
+// Map answers to Algolia category keys (matching actual index values)
 function getRecommendedCategories(answers: Answers): string[] {
   const categories: string[] = [];
 
@@ -142,7 +143,10 @@ function getRecommendedCategories(answers: Answers): string[] {
         categories.push("Boom Lift");
       }
       if (answers.environment === "indoor") {
-        categories.push("Man Lift");
+        categories.push("Man Lift", "Scissor Lift");
+      }
+      if (categories.length === 0) {
+        categories.push("Scissor Lift", "Boom Lift", "Man Lift");
       }
       break;
     case "lift-materials":
@@ -152,7 +156,7 @@ function getRecommendedCategories(answers: Answers): string[] {
       categories.push("Boom Lift", "Telehandler");
       break;
     case "move-goods":
-      categories.push("Forklift", "Pallet Jack");
+      categories.push("Forklift");
       break;
     case "generate-power":
       categories.push("Generator");
@@ -160,14 +164,12 @@ function getRecommendedCategories(answers: Answers): string[] {
     case "site-lighting":
       categories.push("Lighting Tower");
       break;
+    default:
+      // Default categories if nothing selected
+      categories.push("Scissor Lift", "Boom Lift", "Forklift");
   }
 
-  // Default to common categories if none matched
-  if (categories.length === 0) {
-    categories.push("Scissor Lift", "Boom Lift", "Forklift");
-  }
-
-  return categories;
+  return [...new Set(categories)]; // Remove duplicates
 }
 
 // Map answers to power source filter
@@ -212,7 +214,7 @@ export function EquipmentSelector({
   subtitle = "Answer a few questions to find the right equipment for your project",
   resultsUrl = "/equipment",
   showInlineResults = true,
-  inlineResultsCount = 6,
+  inlineResultsCount = 12,
   viewAllText = "View All Matches",
   background = "white",
   showSkip = true,
@@ -224,6 +226,7 @@ export function EquipmentSelector({
   const [recommendations, setRecommendations] = useState<Equipment[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalMatches, setTotalMatches] = useState(0);
+  const [displayCount, setDisplayCount] = useState(6);
 
   const step = STEPS[currentStep];
   const progress = ((currentStep + 1) / STEPS.length) * 100;
@@ -259,41 +262,51 @@ export function EquipmentSelector({
         const categories = getRecommendedCategories(answers);
         const powerFilter = getPowerFilter(answers);
 
-        // Fetch all products and filter client-side
+        // Search Algolia with category filter
         const result = await searchProducts({
           page: 0,
-          hitsPerPage: 500,
+          hitsPerPage: 100,
           filters: {},
         });
 
         let filtered = result.hits.map(mapAlgoliaToEquipment);
 
         // Filter by recommended categories
-        filtered = filtered.filter((item) =>
-          categories.some((cat) =>
-            item.category.toLowerCase().includes(cat.toLowerCase())
-          )
-        );
-
-        // Filter by power source if specified
-        if (powerFilter) {
-          filtered = filtered.filter(
-            (item) =>
-              item.energySource?.toLowerCase() === powerFilter.toLowerCase()
+        if (categories.length > 0) {
+          filtered = filtered.filter((item) =>
+            categories.some((cat) =>
+              item.category?.toLowerCase().includes(cat.toLowerCase())
+            )
           );
         }
 
-        // Filter by environment
+        // Filter by power source if specified
+        if (powerFilter) {
+          const powerFiltered = filtered.filter(
+            (item) =>
+              item.energySource?.toLowerCase() === powerFilter.toLowerCase()
+          );
+          // Only apply power filter if it doesn't eliminate all results
+          if (powerFiltered.length > 0) {
+            filtered = powerFiltered;
+          }
+        }
+
+        // Filter by environment for indoor
         if (answers.environment === "indoor") {
-          filtered = filtered.filter(
+          const indoorFiltered = filtered.filter(
             (item) =>
               item.energySource?.toLowerCase() === "electric" ||
               item.energySource?.toLowerCase() === "hybrid"
           );
+          // Only apply if it doesn't eliminate all results
+          if (indoorFiltered.length > 0) {
+            filtered = indoorFiltered;
+          }
         }
 
         setTotalMatches(filtered.length);
-        setRecommendations(filtered.slice(0, inlineResultsCount));
+        setRecommendations(filtered);
       } catch (error) {
         console.error("Failed to fetch recommendations:", error);
       } finally {
@@ -302,7 +315,7 @@ export function EquipmentSelector({
     };
 
     fetchRecommendations();
-  }, [isComplete, answers, inlineResultsCount]);
+  }, [isComplete, answers]);
 
   // Build query params for results URL
   const buildResultsUrl = () => {
@@ -316,6 +329,10 @@ export function EquipmentSelector({
       params.set("power", power);
     }
     return `${resultsUrl}?${params.toString()}`;
+  };
+
+  const loadMore = () => {
+    setDisplayCount((prev) => Math.min(prev + 6, recommendations.length));
   };
 
   // Icon component
@@ -368,41 +385,55 @@ export function EquipmentSelector({
 
   const bgClass = background === "gray" ? "bg-gray-50" : "bg-white";
 
-  // Results view
+  // Results view - shown after completion
   if (isComplete) {
+    const displayedProducts = recommendations.slice(0, displayCount);
+    const hasMore = displayCount < recommendations.length;
+
     return (
-      <section className={`${bgClass} py-12`}>
-        <div className="max-w-6xl mx-auto px-4">
+      <section className={`${bgClass} py-8 md:py-12`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Results Header */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-green-100 text-green-800 rounded-full text-sm font-medium mb-4">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="text-center mb-6 md:mb-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 text-green-800 rounded-full text-sm font-medium mb-3">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
               Selection Complete
             </div>
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-              We Found {totalMatches} Matches
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+              {loading ? "Finding matches..." : `We Found ${totalMatches} Matches`}
             </h2>
-            <p className="text-gray-600">
+            <p className="text-gray-600 text-sm sm:text-base">
               Based on your selections, here are our top recommendations
             </p>
           </div>
 
           {/* Summary of selections */}
-          <div className="flex flex-wrap justify-center gap-2 mb-8">
+          <div className="flex flex-wrap justify-center gap-2 mb-6 md:mb-8">
             {Object.entries(answers).map(([key, value]) => {
               const stepDef = STEPS.find((s) => s.id === key);
               const option = stepDef?.options.find((o) => o.id === value);
               return option ? (
                 <span
                   key={key}
-                  className="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
+                  className="px-2 sm:px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs sm:text-sm"
                 >
                   {option.label}
                 </span>
               ) : null;
             })}
+            <button
+              onClick={() => {
+                setIsComplete(false);
+                setCurrentStep(0);
+                setAnswers({});
+                setDisplayCount(6);
+              }}
+              className="px-2 sm:px-3 py-1 text-[var(--color-primary,#e31937)] hover:bg-red-50 rounded-full text-xs sm:text-sm font-medium"
+            >
+              Start Over
+            </button>
           </div>
 
           {/* Loading */}
@@ -413,66 +444,79 @@ export function EquipmentSelector({
           )}
 
           {/* Results Grid */}
-          {!loading && showInlineResults && recommendations.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {recommendations.map((item) => (
-                <EquipmentCard
-                  key={item.objectId}
-                  id={item.id}
-                  imageUrl={item.imageUrl}
-                  brand={item.brand}
-                  model={item.model}
-                  name={item.name}
-                  category={item.category}
-                  spec1={
-                    item.specs.workingHeight
-                      ? `Working Height: ${item.specs.workingHeight}`
-                      : item.specs.capacity
-                      ? `Capacity: ${item.specs.capacity}`
-                      : ""
-                  }
-                  spec2={
-                    item.specs.horizontalReach
-                      ? `Reach: ${item.specs.horizontalReach}`
-                      : ""
-                  }
-                  ctaText="View Details"
-                  ctaLink={`/equipment/${item.slug}`}
-                />
-              ))}
-            </div>
+          {!loading && showInlineResults && displayedProducts.length > 0 && (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
+                {displayedProducts.map((item) => (
+                  <EquipmentCard
+                    key={item.objectId}
+                    id={item.id}
+                    imageUrl={item.imageUrl}
+                    brand={item.brand}
+                    model={item.model}
+                    name={item.name}
+                    category={item.category}
+                    spec1={
+                      item.specs.workingHeight
+                        ? `Working Height: ${item.specs.workingHeight}`
+                        : item.specs.capacity
+                        ? `Capacity: ${item.specs.capacity}`
+                        : ""
+                    }
+                    spec2={
+                      item.specs.horizontalReach
+                        ? `Reach: ${item.specs.horizontalReach}`
+                        : ""
+                    }
+                    ctaText="View Details"
+                    ctaLink={`/equipment/${item.slug}`}
+                  />
+                ))}
+              </div>
+
+              {/* Load More / View All */}
+              <div className="text-center space-y-3">
+                {hasMore && (
+                  <button
+                    onClick={loadMore}
+                    className="px-6 py-2.5 font-medium border-2 border-[var(--color-primary,#e31937)] text-[var(--color-primary,#e31937)] rounded-lg hover:bg-[var(--color-primary,#e31937)] hover:text-white transition-colors"
+                  >
+                    Load More ({recommendations.length - displayCount} remaining)
+                  </button>
+                )}
+
+                {totalMatches > 0 && (
+                  <div>
+                    <a
+                      href={buildResultsUrl()}
+                      className="inline-flex items-center gap-2 text-[var(--color-primary,#e31937)] hover:underline font-medium text-sm"
+                    >
+                      {viewAllText}
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                      </svg>
+                    </a>
+                  </div>
+                )}
+              </div>
+            </>
           )}
 
-          {/* View All Button */}
-          <div className="text-center space-y-4">
-            <a
-              href={buildResultsUrl()}
-              className="inline-flex items-center gap-2 px-8 py-3 bg-[var(--color-primary,#e31937)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-hover,#c42920)] transition-colors"
-            >
-              {viewAllText}
-              {totalMatches > inlineResultsCount && (
-                <span className="opacity-80">
-                  ({totalMatches - inlineResultsCount} more)
-                </span>
-              )}
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
-            </a>
-
-            <div>
-              <button
-                onClick={() => {
-                  setIsComplete(false);
-                  setCurrentStep(0);
-                  setAnswers({});
-                }}
-                className="text-sm text-gray-500 hover:text-gray-700 underline"
+          {/* No Results */}
+          {!loading && recommendations.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-gray-600 mb-4">No exact matches found. Try browsing all equipment.</p>
+              <a
+                href={resultsUrl}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--color-primary,#e31937)] text-white font-semibold rounded-lg hover:bg-[var(--color-primary-hover,#c42920)] transition-colors"
               >
-                Start Over
-              </button>
+                Browse All Equipment
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </a>
             </div>
-          </div>
+          )}
         </div>
       </section>
     );
@@ -480,26 +524,26 @@ export function EquipmentSelector({
 
   // Wizard view
   return (
-    <section className={`${bgClass} min-h-[600px] py-12`}>
-      <div className="max-w-2xl mx-auto px-4">
+    <section className={`${bgClass} min-h-[500px] md:min-h-[600px] py-8 md:py-12`}>
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
+        <div className="text-center mb-6 md:mb-8">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900 mb-2">
             {title}
           </h1>
-          <p className="text-gray-600">{subtitle}</p>
+          <p className="text-gray-600 text-sm sm:text-base">{subtitle}</p>
         </div>
 
         {/* Progress Bar */}
-        <div className="mb-8">
+        <div className="mb-6 md:mb-8">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-600">
+            <span className="text-xs sm:text-sm font-medium text-gray-600">
               Step {currentStep + 1} of {STEPS.length}
             </span>
             {showSkip && (
               <a
                 href={skipUrl}
-                className="text-sm text-[var(--color-primary,#e31937)] hover:underline"
+                className="text-xs sm:text-sm text-[var(--color-primary,#e31937)] hover:underline"
               >
                 Skip to browse
               </a>
@@ -514,21 +558,21 @@ export function EquipmentSelector({
         </div>
 
         {/* Question Card */}
-        <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 mb-6">
-          <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-2">
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 md:p-8 mb-6">
+          <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">
             {step.question}
           </h2>
-          <p className="text-gray-600 mb-6">{step.subtitle}</p>
+          <p className="text-gray-600 text-sm sm:text-base mb-4 sm:mb-6">{step.subtitle}</p>
 
-          {/* Options Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          {/* Options Grid - responsive columns */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3">
             {step.options.map((option) => {
               const isSelected = answers[step.id as keyof Answers] === option.id;
               return (
                 <button
                   key={option.id}
                   onClick={() => handleSelect(option.id)}
-                  className={`p-4 rounded-lg border-2 text-left transition-all ${
+                  className={`p-3 sm:p-4 rounded-lg border-2 text-left transition-all ${
                     isSelected
                       ? "border-[var(--color-primary,#e31937)] bg-red-50"
                       : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
@@ -536,7 +580,7 @@ export function EquipmentSelector({
                 >
                   {option.icon && (
                     <div
-                      className={`mb-2 ${
+                      className={`mb-1 sm:mb-2 ${
                         isSelected
                           ? "text-[var(--color-primary,#e31937)]"
                           : "text-gray-400"
@@ -546,14 +590,14 @@ export function EquipmentSelector({
                     </div>
                   )}
                   <div
-                    className={`font-medium ${
+                    className={`font-medium text-sm sm:text-base ${
                       isSelected ? "text-[var(--color-primary,#e31937)]" : "text-gray-900"
                     }`}
                   >
                     {option.label}
                   </div>
                   {option.description && (
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="text-xs text-gray-500 mt-0.5 sm:mt-1 hidden sm:block">
                       {option.description}
                     </div>
                   )}
@@ -568,13 +612,13 @@ export function EquipmentSelector({
           <button
             onClick={handleBack}
             disabled={currentStep === 0}
-            className={`flex items-center gap-2 px-6 py-3 font-medium rounded-lg transition-colors ${
+            className={`flex items-center gap-1 sm:gap-2 px-4 sm:px-6 py-2.5 sm:py-3 font-medium rounded-lg transition-colors text-sm sm:text-base ${
               currentStep === 0
                 ? "text-gray-300 cursor-not-allowed"
                 : "text-gray-600 hover:bg-gray-100"
             }`}
           >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
             Back
@@ -583,14 +627,14 @@ export function EquipmentSelector({
           <button
             onClick={handleContinue}
             disabled={!answers[step.id as keyof Answers]}
-            className={`flex items-center gap-2 px-8 py-3 font-semibold rounded-lg transition-colors ${
+            className={`flex items-center gap-1 sm:gap-2 px-6 sm:px-8 py-2.5 sm:py-3 font-semibold rounded-lg transition-colors text-sm sm:text-base ${
               answers[step.id as keyof Answers]
                 ? "bg-[var(--color-primary,#e31937)] text-white hover:bg-[var(--color-primary-hover,#c42920)]"
                 : "bg-gray-200 text-gray-400 cursor-not-allowed"
             }`}
           >
             {currentStep === STEPS.length - 1 ? "See Results" : "Continue"}
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
