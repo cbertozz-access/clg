@@ -262,6 +262,9 @@ export function EquipmentSelector({
         const categories = getRecommendedCategories(answers);
         const powerFilter = getPowerFilter(answers);
 
+        console.log("[ProductSelector] Filtering for categories:", categories);
+        console.log("[ProductSelector] Answers:", answers);
+
         // Search Algolia with category filter
         const result = await searchProducts({
           page: 0,
@@ -270,14 +273,16 @@ export function EquipmentSelector({
         });
 
         let filtered = result.hits.map(mapAlgoliaToEquipment);
+        console.log("[ProductSelector] Total products from API:", filtered.length);
 
-        // Filter by recommended categories
+        // Filter by recommended categories (exact match, case-insensitive)
         if (categories.length > 0) {
           filtered = filtered.filter((item) =>
             categories.some((cat) =>
-              item.category?.toLowerCase().includes(cat.toLowerCase())
+              item.category?.toLowerCase() === cat.toLowerCase()
             )
           );
+          console.log("[ProductSelector] After category filter:", filtered.length);
         }
 
         // Filter by power source if specified
