@@ -506,6 +506,32 @@ npm run dev
 
 ---
 
+## Related Projects
+
+### SMS Demo - Offhire Notifications
+
+Internal tool for automated SMS notifications to customers during equipment offhire process.
+
+| | |
+|---|---|
+| **Repository** | https://github.com/cbertozz-access/sms-demo |
+| **Deployment** | https://sms-demo-orcin.vercel.app |
+| **Stack** | Next.js, Builder.io, Iterable, Vercel |
+
+**Features:**
+- CSV upload for customer lists
+- Integration with Iterable for SMS journeys
+- Multi-brand theming (Access Hire, Access Express)
+- Builder.io visual editing with custom components
+- Design token support via CSS variables
+
+**Builder.io Components:**
+- Hero Section, Feature Card, CTA Banner, Info Box
+- SMS Journey Flowchart
+- CSV List Uploader
+
+---
+
 ## Contact & Support
 
 For questions about this implementation, refer to the conversation history or contact the development team.
