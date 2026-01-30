@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { EquipmentCard } from "./EquipmentCard";
 import { searchProducts, mapAlgoliaToEquipment } from "@/lib/api/algolia";
+import { useEnquiryCart } from "@/lib/enquiry-cart";
 
 /**
  * Product Selector Wizard
@@ -252,6 +253,40 @@ export function EquipmentSelector({
   const [totalMatches, setTotalMatches] = useState(0);
   const [displayCount, setDisplayCount] = useState(6);
   const [selectedEquipment, setSelectedEquipment] = useState<Equipment | null>(null);
+
+  // Enquiry cart
+  const { addItem, removeItem, isInCart } = useEnquiryCart();
+
+  // Add to cart and track to Firebase
+  const handleAddToCart = (equipment: Equipment) => {
+    const item = {
+      id: equipment.id,
+      name: equipment.name,
+      brand: equipment.brand,
+      category: equipment.category,
+      imageUrl: equipment.imageUrl,
+    };
+
+    if (isInCart(equipment.id)) {
+      removeItem(equipment.id);
+    } else {
+      addItem(item);
+
+      // Track to Firebase for personalization
+      if (typeof window !== "undefined" && (window as unknown as { CLGVisitor?: { track: (event: string, data: Record<string, unknown>) => void } }).CLGVisitor) {
+        const CLGVisitor = (window as unknown as { CLGVisitor: { track: (event: string, data: Record<string, unknown>) => void } }).CLGVisitor;
+        CLGVisitor.track("add_to_enquiry_cart", {
+          product_id: equipment.id,
+          product_name: equipment.name,
+          brand: equipment.brand,
+          category: equipment.category,
+          source: "product_selector",
+          added_at: new Date().toISOString(),
+        });
+        console.log("[ProductSelector] Tracked add to cart:", equipment.name);
+      }
+    }
+  };
 
   // Get relevant steps based on current answers (filters out irrelevant questions)
   const steps = getRelevantSteps(answers);
@@ -725,12 +760,34 @@ export function EquipmentSelector({
                   >
                     Close
                   </button>
-                  <a
-                    href="/contact"
-                    className="flex-1 px-4 py-3 bg-[var(--color-primary,#e31937)] text-white font-medium rounded-lg hover:bg-[var(--color-primary-hover,#c42920)] transition-colors text-center"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleAddToCart(selectedEquipment);
+                      setSelectedEquipment(null);
+                    }}
+                    className={`flex-1 px-4 py-3 font-medium rounded-lg transition-colors text-center flex items-center justify-center gap-2 ${
+                      isInCart(selectedEquipment.id)
+                        ? "bg-green-600 text-white hover:bg-green-700"
+                        : "bg-[var(--color-primary,#e31937)] text-white hover:bg-[var(--color-primary-hover,#c42920)]"
+                    }`}
                   >
-                    Enquire Now
-                  </a>
+                    {isInCart(selectedEquipment.id) ? (
+                      <>
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        Added to Enquiry
+                      </>
+                    ) : (
+                      <>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        Add to Enquiry
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
             </div>

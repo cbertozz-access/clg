@@ -259,6 +259,27 @@ export default function SmokeTestPage() {
         };
       }
     },
+    {
+      id: 'add_to_cart',
+      name: 'Add to Enquiry Cart',
+      description: 'Product added to cart tracked for personalization',
+      status: 'waiting',
+      eventType: 'track_event',
+      validate: (event) => {
+        const eventName = event.data?.event_name;
+        const props = event.data?.properties as Record<string, unknown> | undefined;
+        if (eventName !== 'add_to_enquiry_cart') {
+          return { pass: false, details: 'Waiting for add to cart event' };
+        }
+        const productId = props?.product_id;
+        const productName = props?.product_name;
+        const category = props?.category;
+        return {
+          pass: !!productId,
+          details: `${productName || 'Unknown'} (${category || 'N/A'}) added to cart`
+        };
+      }
+    },
     // === RESPONSE TIMES ===
     {
       id: 'check_identity_latency',
@@ -517,7 +538,7 @@ export default function SmokeTestPage() {
             { title: 'Core Functionality', ids: ['sdk_init', 'visitor_id_format', 'check_identity', 'device_fingerprint', 'brand_detection'] },
             { title: 'Identity Linking', ids: ['link_identity', 'pii_hashed', 'duplicate_detection'] },
             { title: 'Form Tracking', ids: ['form_submit', 'form_identity_linked'] },
-            { title: 'Product Selector', ids: ['product_selector_complete', 'selector_categories'] },
+            { title: 'Product Selector', ids: ['product_selector_complete', 'selector_categories', 'add_to_cart'] },
             { title: 'Performance', ids: ['check_identity_latency', 'link_identity_latency'] },
           ].map((group) => {
             const groupTests = testCases.filter(t => group.ids.includes(t.id));
