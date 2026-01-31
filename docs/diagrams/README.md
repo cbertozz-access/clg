@@ -11,6 +11,8 @@ This directory contains architecture diagrams for the CLG Enterprise system, fol
 | 3 | Identity Graph | `03-identity-graph.png` | Firebase identity resolution structure | Backend devs |
 | 4 | CI/CD Pipeline | `04-cicd-pipeline.png` | GitHub → Vercel deployment flow | DevOps |
 | 5 | Security Layer | `05-security-layer.png` | API protection layers | Security review |
+| 6 | Security Architecture | `06-security-architecture.png` | Full security zones and controls | Security review |
+| 7 | Security Architecture (Detailed) | `07-security-architecture-detailed.png` | Comprehensive security with all zones | Security audit |
 
 ## Interactive Diagrams (Eraser.io)
 
@@ -22,7 +24,8 @@ These diagrams are also available as interactive, editable versions in Eraser:
 - **[Data Flow: Form Submission](https://app.eraser.io/new?requestId=ug3MzKlKaocyAK4kwFxY)** - Form → NS Adapter → NetSuite
 - **[Data Flow: Identity Resolution](https://app.eraser.io/new?requestId=BroINGO3goFdohPJb0XL)** - How linkIdentity resolves duplicates
 - **[Deployment](https://app.eraser.io/new?requestId=nhIgl0WdLFls09kTKcJi)** - Vercel + Firebase + SaaS services
-- **[Security Architecture](https://app.eraser.io/new?requestId=9VNZtBFmx28mKjS8YYD4)** - 4-layer API protection
+- **[Security Architecture](https://app.eraser.io/new?requestId=A1TzWjjz8IUnVezY2tW4)** - Security zones and controls
+- **[Security Architecture (Detailed)](https://app.eraser.io/new?requestId=v3Q3HLS4pXgCLjuCoy77)** - Comprehensive security with all layers
 - **[CI/CD Pipeline](https://app.eraser.io/new?requestId=ofyoSjmVe1fvCzCBUjDc)** - GitHub → Vercel deploy flow
 
 ## C4 Model Structure
