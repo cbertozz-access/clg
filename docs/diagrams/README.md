@@ -24,8 +24,7 @@ These diagrams are also available as interactive, editable versions in Eraser:
 - **[Data Flow: Form Submission](https://app.eraser.io/new?requestId=ug3MzKlKaocyAK4kwFxY)** - Form → NS Adapter → NetSuite
 - **[Data Flow: Identity Resolution](https://app.eraser.io/new?requestId=BroINGO3goFdohPJb0XL)** - How linkIdentity resolves duplicates
 - **[Deployment](https://app.eraser.io/new?requestId=nhIgl0WdLFls09kTKcJi)** - Vercel + Firebase + SaaS services
-- **[Security Architecture](https://app.eraser.io/new?requestId=A1TzWjjz8IUnVezY2tW4)** - Security zones and controls
-- **[Security Architecture (Detailed)](https://app.eraser.io/new?requestId=v3Q3HLS4pXgCLjuCoy77)** - Comprehensive security with all layers
+- **[Security Architecture](https://app.eraser.io/new?requestId=o9GW8eFMzzO0ttXqb30X)** - Security zones and controls
 - **[CI/CD Pipeline](https://app.eraser.io/new?requestId=ofyoSjmVe1fvCzCBUjDc)** - GitHub → Vercel deploy flow
 
 ## C4 Model Structure
@@ -92,6 +91,7 @@ NetSuite Merge → mergeIdentity → consolidate UIDs
 1. **PNG files**: Regenerate using Eraser API or export from Eraser.io
 2. **Eraser links**: These are temporary - save to your Eraser workspace for persistence
 3. **Keep in sync**: Update diagrams when architecture changes
+4. **Eraserbot**: Set up automatic sync - see [ERASERBOT-SETUP.md](./ERASERBOT-SETUP.md)
 
 ## Related Documentation
 
