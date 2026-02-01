@@ -1,0 +1,167 @@
+name: Update Architecture Diagrams
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/app/api/**/*.ts'
+      - 'src/lib/security/**/*.ts'
+      - 'src/middleware.ts'
+      - 'functions/index.js'
+      - 'public/clg-visitor.js'
+      - '.github/workflows/*.yml'
+
+jobs:
+  update-diagrams:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Determine which diagrams to update
+        id: changes
+        run: |
+          # Get changed files in the last commit
+          CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
+
+          UPDATE_SYSTEM=false
+          UPDATE_SECURITY=false
+          UPDATE_IDENTITY=false
+          UPDATE_CICD=false
+
+          if echo "$CHANGED" | grep -qE "src/app/api/|functions/index.js|src/lib/api/"; then
+            UPDATE_SYSTEM=true
+          fi
+
+          if echo "$CHANGED" | grep -qE "src/lib/security/|src/middleware.ts|src/app/api/contact/"; then
+            UPDATE_SECURITY=true
+          fi
+
+          if echo "$CHANGED" | grep -qE "functions/index.js|public/clg-visitor.js"; then
+            UPDATE_IDENTITY=true
+          fi
+
+          if echo "$CHANGED" | grep -qE ".github/workflows/"; then
+            UPDATE_CICD=true
+          fi
+
+          echo "update_system=$UPDATE_SYSTEM" >> $GITHUB_OUTPUT
+          echo "update_security=$UPDATE_SECURITY" >> $GITHUB_OUTPUT
+          echo "update_identity=$UPDATE_IDENTITY" >> $GITHUB_OUTPUT
+          echo "update_cicd=$UPDATE_CICD" >> $GITHUB_OUTPUT
+
+      - name: Generate System Architecture Diagram
+        if: steps.changes.outputs.update_system == 'true'
+        run: |
+          RESPONSE=$(curl -s -X POST "https://app.eraser.io/api/render/prompt" \
+            -H "Authorization: Bearer ${{ secrets.ERASER_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "text": "Generate a C4 Container diagram showing CLG architecture. Include: Next.js frontend hosted on Vercel, API routes, Firebase Cloud Functions (visitorId, checkIdentity, linkIdentity, mergeIdentity), Firestore database, and external integrations (NS Adapter/NetSuite, Amplitude Analytics, Iterable Email, Builder.io CMS, Algolia Search, Datadog RUM, Upstash Redis).",
+              "diagramType": "cloud-architecture-diagram",
+              "background": true,
+              "theme": "light",
+              "scale": "2",
+              "returnFile": true
+            }')
+
+          IMAGE_URL=$(echo "$RESPONSE" | jq -r '.imageUrl // empty')
+          if [ -n "$IMAGE_URL" ]; then
+            curl -s -o docs/diagrams/01-system-overview.png "$IMAGE_URL"
+            echo "✅ System architecture diagram updated"
+          else
+            echo "⚠️ Could not generate system diagram"
+            echo "$RESPONSE"
+          fi
+
+      - name: Generate Security Layer Diagram
+        if: steps.changes.outputs.update_security == 'true'
+        run: |
+          RESPONSE=$(curl -s -X POST "https://app.eraser.io/api/render/prompt" \
+            -H "Authorization: Bearer ${{ secrets.ERASER_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "text": "Generate a security architecture diagram showing API protection layers for a Next.js application: 1) Rate limiting with Upstash Redis (5 req/min), 2) CSRF protection with double-submit cookie pattern, 3) Input validation with Zod schemas and HTML sanitization, 4) Security headers middleware (CSP, HSTS, X-Frame-Options). Show the request flow through each layer from browser to backend API.",
+              "diagramType": "cloud-architecture-diagram",
+              "background": true,
+              "theme": "light",
+              "scale": "2",
+              "returnFile": true
+            }')
+
+          IMAGE_URL=$(echo "$RESPONSE" | jq -r '.imageUrl // empty')
+          if [ -n "$IMAGE_URL" ]; then
+            curl -s -o docs/diagrams/05-security-layer.png "$IMAGE_URL"
+            echo "✅ Security layer diagram updated"
+          else
+            echo "⚠️ Could not generate security diagram"
+          fi
+
+      - name: Generate Identity Graph Diagram
+        if: steps.changes.outputs.update_identity == 'true'
+        run: |
+          RESPONSE=$(curl -s -X POST "https://app.eraser.io/api/render/prompt" \
+            -H "Authorization: Bearer ${{ secrets.ERASER_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "text": "Generate an entity relationship diagram showing Firebase identity graph structure: visitors collection (visitorId, deviceId, createdAt, lastSeen), identity_graph collection with email_hash, phone_hash, device_id indexes linking to NetSuite entityId. Show the linkIdentity and mergeIdentity functions that connect anonymous visitors to known identities.",
+              "diagramType": "entity-relationship-diagram",
+              "background": true,
+              "theme": "light",
+              "scale": "2",
+              "returnFile": true
+            }')
+
+          IMAGE_URL=$(echo "$RESPONSE" | jq -r '.imageUrl // empty')
+          if [ -n "$IMAGE_URL" ]; then
+            curl -s -o docs/diagrams/03-identity-graph.png "$IMAGE_URL"
+            echo "✅ Identity graph diagram updated"
+          else
+            echo "⚠️ Could not generate identity diagram"
+          fi
+
+      - name: Generate CI/CD Pipeline Diagram
+        if: steps.changes.outputs.update_cicd == 'true'
+        run: |
+          RESPONSE=$(curl -s -X POST "https://app.eraser.io/api/render/prompt" \
+            -H "Authorization: Bearer ${{ secrets.ERASER_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "text": "Generate a flowchart showing CI/CD pipeline: feature branches merge to develop (Dev environment on Vercel), develop merges to staging (UAT environment), staging merges to main (Production). GitHub Actions runs: lint, typecheck, build, security scan on PRs. Deploy jobs run on push to each branch. Show the three Vercel environments: clg-dev, clg-uat, clg production.",
+              "diagramType": "flowchart-diagram",
+              "background": true,
+              "theme": "light",
+              "scale": "2",
+              "returnFile": true
+            }')
+
+          IMAGE_URL=$(echo "$RESPONSE" | jq -r '.imageUrl // empty')
+          if [ -n "$IMAGE_URL" ]; then
+            curl -s -o docs/diagrams/04-cicd-pipeline.png "$IMAGE_URL"
+            echo "✅ CI/CD pipeline diagram updated"
+          else
+            echo "⚠️ Could not generate CI/CD diagram"
+          fi
+
+      - name: Commit updated diagrams
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add docs/diagrams/*.png
+          if git diff --staged --quiet; then
+            echo "No diagram changes to commit"
+          else
+            git commit -m "docs: auto-update architecture diagrams [skip ci]"
+            git push
+          fi
