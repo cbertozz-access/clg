@@ -7,7 +7,7 @@
  * 3. Input validation & sanitization
  * 4. Security headers (via middleware)
  *
- * Flow: Validate → NS Adapter → Firebase linkIdentity → Response
+ * Flow: Validate → NS Adapter → Firebase linkIdentity → Iterable → Response
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -20,6 +20,7 @@ import {
   validateContactForm,
   validationErrorBody,
 } from "@/lib/security";
+import { syncContactSubmission } from "@/lib/integrations/iterable";
 
 const NS_ADAPTER_URL =
   process.env.NS_ADAPTER_URL || "https://dev-agws.aghost.au/api/contact-request";
@@ -171,7 +172,31 @@ export async function POST(request: NextRequest) {
     }
 
     // ========================================
-    // 7. Success Response
+    // 7. Sync to Iterable for email marketing (non-blocking)
+    // ========================================
+    syncContactSubmission({
+      email: validatedData.contactEmail,
+      firstName: validatedData.contactFirstName,
+      lastName: validatedData.contactLastName,
+      phone: validatedData.contactPhone,
+      company: validatedData.contactCompanyName,
+      industry: validatedData.contactIndustry,
+      country: validatedData.contactCountry,
+      contactType: validatedData.contactType,
+      transactionType: validatedData.transactionType,
+      sourceDepot: validatedData.sourceDepot,
+      productEnquiry: validatedData.productEnquiry,
+      message: validatedData.contactMessage,
+      visitorId: validatedData.visitorId,
+      utmSource: validatedData.utmSource,
+      utmMedium: validatedData.utmMedium,
+      utmCampaign: validatedData.utmCampaign,
+    }).catch((err) => {
+      console.error("[Contact API] Iterable sync error:", err);
+    });
+
+    // ========================================
+    // 8. Success Response
     // ========================================
     console.log("[Contact API] Success:", {
       contactRequestId: nsResult.contactRequestId,
