@@ -7,6 +7,10 @@
 
 // Use local API route to avoid CORS issues (proxies to dev-agws.aghost.au)
 const CONTACT_API_URL = '/api/contact';
+const CSRF_TOKEN_URL = '/api/csrf-token';
+
+// CSRF token cache (refreshed on each page load)
+let cachedCsrfToken: string | null = null;
 
 // Cookie/localStorage keys for visitor ID (matches clg-visitor.js SDK)
 const VISITOR_COOKIE_KEY = 'clg_vid';
@@ -83,6 +87,41 @@ export interface ContactRequestResponse {
   contactRequestId?: string;
   message?: string;
   error?: string;
+}
+
+/**
+ * Fetch CSRF token for form submission
+ * Caches the token for the session to reduce API calls
+ */
+async function getCsrfToken(): Promise<string> {
+  if (cachedCsrfToken) {
+    return cachedCsrfToken;
+  }
+
+  try {
+    const response = await fetch(CSRF_TOKEN_URL, {
+      method: 'GET',
+      credentials: 'same-origin',
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch CSRF token: ${response.status}`);
+    }
+
+    const data = await response.json();
+    cachedCsrfToken = data.token;
+    return data.token;
+  } catch (error) {
+    console.error('Failed to fetch CSRF token:', error);
+    throw error;
+  }
+}
+
+/**
+ * Clear cached CSRF token (call after successful submission or on error)
+ */
+export function clearCsrfToken(): void {
+  cachedCsrfToken = null;
 }
 
 /**
@@ -228,21 +267,25 @@ function getSessionContext(): Partial<ContactRequestData> {
 
 /**
  * Submit a contact request to the API
- * Automatically includes visitor ID, session ID, UTM, and attribution data
+ * Automatically includes visitor ID, session ID, UTM, attribution data, and CSRF token
  */
 export async function submitContactRequest(
   data: Omit<ContactRequestData, 'contactRequestId'>
 ): Promise<ContactRequestResponse> {
   try {
+    // Fetch CSRF token first
+    const csrfToken = await getCsrfToken();
+
     const utmParams = getUtmParams();
     const firstTouchUtm = getFirstTouchUtm();
     const sessionContext = getSessionContext();
     const refererURL = typeof window !== 'undefined' ? window.location.href : undefined;
     const visitorId = getVisitorId();
 
-    const requestBody: ContactRequestData = {
+    const requestBody = {
       contactRequestId: generateUUID(),
       visitorId: visitorId || undefined,
+      csrfToken, // Include CSRF token in request body
       ...data,
       ...utmParams,
       ...firstTouchUtm,
@@ -277,12 +320,17 @@ export async function submitContactRequest(
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       },
+      credentials: 'same-origin', // Important for CSRF cookie
       body: JSON.stringify(requestBody),
     });
 
     const result = await response.json();
 
     if (!response.ok) {
+      // Clear CSRF token on error (might be expired)
+      if (response.status === 403) {
+        clearCsrfToken();
+      }
       return {
         success: false,
         error: result.error || result.message || `Request failed with status ${response.status}`,
@@ -296,6 +344,8 @@ export async function submitContactRequest(
     };
   } catch (error) {
     console.error('Contact request failed:', error);
+    // Clear cached token on network error
+    clearCsrfToken();
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to submit contact request',

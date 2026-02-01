@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Enable instrumentation for OpenTelemetry tracing
+  experimental: {
+    instrumentationHook: true,
+  },
+
   // Allow Builder.io to embed this site in an iframe for visual editing
   // Allow GTM and related scripts to load
   async headers() {
@@ -12,8 +17,8 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: [
               "frame-ancestors 'self' https://*.builder.io https://builder.io",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.googletagmanager.com https://*.google-analytics.com https://cdn.builder.io https://*.builder.io https://edge.marker.io https://*.marker.io",
-              "connect-src 'self' https://*.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://*.builder.io https://*.cloudfunctions.net https://sgtm.accesshire.net https://composable-lg.ts.r.appspot.com https://*.netlify.app https://*.marker.io https://api.marker.io https://*.amazonaws.com https://*.algolia.net https://*.algolianet.com",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.googletagmanager.com https://*.google-analytics.com https://cdn.builder.io https://*.builder.io https://edge.marker.io https://*.marker.io https://*.datadoghq.com",
+              "connect-src 'self' https://*.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com https://*.builder.io https://*.cloudfunctions.net https://sgtm.accesshire.net https://composable-lg.ts.r.appspot.com https://*.netlify.app https://*.marker.io https://api.marker.io https://*.amazonaws.com https://*.algolia.net https://*.algolianet.com https://*.upstash.io https://*.datadoghq.com https://rum.browser-intake-datadoghq.com",
               "img-src 'self' data: https: blob:",
             ].join("; "),
           },
