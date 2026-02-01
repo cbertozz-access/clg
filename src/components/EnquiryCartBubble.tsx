@@ -21,8 +21,15 @@ export function EnquiryCartBubble() {
   // Animate when item count increases
   useEffect(() => {
     if (itemCount > prevCountRef.current) {
-      setIsAnimating(true);
-      const timer = setTimeout(() => setIsAnimating(false), 600);
+      // Use requestAnimationFrame to batch state updates
+      requestAnimationFrame(() => {
+        setIsAnimating(true);
+      });
+      const timer = setTimeout(() => {
+        requestAnimationFrame(() => {
+          setIsAnimating(false);
+        });
+      }, 600);
       return () => clearTimeout(timer);
     }
     prevCountRef.current = itemCount;

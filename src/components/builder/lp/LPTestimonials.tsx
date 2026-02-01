@@ -61,7 +61,7 @@ export function LPTestimonials(props: Partial<LPTestimonialsProps>) {
               <StarRating />
             </div>
             <blockquote className="text-xl text-white mb-6 leading-relaxed">
-              "{testimonial.quote}"
+              &ldquo;{testimonial.quote}&rdquo;
             </blockquote>
             <div className="flex items-center justify-center gap-3">
               {testimonial.avatarUrl ? (
@@ -99,7 +99,7 @@ export function LPTestimonials(props: Partial<LPTestimonialsProps>) {
           {testimonials.map((testimonial, index) => (
             <div key={index} className="bg-white border rounded-xl p-6">
               <StarRating />
-              <p className="text-[#6B7280] mb-4">"{testimonial.quote}"</p>
+              <p className="text-[#6B7280] mb-4">&ldquo;{testimonial.quote}&rdquo;</p>
               <div className="flex items-center gap-3">
                 {testimonial.avatarUrl ? (
                   <img

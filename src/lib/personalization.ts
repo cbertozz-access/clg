@@ -240,7 +240,7 @@ export function buildPersonalizationContext(options: {
   // Content priority: overrides > campaign content > category template
   let headline: string;
   let subheadline: string;
-  let heroImage: string | undefined;
+  const heroImage: string | undefined = campaignContent.heroImage;
 
   if (overrides.headline) {
     headline = overrides.headline;
@@ -259,9 +259,6 @@ export function buildPersonalizationContext(options: {
     const template = heroContentTemplates[category] || heroContentTemplates['default'];
     subheadline = template.subheadline;
   }
-
-  // Hero image from campaign
-  heroImage = campaignContent.heroImage;
 
   // Build greeting
   const greeting = name ? `G'day ${name}!` : undefined;
