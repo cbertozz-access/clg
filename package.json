@@ -15,6 +15,7 @@
     "setup:access-hire": "tsx scripts/create-access-hire-brand.ts"
   },
   "dependencies": {
+    "@amplitude/analytics-browser": "^2.34.0",
     "@builder.io/react": "^9.1.0",
     "@builder.io/sdk-react-nextjs": "^0.24.0",
     "@datadog/browser-rum": "^5.0.0",

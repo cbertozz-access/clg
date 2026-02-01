@@ -4,6 +4,7 @@ import Script from "next/script";
 import "./globals.css";
 import { EnquiryCartProvider } from "@/lib/enquiry-cart";
 import { VisitorDebugPanel } from "@/components/debug/VisitorDebugPanel";
+import { AnalyticsProvider } from "@/components/AnalyticsProvider";
 
 // Access Hire Australia fonts
 const lato = Lato({
@@ -60,10 +61,12 @@ export default function RootLayout({
       <body
         className={`${lato.variable} ${roboto.variable} ${montserrat.variable} ${openSans.variable} antialiased`}
       >
-        <EnquiryCartProvider>
-          {children}
-          <VisitorDebugPanel />
-        </EnquiryCartProvider>
+        <AnalyticsProvider>
+          <EnquiryCartProvider>
+            {children}
+            <VisitorDebugPanel />
+          </EnquiryCartProvider>
+        </AnalyticsProvider>
         {/* CLG Visitor Tracking SDK */}
         <Script
           src="/clg-visitor.js"
