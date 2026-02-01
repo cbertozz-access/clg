@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
       );
       return NextResponse.json(rateLimitErrorBody(resetInSeconds), {
         status: 429,
-        headers: rateLimitResult.headers,
+        headers: { ...rateLimitResult.headers },
       });
     }
 

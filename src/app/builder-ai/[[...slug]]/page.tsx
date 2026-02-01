@@ -3,7 +3,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { getBrandThemeFromContent } from "@/lib/builder/brand-model";
 import { fetchOneEntry, getBuilderSearchParams } from "@builder.io/sdk-react-nextjs";
 
-const BUILDER_API_KEY = process.env.NEXT_PUBLIC_BUILDER_API_KEY!.trim();
+const BUILDER_API_KEY = (process.env.NEXT_PUBLIC_BUILDER_API_KEY || '').trim();
 const MODEL_NAME = "builder-test-ai";
 
 // Force dynamic rendering for live editing support

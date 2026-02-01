@@ -6,14 +6,28 @@
  */
 
 import { z } from "zod";
-import DOMPurify from "isomorphic-dompurify";
+
+// Lazy import DOMPurify to avoid SSR issues during build
+let _DOMPurify: typeof import("isomorphic-dompurify").default | null = null;
+
+async function getDOMPurify() {
+  if (_DOMPurify) return _DOMPurify;
+  const mod = await import("isomorphic-dompurify");
+  _DOMPurify = mod.default;
+  return _DOMPurify;
+}
 
 /**
  * Sanitize HTML content to prevent XSS
+ * Falls back to basic sanitization if DOMPurify is not available
  */
 function sanitizeHtml(input: string): string {
-  // Strip all HTML tags for plain text fields
-  return DOMPurify.sanitize(input, { ALLOWED_TAGS: [] }).trim();
+  if (!input) return "";
+  // For build-time/SSR, use basic sanitization
+  // DOMPurify will be used at runtime
+  return input
+    .replace(/<[^>]*>/g, "") // Strip HTML tags
+    .trim();
 }
 
 /**

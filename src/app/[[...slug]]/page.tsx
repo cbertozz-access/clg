@@ -5,7 +5,7 @@ import { brands } from "@/lib/themes/brands";
 import { fetchOneEntry, getBuilderSearchParams } from "@builder.io/sdk-react-nextjs";
 import { EnquiryCartBubble } from "@/components/EnquiryCartBubble";
 
-const BUILDER_API_KEY = process.env.NEXT_PUBLIC_BUILDER_API_KEY!.trim();
+const BUILDER_API_KEY = (process.env.NEXT_PUBLIC_BUILDER_API_KEY || '').trim();
 
 // Model to use for general pages
 const MODEL_NAME = "cc-equipment-category";

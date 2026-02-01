@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Enable instrumentation for OpenTelemetry tracing
   experimental: {
-    instrumentationHook: true,
+    
   },
 
   // Allow Builder.io to embed this site in an iframe for visual editing

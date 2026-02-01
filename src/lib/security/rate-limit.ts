@@ -9,14 +9,31 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { headers } from "next/headers";
 
-// Initialize rate limiter (singleton, outside handlers for caching)
-export const ratelimit = new Ratelimit({
-  redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(5, "1 m"), // 5 requests per minute
-  analytics: true,
-  prefix: "clg:ratelimit",
-  timeout: 5000, // 5 second timeout for Redis operations
-});
+// Lazy-initialized rate limiter singleton
+let _ratelimit: Ratelimit | null = null;
+
+function getRatelimit(): Ratelimit | null {
+  if (_ratelimit) return _ratelimit;
+  
+  // Check if Upstash env vars are configured
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  
+  if (!url || !token) {
+    console.warn('[Rate Limit] Upstash Redis not configured - rate limiting disabled');
+    return null;
+  }
+  
+  _ratelimit = new Ratelimit({
+    redis: new Redis({ url, token }),
+    limiter: Ratelimit.slidingWindow(5, "1 m"), // 5 requests per minute
+    analytics: true,
+    prefix: "clg:ratelimit",
+    timeout: 5000, // 5 second timeout for Redis operations
+  });
+  
+  return _ratelimit;
+}
 
 /**
  * Get client IP address with multiple fallbacks
@@ -56,6 +73,8 @@ export interface RateLimitHeaders {
 /**
  * Check rate limit for a given identifier (usually IP)
  * Returns success status and headers for response
+ * 
+ * If Redis is not configured, allows all requests (disabled mode)
  */
 export async function checkRateLimit(identifier: string): Promise<{
   success: boolean;
@@ -64,6 +83,25 @@ export async function checkRateLimit(identifier: string): Promise<{
   resetTime: number;
   headers: RateLimitHeaders;
 }> {
+  const ratelimit = getRatelimit();
+  
+  // If rate limiting is disabled, allow all requests
+  if (!ratelimit) {
+    const now = Date.now();
+    return {
+      success: true,
+      remaining: 999,
+      limit: 999,
+      resetTime: now + 60000,
+      headers: {
+        "Retry-After": "0",
+        "X-RateLimit-Limit": "999",
+        "X-RateLimit-Remaining": "999",
+        "X-RateLimit-Reset": new Date(now + 60000).toISOString(),
+      },
+    };
+  }
+  
   const { success, remaining, limit, reset, pending } = await ratelimit.limit(identifier);
 
   // Wait for analytics to complete
