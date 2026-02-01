@@ -4,7 +4,21 @@
 
 CLG (Composable Landing Generator) is a multi-brand landing page system built for Access Group. It enables marketing teams to create and manage landing pages across multiple brands using a visual editor, while maintaining consistent brand theming, equipment enquiry functionality, and visitor tracking capabilities.
 
-The system combines a Next.js frontend with Builder.io as the headless CMS, Google Cloud Platform for serverless visitor identification, and Vercel for hosting with continuous deployment.
+The system combines a Next.js frontend with Builder.io as the headless CMS, Google Cloud Platform for serverless visitor identification, Vercel for hosting with continuous deployment, and a comprehensive security layer protecting all API endpoints.
+
+### Key Integrations
+
+| Service | Purpose | Type |
+|---------|---------|------|
+| **Builder.io** | Headless CMS, visual editing | Content |
+| **Vercel** | Hosting, edge functions, CI/CD | Infrastructure |
+| **Firebase** | Cloud Functions, Firestore database | Backend |
+| **Algolia** | Equipment search | Search |
+| **NS Adapter** | NetSuite lead creation | CRM |
+| **Amplitude** | Product analytics, event tracking | Analytics |
+| **Iterable** | Email marketing automation | Marketing |
+| **Datadog** | Real User Monitoring (RUM) | Observability |
+| **Upstash Redis** | Rate limiting | Security |
 
 ---
 
@@ -13,6 +27,29 @@ The system combines a Next.js frontend with Builder.io as the headless CMS, Goog
 ### Overview
 
 The architecture follows a composable approach where content management, visitor tracking, and frontend rendering are handled by separate specialised services that communicate via APIs. This separation allows each component to scale independently and be updated without affecting others.
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        CLG WEBSITE                               │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────────┐  │
+│  │  Next.js    │  │  API Routes │  │  clg-visitor.js SDK     │  │
+│  │  Frontend   │  │  /api/*     │  │  (client-side identity) │  │
+│  └─────────────┘  └──────┬──────┘  └─────────────────────────┘  │
+└──────────────────────────┼──────────────────────────────────────┘
+                           │
+         ┌─────────────────┼─────────────────┐
+         ▼                 ▼                 ▼
+┌─────────────────┐ ┌─────────────┐ ┌─────────────────┐
+│   NS Adapter    │ │   Firebase  │ │    Amplitude    │
+│ (dev-agws.au)   │ │  Functions  │ │    Analytics    │
+└────────┬────────┘ └──────┬──────┘ └────────┬────────┘
+         │                 │                 │
+         ▼                 ▼                 ▼
+┌─────────────────┐ ┌─────────────┐ ┌─────────────────┐
+│    NetSuite     │ │  Firestore  │ │    Iterable     │
+│      CRM        │ │   Database  │ │     Email       │
+└─────────────────┘ └─────────────┘ └─────────────────┘
+```
 
 ### Frontend Application
 
@@ -42,25 +79,163 @@ The consumption layer is where components read their styles. All brand-aware com
 
 ### Visitor Identification System
 
-The visitor identification system provides persistent tracking of anonymous visitors across sessions. It uses a serverless architecture with a Cloud Function handling identification logic and Firestore providing persistent storage.
+The visitor identification system provides persistent tracking of anonymous visitors across sessions. It uses a serverless architecture with Cloud Functions handling identification logic and Firestore providing persistent storage.
 
-When a visitor first arrives, the browser SDK calls the identification API. The API generates a UUID, creates a visitor document in Firestore with initial metadata, and returns the ID to the browser. The SDK stores this ID in both a cookie and localStorage for redundancy.
+#### Firebase Cloud Functions
+
+The system includes four Cloud Functions for identity management:
+
+| Function | Purpose | Trigger |
+|----------|---------|---------|
+| `visitorId` | Generate/retrieve visitor IDs | HTTP GET/POST |
+| `checkIdentity` | Check if email/phone exists in identity graph | HTTP POST |
+| `linkIdentity` | Link visitor to known identity (email/phone) | HTTP POST |
+| `mergeIdentity` | Consolidate duplicate visitor records | HTTP POST |
+
+When a visitor first arrives, the browser SDK calls the `visitorId` function. The function generates a UUID, creates a visitor document in Firestore with initial metadata, and returns the ID to the browser. The SDK stores this ID in both a cookie and localStorage for redundancy.
 
 On subsequent visits, the SDK retrieves the stored ID and sends it to the API. The API looks up the existing visitor document, increments the page view counter, updates the last seen timestamp, and returns the full profile including any accumulated behavioural data.
 
-The visitor document stores identity information, engagement metrics, traffic source attribution, a chronological list of tracked events, computed audience segments, and a lead score. This data enables personalisation and provides analytics on visitor behaviour.
+#### Identity Graph Structure
+
+The identity resolution system uses two Firestore collections:
+
+**`visitors` collection:**
+- `id` (string, primary key) - Visitor UUID
+- `master_uid` (string) - Canonical identity reference
+- `devices` (string[]) - Associated device fingerprints
+- `status` (string) - active/merged/archived
+- `merged_uids` (string[]) - Previously merged visitor IDs
+- `brands` (string[]) - Brands this visitor has interacted with
+
+**`identity_graph` collection:**
+- `id` (string, primary key) - Graph node ID
+- `email_hash` (string) - SHA-256 hashed email
+- `phone_hash` (string) - SHA-256 hashed phone
+- `device_id` (string) - Device fingerprint
+- `master_uid` (string) - Links to canonical visitor
 
 ### Lead Scoring
 
-The system automatically computes a lead score based on visitor behaviour. Different events contribute different point values reflecting their indication of purchase intent. Basic engagement like page views contributes minimal points, while high-intent actions like form completions or contact requests contribute significantly more.
+The system automatically computes a lead score based on visitor behaviour. Different events contribute different point values reflecting their indication of purchase intent:
+
+| Event | Points | Category |
+|-------|--------|----------|
+| Page view | 1 | Basic engagement |
+| Equipment view | 2 | Interest signal |
+| Add to enquiry cart | 5 | High intent |
+| Form start | 10 | Conversion signal |
+| Form completion | 25 | Conversion |
+| Contact request | 50 | High-value lead |
 
 The lead score accumulates over time as visitors interact with the site. This score can be used for personalisation decisions, such as showing different content to high-intent versus casual visitors, or for prioritising leads in sales workflows.
 
 ### Google Tag Manager Integration
 
-The visitor SDK automatically pushes identification data to the GTM data layer when a visitor is identified. This includes the visitor ID, whether they're new or returning, their page view count, session count, lead score, and any assigned segments.
+The visitor SDK automatically pushes identification data to the GTM data layer when a visitor is identified. This includes:
+
+- `clg_visitor_id` - The visitor UUID
+- `clg_is_new_visitor` - Boolean for first visit
+- `clg_page_views` - Total page view count
+- `clg_session_count` - Number of sessions
+- `clg_lead_score` - Computed lead score
+- `clg_segments` - Array of assigned segments
 
 This integration enables GTM tags and triggers to access visitor data for analytics, advertising pixels, and other marketing tools without additional implementation work.
+
+---
+
+## Observability
+
+### Datadog Real User Monitoring
+
+The application integrates Datadog RUM for comprehensive frontend observability. The integration is implemented via a React component (`DatadogRum`) that initialises the Datadog browser SDK.
+
+**Capabilities:**
+- Real-time performance metrics (Core Web Vitals)
+- User session replay
+- Error tracking with stack traces
+- Resource timing analysis
+- Custom action tracking
+
+**Configuration:**
+```typescript
+// Environment variables required
+NEXT_PUBLIC_DATADOG_APPLICATION_ID
+NEXT_PUBLIC_DATADOG_CLIENT_TOKEN
+NEXT_PUBLIC_DATADOG_SITE // e.g., "datadoghq.com"
+NEXT_PUBLIC_DATADOG_SERVICE // e.g., "clg-frontend"
+NEXT_PUBLIC_DATADOG_ENV // e.g., "production"
+```
+
+**Session Sampling:**
+- 100% of sessions tracked for errors
+- Configurable sample rate for session replay (default 20%)
+
+### OpenTelemetry Tracing
+
+Server-side tracing is enabled via Vercel's OpenTelemetry integration (`@vercel/otel`). This provides:
+
+- Distributed tracing across API routes
+- Automatic span creation for fetch requests
+- Integration with Vercel's observability dashboard
+
+---
+
+## Analytics
+
+### Amplitude Integration
+
+Amplitude serves as the primary product analytics platform, tracking user behaviour and enabling cohort analysis.
+
+**Event Types:**
+
+| Event | Trigger | Properties |
+|-------|---------|------------|
+| `page_view` | Page load | url, referrer, brand |
+| `equipment_view` | Equipment modal open | product_id, category |
+| `cart_add` | Add to enquiry | product_id, cart_size |
+| `cart_remove` | Remove from enquiry | product_id, cart_size |
+| `form_start` | Form field focus | form_type |
+| `form_submit` | Form submission | form_type, success |
+| `contact_request` | Contact form complete | lead_score, visitor_id |
+
+**Implementation:**
+- Browser SDK (`@amplitude/analytics-browser`) for client events
+- Server SDK (`@amplitude/analytics-node`) for secure server-side events
+- PII is hashed before sending to Amplitude (email → SHA-256)
+
+**User Identity:**
+- Anonymous ID: CLG visitor_id
+- Known ID: Linked after form submission via `linkIdentity`
+
+---
+
+## Email Marketing
+
+### Iterable Integration
+
+Iterable handles automated email campaigns triggered by visitor actions and form submissions.
+
+**Integration Flow:**
+```
+Form Submit → NS Adapter → NetSuite
+                ↓
+           Amplitude (event)
+                ↓
+           Iterable (webhook)
+                ↓
+           Email Campaign Triggered
+```
+
+**Campaign Triggers:**
+- Contact form submission → Welcome sequence
+- Quote request → Quote follow-up sequence
+- High lead score (>50) → Sales outreach notification
+
+**Data Sync:**
+- Amplitude cohorts can sync to Iterable user lists
+- Email engagement (opens, clicks) syncs back to visitor profile
 
 ---
 
@@ -78,6 +253,20 @@ Content responses are cached using Incremental Static Regeneration with a revali
 
 For programmatic content management, the Write API enables creating and updating content entries. This is used by maintenance scripts for tasks like creating new brand entries or bulk-updating content fields. The Write API requires authentication with a private API key that is never exposed to the browser.
 
+### Algolia Search API
+
+Equipment search is powered by Algolia, providing:
+
+- Instant search with typo tolerance
+- Faceted filtering (category, brand, power type)
+- Geo-search for location-based results
+- Search analytics for query insights
+
+**Index Structure:**
+- `equipment` - Main equipment catalogue
+- `equipment_categories` - Category hierarchy
+- `equipment_brands` - Brand metadata
+
 ### Visitor Identification API
 
 The visitor identification API is a Cloud Function that handles both GET and POST requests. GET requests retrieve or create visitor profiles. POST requests track events and update visitor data.
@@ -86,7 +275,18 @@ The API accepts the visitor ID (if known), current page URL, referrer, and user 
 
 ### Contact Request API
 
-The application includes an API endpoint for processing contact form submissions. This endpoint validates the form data, constructs a contact request payload, and forwards it to the Access Group's contact management system. It handles error cases gracefully and returns appropriate status codes to the frontend.
+The application includes an API endpoint (`/api/contact`) for processing contact form submissions. This endpoint applies multiple security layers before forwarding to downstream systems:
+
+1. **Rate Limiting** - 5 requests per minute per IP (Upstash Redis)
+2. **CSRF Validation** - Double-submit cookie pattern
+3. **Input Validation** - Zod schema validation with DOMPurify sanitisation
+4. **Security Headers** - Applied via middleware
+
+After validation, the endpoint:
+1. Forwards to NS Adapter → NetSuite (creates lead)
+2. Calls `linkIdentity` → Firebase (links visitor to email)
+3. Triggers tracking event → Amplitude
+4. Returns success response to frontend
 
 ---
 
@@ -144,31 +344,166 @@ All components use CSS variables for theming and automatically adapt to the acti
 
 ## CI/CD Process
 
-### Source Control
+### Branch Strategy
 
-The codebase is managed in a Git repository with the main branch serving as the production branch. All changes flow through the main branch, with feature branches used for development work that requires isolation.
+The codebase follows a three-environment deployment model:
 
-### Automatic Deployment
+```
+feature/* ──► develop (Dev) ──► staging (UAT) ──► main (Production)
+     │              │                │                  │
+     │              ▼                ▼                  ▼
+  Preview      clg-dev.         clg-uat.           clg.
+  deploys      vercel.app       vercel.app         vercel.app
+```
 
-The hosting platform monitors the repository for changes. When commits are pushed to the main branch, an automatic deployment pipeline triggers. The pipeline executes the following sequence:
+### Environment Configuration
 
-First, the latest code is pulled from the repository. Dependencies are installed from the package lock file to ensure reproducible builds. The build process then compiles TypeScript, bundles the application, and generates optimised production assets.
+| Environment | Branch | Domain | Approvers | Tests |
+|-------------|--------|--------|-----------|-------|
+| Production | `main` | `clg.vercel.app` | 2 required | Full E2E |
+| UAT | `staging` | `clg-uat.vercel.app` | 1 required | Unit + Integration |
+| Development | `develop` | `clg-dev.vercel.app` | 1 required | Lint + Build |
+| Preview | `feature/*` | Auto-generated | None | Lint + Build |
 
-During the build, static pages are pre-rendered where possible, and serverless functions are created for dynamic routes. The build output is then deployed to the edge network, replacing the previous deployment atomically to prevent any downtime.
+### GitHub Actions Workflows
 
-Finally, the CDN cache is invalidated for changed assets, and the new deployment goes live. The entire process typically completes within one to two minutes of the triggering commit.
+#### CI Pipeline (`.github/workflows/ci.yml`)
+
+Runs on all pull requests:
+1. **Lint & TypeScript** - ESLint + `tsc --noEmit`
+2. **Security Scan** - `npm audit` + Snyk vulnerability check
+3. **Unit Tests** - Jest with coverage reporting
+4. **Build Validation** - Next.js production build
+5. **E2E Tests** - Playwright (staging/main PRs only)
+
+#### PR Checks (`.github/workflows/pr-checks.yml`)
+
+Additional validation for pull requests:
+- Lighthouse performance audit
+- Bundle size analysis
+- Visual regression tests (optional)
+
+### Branch Protection Rules
+
+**`main` (Production):**
+- 2 approvers required
+- All status checks must pass
+- Require signed commits
+- Restrict push to release managers
+
+**`staging` (UAT):**
+- 1 approver required
+- Status checks: lint, security, test, build
+
+**`develop` (Dev):**
+- 1 approver required
+- Status checks: lint, build
 
 ### Preview Deployments
 
-For pull requests, the platform automatically creates preview deployments on unique URLs. This allows changes to be tested in a production-like environment before merging. Preview URLs are posted as comments on the pull request for easy access.
+For pull requests, Vercel automatically creates preview deployments on unique URLs. This allows changes to be tested in a production-like environment before merging. Preview URLs are posted as comments on the pull request for easy access.
 
-### Manual Deployment
+### Rollback Strategy
 
-When immediate deployment is needed or cache invalidation is required, manual deployment can be triggered through the platform's CLI. A force flag bypasses build caching to ensure completely fresh builds when troubleshooting caching issues.
+1. **Instant Rollback:** Vercel dashboard → Deployments → Promote previous
+2. **Git-based Rollback:** Create `hotfix/rollback-*` branch, revert commits, expedited PR
 
 ### Cloud Function Deployment
 
-The visitor identification Cloud Function is deployed separately through Google Cloud Platform's tooling. Deployment can be triggered via npm script or directly through the gcloud CLI. The function automatically scales based on traffic and requires no capacity planning.
+The Firebase Cloud Functions are deployed separately through Google Cloud Platform's tooling. Deployment can be triggered via npm script or directly through the gcloud CLI. The functions automatically scale based on traffic and require no capacity planning.
+
+---
+
+## Security
+
+### Security Layers
+
+All API routes pass through multiple security layers implemented in middleware and route handlers:
+
+```
+Request → Rate Limiting → CSRF Check → Input Validation → Security Headers → Handler
+              ↓               ↓              ↓                  ↓
+           429 Error      403 Error      400 Error         Response Headers
+```
+
+### Rate Limiting
+
+Implemented using Upstash Redis with a sliding window algorithm:
+
+- **Limit:** 5 requests per minute per IP
+- **Headers:** `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`
+- **Response:** 429 with `Retry-After` header
+
+```typescript
+// Configuration
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(5, "1 m"),
+  prefix: "clg:ratelimit",
+});
+```
+
+### CSRF Protection
+
+Double-submit cookie pattern implementation:
+
+1. Server generates cryptographic token
+2. Token stored in HTTP-only cookie AND returned to client
+3. Client includes token in request body
+4. Server validates cookie token matches body token
+
+### Input Validation
+
+Zod schemas with DOMPurify sanitisation:
+
+```typescript
+// All text inputs are sanitised
+const sanitizeHtml = (input: string): string => {
+  return DOMPurify.sanitize(input, { ALLOWED_TAGS: [] }).trim();
+};
+
+// Schema validates and transforms
+const ContactFormSchema = z.object({
+  contactEmail: z.string().email().transform(val => val.toLowerCase().trim()),
+  contactMessage: z.string().min(10).max(5000).transform(sanitizeHtml),
+  // ... other fields
+});
+```
+
+### Security Headers
+
+Applied via Next.js middleware:
+
+| Header | Value | Purpose |
+|--------|-------|---------|
+| `Content-Security-Policy` | Strict CSP | XSS prevention |
+| `Strict-Transport-Security` | `max-age=31536000; includeSubDomains` | Force HTTPS |
+| `X-Content-Type-Options` | `nosniff` | MIME sniffing prevention |
+| `X-Frame-Options` | `SAMEORIGIN` | Clickjacking prevention |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` | Referrer control |
+
+### Secrets Management
+
+**Server-only (never exposed):**
+- `AG_API_CLIENT_SECRET`
+- `ITERABLE_API_KEY`
+- `AMPLITUDE_SERVER_API_KEY`
+- `PII_ENCRYPTION_KEY`
+- `CSRF_SECRET`
+- `UPSTASH_REDIS_REST_TOKEN`
+
+**Public (safe to expose):**
+- `NEXT_PUBLIC_BUILDER_API_KEY`
+- `NEXT_PUBLIC_AMPLITUDE_API_KEY`
+- `NEXT_PUBLIC_DATADOG_CLIENT_TOKEN`
+- `NEXT_PUBLIC_ENVIRONMENT`
+
+### PII Handling
+
+- Email addresses are SHA-256 hashed before sending to analytics
+- Phone numbers are normalised and hashed
+- Full PII only sent to NS Adapter over HTTPS
+- Visitor tracking uses anonymous UUIDs
 
 ---
 
@@ -202,12 +537,52 @@ Font loading uses the display swap strategy to prevent invisible text during fon
 
 ---
 
-## Security Considerations
+## Appendix: Environment Variables
 
-API keys are segregated by capability. Public keys used for content fetching are safe to expose in client-side code as they only permit read operations. Private keys for write operations are stored as environment variables and never included in client bundles.
+### Required Variables
 
-The contact form API validates all input server-side before forwarding to downstream systems. This prevents malformed data from reaching the contact management system and protects against injection attacks.
+```bash
+# Builder.io
+NEXT_PUBLIC_BUILDER_API_KEY=
+BUILDER_PRIVATE_KEY=
 
-Visitor tracking stores only anonymous behavioural data. No personally identifiable information is collected through the tracking system. The visitor ID is a randomly generated UUID with no correlation to real-world identity.
+# Firebase
+GOOGLE_CLOUD_PROJECT=
+FIREBASE_LINK_IDENTITY_URL=
 
-All external communications use HTTPS encryption. The application enforces secure connections and sets appropriate security headers through the hosting platform's configuration.
+# Analytics
+NEXT_PUBLIC_AMPLITUDE_API_KEY=
+AMPLITUDE_SERVER_API_KEY=
+
+# Observability
+NEXT_PUBLIC_DATADOG_APPLICATION_ID=
+NEXT_PUBLIC_DATADOG_CLIENT_TOKEN=
+NEXT_PUBLIC_DATADOG_SITE=
+NEXT_PUBLIC_DATADOG_SERVICE=
+NEXT_PUBLIC_DATADOG_ENV=
+
+# Security
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
+CSRF_SECRET=
+
+# Integrations
+NS_ADAPTER_URL=
+NS_ADAPTER_API_KEY=
+ITERABLE_API_KEY=
+
+# Algolia
+NEXT_PUBLIC_ALGOLIA_APP_ID=
+NEXT_PUBLIC_ALGOLIA_SEARCH_KEY=
+ALGOLIA_ADMIN_KEY=
+```
+
+---
+
+## Related Documentation
+
+- [ARCHITECTURE.md](./ARCHITECTURE.md) - High-level architecture overview
+- [ENTERPRISE-ARCHITECTURE-PLAN.md](./ENTERPRISE-ARCHITECTURE-PLAN.md) - Implementation roadmap
+- [identity-graph-plan.md](./identity-graph-plan.md) - Identity resolution design
+- [diagrams/README.md](./diagrams/README.md) - Architecture diagrams
+- [adr/README.md](./adr/README.md) - Architecture Decision Records
