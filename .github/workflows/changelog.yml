@@ -1,0 +1,77 @@
+name: Update Changelog
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'CHANGELOG.md'
+      - '.github/workflows/changelog.yml'
+
+jobs:
+  update-changelog:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get commit info
+        id: commit
+        run: |
+          echo "message<<EOF" >> $GITHUB_OUTPUT
+          git log -1 --pretty=%B >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "author=$(git log -1 --pretty=%an)" >> $GITHUB_OUTPUT
+          echo "date=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
+          echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Determine change type
+        id: type
+        run: |
+          MSG="${{ steps.commit.outputs.message }}"
+          if echo "$MSG" | grep -qiE "^(feat|add)"; then
+            echo "type=Added" >> $GITHUB_OUTPUT
+          elif echo "$MSG" | grep -qiE "^fix"; then
+            echo "type=Fixed" >> $GITHUB_OUTPUT
+          elif echo "$MSG" | grep -qiE "^(update|change|refactor)"; then
+            echo "type=Changed" >> $GITHUB_OUTPUT
+          elif echo "$MSG" | grep -qiE "^(remove|delete|deprecate)"; then
+            echo "type=Removed" >> $GITHUB_OUTPUT
+          elif echo "$MSG" | grep -qiE "^(security|sec)"; then
+            echo "type=Security" >> $GITHUB_OUTPUT
+          else
+            echo "type=Changed" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update CHANGELOG.md
+        run: |
+          # Extract first line of commit message
+          FIRST_LINE=$(echo "${{ steps.commit.outputs.message }}" | head -1)
+          CHANGE_TYPE="${{ steps.type.outputs.type }}"
+          DATE="${{ steps.commit.outputs.date }}"
+          SHA="${{ steps.commit.outputs.short_sha }}"
+
+          # Check if this section exists, if not create it
+          if ! grep -q "### $CHANGE_TYPE" CHANGELOG.md; then
+            # Add section after [Unreleased]
+            sed -i "/## \[Unreleased\]/a\\
+\\
+### $CHANGE_TYPE" CHANGELOG.md
+          fi
+
+          # Add entry under the appropriate section
+          sed -i "/### $CHANGE_TYPE/a\\
+- $FIRST_LINE (\`$SHA\`)" CHANGELOG.md
+
+      - name: Commit changelog update
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add CHANGELOG.md
+          git diff --staged --quiet || git commit -m "docs: auto-update CHANGELOG [skip ci]"
+          git push

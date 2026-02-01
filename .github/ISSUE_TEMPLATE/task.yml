@@ -1,0 +1,67 @@
+name: Task
+description: Track implementation tasks for CLG
+title: "[TASK] "
+labels: ["task", "enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to create trackable implementation tasks.
+        Commits that include "Fixes #<issue_number>" will auto-close these issues.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Task Description
+      description: What needs to be done?
+      placeholder: Describe the task clearly
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of the system does this affect?
+      options:
+        - Frontend (Next.js/React)
+        - API Routes
+        - Security
+        - Firebase Functions
+        - CI/CD
+        - Documentation
+        - Testing
+        - Infrastructure
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - High
+        - Medium
+        - Low
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: How will we know this is done?
+      placeholder: |
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+    validations:
+      required: false
+
+  - type: textarea
+    id: related
+    attributes:
+      label: Related Issues/PRs
+      description: Link any related issues or pull requests
+      placeholder: "#123, #456"
+    validations:
+      required: false
